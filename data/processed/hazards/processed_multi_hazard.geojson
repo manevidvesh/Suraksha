@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "name": "suraksha_processed_multi_hazard_red_zones",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [76.10, 11.42],
+            [76.16, 11.42],
+            [76.17, 11.48],
+            [76.12, 11.50],
+            [76.09, 11.46],
+            [76.10, 11.42]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "RZ-WAY-01",
+        "zone_code": "RED-KL-07-WAY",
+        "name": "Wayanad Slope High-Risk Landslide Basin",
+        "hazard_type": "Landslide",
+        "severity": "Critical",
+        "source_agency": "GSI"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [76.25, 9.77],
+            [76.29, 9.77],
+            [76.28, 9.85],
+            [76.24, 9.84],
+            [76.25, 9.77]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "RZ-ERN-01",
+        "zone_code": "RED-KL-07-CHE",
+        "name": "Chellanam Severe Inundation & Seawall Breach Strip",
+        "hazard_type": "Coastal erosion",
+        "severity": "High",
+        "source_agency": "IMD & SOI"
+      }
+    }
+  ]
+}

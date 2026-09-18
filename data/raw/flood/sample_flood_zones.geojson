@@ -1,0 +1,27 @@
+{
+  "type": "FeatureCollection",
+  "name": "sample_flood_inundation_zones",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "hazard": "Flood",
+        "return_period": 50,
+        "district": "Ernakulam",
+        "severity": "High"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [76.25, 9.77],
+            [76.29, 9.77],
+            [76.28, 9.85],
+            [76.24, 9.84],
+            [76.25, 9.77]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "name": "sample_road_network",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "road_id": "NH-766",
+        "name": "Kozhikode-Kollegal Highway (Wayanad Ghats)",
+        "type": "National Highway",
+        "all_weather": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [75.98, 11.50],
+          [76.05, 11.55],
+          [76.13, 11.60],
+          [76.22, 11.68]
+        ]
+      }
+    }
+  ]
+}

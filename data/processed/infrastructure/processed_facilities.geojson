@@ -1,0 +1,28 @@
+{
+  "type": "FeatureCollection",
+  "name": "suraksha_processed_facilities",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [76.1750, 11.6620] },
+      "properties": {
+        "facility_id": "PHC-WAY-01",
+        "name": "Meenangadi Community Health Centre",
+        "type": "Healthcare",
+        "beds": 30,
+        "district": "Wayanad"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [76.4810, 10.1150] },
+      "properties": {
+        "facility_id": "SCH-ERN-01",
+        "name": "Perumbavoor Higher Secondary School",
+        "type": "School",
+        "capacity_students": 1200,
+        "district": "Ernakulam"
+      }
+    }
+  ]
+}

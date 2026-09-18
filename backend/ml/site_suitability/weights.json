@@ -1,0 +1,7 @@
+{
+  "slope_stability": 0.25,
+  "flood_safety": 0.25,
+  "water_availability": 0.2,
+  "road_connectivity": 0.15,
+  "social_infrastructure": 0.15
+}

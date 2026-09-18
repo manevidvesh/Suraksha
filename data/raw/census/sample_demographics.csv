@@ -1,0 +1,7 @@
+habitation_id,habitation_name,district,total_population,households,female_ratio_pct,elderly_pop_pct,children_pop_pct,kutcha_houses_pct
+H1,Kavalapara Hamlet,Wayanad,340,78,51.2,14.5,16.2,42.0
+H2,Chellanam Coastal Ward,Ernakulam,1120,240,50.8,16.8,12.5,38.5
+H3,Teesta Riverside Colony,Kalimpong,560,115,49.5,11.2,18.0,55.0
+H4,Munnar Tea Estate Line,Idukki,210,45,52.0,18.5,14.0,68.0
+H5,Sundarbans Char Basti,South 24 Parganas,890,195,48.9,13.0,19.5,72.0
+H6,Idukki Reservoir Fringe,Idukki,430,92,50.4,15.0,15.2,35.0

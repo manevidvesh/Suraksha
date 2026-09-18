@@ -1,0 +1,29 @@
+[
+  {
+    "id": "S1",
+    "name": "Meenangadi Rehabilitation Colony",
+    "region": "Wayanad Plateau",
+    "latitude": 11.6600,
+    "longitude": 76.1700,
+    "distanceKm": 12,
+    "cap": { "land": 500, "water": 420, "sanitation": 380, "healthcare": 300, "schools": 250 }
+  },
+  {
+    "id": "S2",
+    "name": "Perumbavoor Resettlement Layout",
+    "region": "Ernakulam Midland",
+    "latitude": 10.1100,
+    "longitude": 76.4780,
+    "distanceKm": 26,
+    "cap": { "land": 800, "water": 650, "sanitation": 700, "healthcare": 600, "schools": 550 }
+  },
+  {
+    "id": "S4",
+    "name": "Kannur Highland Plots",
+    "region": "North Malabar Midland",
+    "latitude": 11.8700,
+    "longitude": 75.3700,
+    "distanceKm": 18,
+    "cap": { "land": 420, "water": 390, "sanitation": 350, "healthcare": 320, "schools": 300 }
+  }
+]

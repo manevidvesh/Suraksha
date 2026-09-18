@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "name": "sample_landslide_susceptibility_zones",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_code": "LS-KL-WAY-01",
+        "district": "Wayanad",
+        "slope_deg": 41.5,
+        "hazard": "Landslide",
+        "severity": "Critical"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [76.10, 11.42],
+            [76.16, 11.42],
+            [76.17, 11.48],
+            [76.12, 11.50],
+            [76.09, 11.46],
+            [76.10, 11.42]
+          ]
+        ]
+      }
+    }
+  ]
+}

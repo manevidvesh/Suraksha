@@ -1,0 +1,8 @@
+station_id,station_name,date,rainfall_mm,intensity_category,district
+IMD-KL-01,Vythiri,2024-07-28,342.5,Extremely Heavy,Wayanad
+IMD-KL-02,Mundakkai,2024-07-29,412.0,Extremely Heavy,Wayanad
+IMD-KL-03,Meppadi,2024-07-30,378.0,Extremely Heavy,Wayanad
+IMD-KL-04,Peerumedu,2024-08-01,215.4,Very Heavy,Idukki
+IMD-KL-05,Munnar,2024-08-02,260.8,Very Heavy,Idukki
+IMD-KL-06,Aluva,2024-08-03,145.0,Heavy,Ernakulam
+IMD-KL-07,Chellanam,2024-08-04,198.2,Very Heavy,Ernakulam

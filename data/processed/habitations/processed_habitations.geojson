@@ -1,0 +1,51 @@
+{
+  "type": "FeatureCollection",
+  "name": "suraksha_processed_habitations",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [76.1320, 11.4550] },
+      "properties": {
+        "id": "H1",
+        "name": "Kavalapara Hamlet",
+        "region": "Wayanad Slope",
+        "district": "Wayanad",
+        "state": "Kerala",
+        "hazard": "Landslide",
+        "pop": 340,
+        "score": 75,
+        "tier": "Immediate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [76.2730, 9.8020] },
+      "properties": {
+        "id": "H2",
+        "name": "Chellanam Coastal Ward",
+        "region": "Ernakulam Coast",
+        "district": "Ernakulam",
+        "state": "Kerala",
+        "hazard": "Coastal erosion",
+        "pop": 1120,
+        "score": 77,
+        "tier": "Immediate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [77.0595, 10.0889] },
+      "properties": {
+        "id": "H4",
+        "name": "Munnar Tea Estate Line",
+        "region": "Idukki Highlands",
+        "district": "Idukki",
+        "state": "Kerala",
+        "hazard": "Landslide",
+        "pop": 210,
+        "score": 73,
+        "tier": "Immediate"
+      }
+    }
+  ]
+}

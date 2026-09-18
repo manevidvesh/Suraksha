@@ -1,0 +1,41 @@
+[
+  {
+    "id": "H1",
+    "name": "Kavalapara Hamlet",
+    "region": "Wayanad Slope",
+    "district": "Wayanad",
+    "state": "Kerala",
+    "hazard": "Landslide",
+    "pop": 340,
+    "latitude": 11.4550,
+    "longitude": 76.1320,
+    "f": { "hazard": 88, "exposure": 70, "vulnerability": 74, "history": 82, "access": 40 },
+    "events": 3
+  },
+  {
+    "id": "H2",
+    "name": "Chellanam Coastal Ward",
+    "region": "Ernakulam Coast",
+    "district": "Ernakulam",
+    "state": "Kerala",
+    "hazard": "Coastal erosion",
+    "pop": 1120,
+    "latitude": 9.8020,
+    "longitude": 76.2730,
+    "f": { "hazard": 76, "exposure": 91, "vulnerability": 68, "history": 71, "access": 62 },
+    "events": 5
+  },
+  {
+    "id": "H4",
+    "name": "Munnar Tea Estate Line",
+    "region": "Idukki Highlands",
+    "district": "Idukki",
+    "state": "Kerala",
+    "hazard": "Landslide",
+    "pop": 210,
+    "latitude": 10.0889,
+    "longitude": 77.0595,
+    "f": { "hazard": 92, "exposure": 65, "vulnerability": 80, "history": 74, "access": 30 },
+    "events": 2
+  }
+]

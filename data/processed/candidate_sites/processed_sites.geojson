@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "name": "suraksha_processed_candidate_sites",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [76.1700, 11.6600] },
+      "properties": {
+        "id": "S1",
+        "name": "Meenangadi Rehabilitation Colony",
+        "region": "Wayanad Plateau",
+        "district": "Wayanad",
+        "land_capacity": 500,
+        "water_capacity": 420,
+        "sanitation_capacity": 380,
+        "healthcare_capacity": 300,
+        "schools_capacity": 250,
+        "effective_capacity": 250,
+        "bottleneck": "schools"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [76.4780, 10.1100] },
+      "properties": {
+        "id": "S2",
+        "name": "Perumbavoor Resettlement Layout",
+        "region": "Ernakulam Midland",
+        "district": "Ernakulam",
+        "land_capacity": 800,
+        "water_capacity": 650,
+        "sanitation_capacity": 700,
+        "healthcare_capacity": 600,
+        "schools_capacity": 550,
+        "effective_capacity": 550,
+        "bottleneck": "schools"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "dataset": "CartoDEM Version-3 R1",
+  "source": "ISRO / Bhuvan Geoportal",
+  "spatial_resolution": "30m",
+  "vertical_datum": "EGM96",
+  "coverage": "Western Ghats, Zone 7 Pilot Corridor",
+  "elevation_range_m": {
+    "min": 2.0,
+    "max": 2695.0
+  },
+  "slope_classification_rules": {
+    "gentle": "0 - 10 deg",
+    "moderate": "10 - 25 deg",
+    "steep": "25 - 35 deg",
+    "critical_escarpment": "> 35 deg"
+  }
+}

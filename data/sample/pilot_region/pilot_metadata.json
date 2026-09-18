@@ -1,0 +1,10 @@
+{
+  "pilot_corridor": "Zone 7 - Southern Peninsula Multi-Hazard Corridor",
+  "states": ["Kerala", "Karnataka", "West Bengal", "Uttarakhand"],
+  "primary_districts": ["Wayanad", "Idukki", "Ernakulam", "Kodagu", "Kalimpong", "Chamoli"],
+  "total_habitations_monitored": 16,
+  "candidate_resettlement_sites": 6,
+  "hazard_types": ["Landslide", "Coastal erosion", "Flash flood", "Cloudburst", "Cyclone"],
+  "coordinate_reference_system": "EPSG:4326 (WGS84)",
+  "system": "SURAKSHA"
+}
