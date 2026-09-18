@@ -37,6 +37,7 @@ import {
   LifelineReadinessModal,
   OfflineActionCardModal,
 } from "@/components/DDMA";
+import { GAZETTED_PRESETS } from "@/lib/gazettedPresets";
 
 export default function HabitationsPage() {
   const {
@@ -58,6 +59,9 @@ export default function HabitationsPage() {
   const [breakdown, setBreakdown] = useState<any>(null);
   const [loadingBreakdown, setLoadingBreakdown] = useState(false);
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
+  const [activePresetId, setActivePresetId] = useState<string>("NDMA-WG-2019");
+  const [cabinetOverrideOpen, setCabinetOverrideOpen] = useState(false);
+  const [cabinetOverrideReason, setCabinetOverrideReason] = useState("");
 
   const corridorHabitations = useMemo(() => {
     return filterHabitationsByCorridor(habitations, selectedCorridor);
@@ -155,60 +159,161 @@ export default function HabitationsPage() {
             }
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
-            {/* Weight Adjustment Panel */}
+          <div className="grid grid-cols-1 lg:grid-cols-[290px_1fr] gap-6">
+            {/* Gazetted Framework Evaluation Panel */}
             <div
-              className="border rounded-sm p-4 h-fit bg-white"
+              className="border rounded-sm p-4 h-fit bg-white space-y-4"
               style={{ borderColor: C.line }}
             >
-              <div className="flex items-center justify-between mb-3">
-                <p className="f-sans text-sm font-semibold text-[#1C2420]">Factor Weights</p>
-                <Sliders size={15} className="text-[#565F58]" />
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="f-sans text-xs font-bold uppercase tracking-wider text-[#1C2420]">
+                    Statutory Framework
+                  </p>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-xs bg-[#E8F0EC] text-[#2A6B52] font-semibold border border-[#2A6B52]/30">
+                    NDMA Standard
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#565F58] mt-1 leading-tight">
+                  Risk weights must comply with official gazetted disaster methodology guidelines.
+                </p>
               </div>
 
-              <div className="space-y-3.5">
-                <Slider
-                  label="Hazard Intensity"
-                  value={weights.hazard}
-                  onChange={(v) => setWeights({ ...weights, hazard: v })}
-                />
-                <Slider
-                  label="Population Exposure"
-                  value={weights.exposure}
-                  onChange={(v) => setWeights({ ...weights, exposure: v })}
-                />
-                <Slider
-                  label="Social Vulnerability"
-                  value={weights.vulnerability}
-                  onChange={(v) => setWeights({ ...weights, vulnerability: v })}
-                />
-                <Slider
-                  label="Historical Frequency"
-                  value={weights.history}
-                  onChange={(v) => setWeights({ ...weights, history: v })}
-                />
-                <Slider
-                  label="Accessibility Deficit"
-                  value={weights.access}
-                  onChange={(v) => setWeights({ ...weights, access: v })}
-                />
+              {/* Preset Selector */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-semibold text-[#1C2420]">
+                  Approved National Protocol
+                </label>
+                <select
+                  value={activePresetId}
+                  onChange={(e) => {
+                    const pid = e.target.value;
+                    setActivePresetId(pid);
+                    const p = GAZETTED_PRESETS.find((x) => x.id === pid);
+                    if (p) setWeights(p.weights);
+                  }}
+                  className="w-full border rounded-xs px-2.5 py-1.5 bg-[#F7F5F1] text-xs text-[#1C2420] focus:outline-none focus:ring-1 focus:ring-[#22364A] cursor-pointer"
+                  style={{ borderColor: C.line }}
+                >
+                  {GAZETTED_PRESETS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.shortName}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <button
-                onClick={() =>
-                  setWeights({
-                    hazard: 30,
-                    exposure: 25,
-                    vulnerability: 20,
-                    history: 15,
-                    access: 10,
-                  })
-                }
-                className="w-full mt-5 inline-flex items-center justify-center gap-1.5 f-sans text-xs py-2 border rounded-sm hover:bg-[#F7F5F1] cursor-pointer transition-colors"
-                style={{ borderColor: C.line, color: C.inkSoft }}
-              >
-                <RotateCcw size={12} /> Reset to Default Model
-              </button>
+              {/* Active Protocol Details Card */}
+              {(() => {
+                const currentPreset = GAZETTED_PRESETS.find((p) => p.id === activePresetId) || GAZETTED_PRESETS[0];
+                return (
+                  <div className="p-3 rounded-xs bg-[#F7F5F1] border border-[#D9D4C7] space-y-2 text-xs">
+                    <p className="font-semibold text-[#1C2420] text-[11px]">
+                      {currentPreset.name}
+                    </p>
+                    <p className="text-[10px] text-[#565F58] leading-tight">
+                      <strong className="text-[#1C2420]">Authority:</strong> {currentPreset.authority}
+                    </p>
+                    <p className="text-[10px] text-[#3E5E82] font-mono leading-tight">
+                      {currentPreset.statutoryBasis}
+                    </p>
+
+                    <div className="pt-2 border-t border-[#D9D4C7] space-y-1.5">
+                      <p className="text-[10px] font-semibold uppercase text-[#565F58]">
+                        Mandated Weights Ratio:
+                      </p>
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
+                        <div className="flex justify-between">
+                          <span className="text-[#565F58]">Hazard:</span>
+                          <span className="font-mono font-semibold text-[#1C2420]">{weights.hazard}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#565F58]">Exposure:</span>
+                          <span className="font-mono font-semibold text-[#1C2420]">{weights.exposure}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#565F58]">Vulnerability:</span>
+                          <span className="font-mono font-semibold text-[#1C2420]">{weights.vulnerability}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#565F58]">History:</span>
+                          <span className="font-mono font-semibold text-[#1C2420]">{weights.history}%</span>
+                        </div>
+                        <div className="flex justify-between col-span-2">
+                          <span className="text-[#565F58]">Access Deficit:</span>
+                          <span className="font-mono font-semibold text-[#1C2420]">{weights.access}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Statutory Cabinet Override (Audit Logged) */}
+              <div className="pt-2 border-t" style={{ borderColor: C.line }}>
+                <button
+                  type="button"
+                  onClick={() => setCabinetOverrideOpen(!cabinetOverrideOpen)}
+                  className="w-full flex items-center justify-between text-left text-[11px] font-semibold text-[#22364A] hover:text-[#B5462F] transition-colors py-1 cursor-pointer"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Sliders size={13} /> Emergency Cabinet Override
+                  </span>
+                  <span className="text-[10px] text-[#565F58]">
+                    {cabinetOverrideOpen ? "▲ Close" : "▼ Calibrate"}
+                  </span>
+                </button>
+
+                {cabinetOverrideOpen && (
+                  <div className="mt-3 space-y-3 pt-2 border-t border-dashed border-[#D9D4C7]">
+                    <div className="p-2 rounded-xs bg-[#FFF9EE] border border-[#C0872B]/40 text-[10px] text-[#8C5D17] leading-tight">
+                      ⚠️ <strong>Audit Warning:</strong> Overrides require recorded justification under Section 34(m) of Disaster Management Act 2005.
+                    </div>
+
+                    <div className="space-y-2.5">
+                      <Slider
+                        label="Hazard Intensity"
+                        value={weights.hazard}
+                        onChange={(v) => setWeights({ ...weights, hazard: v })}
+                      />
+                      <Slider
+                        label="Population Exposure"
+                        value={weights.exposure}
+                        onChange={(v) => setWeights({ ...weights, exposure: v })}
+                      />
+                      <Slider
+                        label="Social Vulnerability"
+                        value={weights.vulnerability}
+                        onChange={(v) => setWeights({ ...weights, vulnerability: v })}
+                      />
+                      <Slider
+                        label="Historical Frequency"
+                        value={weights.history}
+                        onChange={(v) => setWeights({ ...weights, history: v })}
+                      />
+                      <Slider
+                        label="Accessibility Deficit"
+                        value={weights.access}
+                        onChange={(v) => setWeights({ ...weights, access: v })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-[#1C2420] mb-1">
+                        Executive File / Minute No. *
+                      </label>
+                      <input
+                        type="text"
+                        value={cabinetOverrideReason}
+                        onChange={(e) => setCabinetOverrideReason(e.target.value)}
+                        placeholder="e.g., DDMA/WND/MIN-44/2026"
+                        className="w-full border rounded-xs px-2 py-1 bg-[#F7F5F1] text-[11px] focus:outline-none"
+                        style={{ borderColor: C.line }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Habitations List and Detail View */}

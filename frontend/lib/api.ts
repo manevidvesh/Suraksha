@@ -15,6 +15,7 @@ import {
   FALLBACK_SOURCES,
   FALLBACK_RED_ZONES,
 } from "./fallbackData";
+import { generateBufferedPolygon } from "./map";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -130,6 +131,42 @@ export const api = {
       return FALLBACK_RED_ZONES;
     } catch {
       return FALLBACK_RED_ZONES;
+    }
+  },
+
+  async simulateDynamicRedZoneBuffer(payload: {
+    latitude: number;
+    longitude: number;
+    radius_km: number;
+    zone_name: string;
+    hazard_type: string;
+    severity: string;
+  }): Promise<any> {
+    try {
+      return await request<any>("/api/hazards/red-zones/simulate-buffer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      const ring = generateBufferedPolygon(payload.latitude, payload.longitude, payload.radius_km, 18);
+      return {
+        type: "Feature",
+        geometry: {
+          type: "Polygon",
+          coordinates: [ring],
+        },
+        properties: {
+          id: `RZ-DYN-${Date.now()}`,
+          zone_code: `RED-DYN-${payload.hazard_type.slice(0, 3).toUpperCase()}`,
+          name: payload.zone_name,
+          hazard_type: payload.hazard_type,
+          severity: payload.severity,
+          description: `Live Dynamic Early Warning alert: ${payload.radius_km} km radius buffer around epicenter (${payload.latitude.toFixed(3)}, ${payload.longitude.toFixed(3)}). Enforced zero-hour evacuation perimeter under Section 34(b) DM Act.`,
+          source_agency: "IMD Doppler Radar / CWC Telemetry Feed",
+          radius_km: payload.radius_km,
+        },
+      };
     }
   },
 
@@ -261,6 +298,57 @@ export const api = {
       const capExceeded = hab.pop > site.eff.value;
       const reduction = Math.max(45, Math.min(85, Math.round(100 - (hab.f.hazard * 0.4))));
 
+      const households = Math.max(1, Math.ceil(hab.pop / 4.2));
+      const pmayCrores = Number(((households * 1.30) / 100).toFixed(2));
+      const landCrores = Number(((households * 0.80) / 100).toFixed(2));
+      const infraCrores = Number(((households * 1.20) / 100).toFixed(2));
+      const totalCrores = Number((pmayCrores + landCrores + infraCrores).toFixed(2));
+      const ndrfCrores = Number((totalCrores * 0.75).toFixed(2));
+      const sdrfCrores = Number((totalCrores - ndrfCrores).toFixed(2));
+
+      const financialOutlay = {
+        households_count: households,
+        total_crores: totalCrores,
+        pmay_housing_crores: pmayCrores,
+        land_development_crores: landCrores,
+        infrastructure_crores: infraCrores,
+        ndrf_central_share_crores: ndrfCrores,
+        sdrf_state_share_crores: sdrfCrores,
+      };
+
+      const deptMatrix = [
+        {
+          department: "Revenue & Land Records",
+          designation: "Tehsildar / Sub-Collector",
+          mandate: `Cadastral demarcation of ${site.name}, survey of ${households} residential plots (3 cents each), and issuance of freehold title deeds (Pattas).`,
+          timeline: "30 Days",
+        },
+        {
+          department: "Public Works Department (PWD)",
+          designation: "Executive Engineer (Roads & Bridges)",
+          mandate: `Topographical grading, construction of ${dist} km all-weather bituminous road connectivity, and reinforced retaining walls.`,
+          timeline: "60 Days",
+        },
+        {
+          department: "Public Health Engineering / Jal Shakti",
+          designation: "Executive Engineer (PHED)",
+          mandate: `Drilling deep bore-well, overhead distribution reservoir, and piped drinking water grid for ${hab.pop} residents under Jal Jeevan Mission.`,
+          timeline: "45 Days",
+        },
+        {
+          department: "Health & Family Welfare",
+          designation: "District Medical Officer (DMO)",
+          mandate: "Operationalization of Ayushman Bharat Health & Wellness Centre (Sub-Centre) with cold-chain vaccination & mobile outreach clinic.",
+          timeline: "60 Days",
+        },
+        {
+          department: "School Education & Literacy",
+          designation: "District Education Officer (DEO)",
+          mandate: `Expansion of classroom capacity at nearest Government Primary School and establishment of Anganwadi feeding center.`,
+          timeline: "90 Days",
+        },
+      ];
+
       return {
         habitation_id: hab.id,
         habitation_name: hab.name,
@@ -284,6 +372,8 @@ export const api = {
           { metric: "Historical Risk", Before: hab.f.history, After: 10 },
           { metric: "Infrastructure Load", Before: 20, After: Math.min(100, Math.round((hab.pop / site.eff.value) * 80)) },
         ],
+        financial_outlay: financialOutlay,
+        department_matrix: deptMatrix,
       };
     }
   },
@@ -303,25 +393,80 @@ export const api = {
       const hab = FALLBACK_HABITATIONS.find((h) => h.id === habitationId) || FALLBACK_HABITATIONS[0];
       const site = siteId ? FALLBACK_SITES.find((s) => s.id === siteId) : FALLBACK_SITES[0];
 
+      const households = Math.max(1, Math.ceil(hab.pop / 4.2));
+      const pmayCrores = Number(((households * 1.30) / 100).toFixed(2));
+      const landCrores = Number(((households * 0.80) / 100).toFixed(2));
+      const infraCrores = Number(((households * 1.20) / 100).toFixed(2));
+      const totalCrores = Number((pmayCrores + landCrores + infraCrores).toFixed(2));
+      const ndrfCrores = Number((totalCrores * 0.75).toFixed(2));
+      const sdrfCrores = Number((totalCrores - ndrfCrores).toFixed(2));
+
+      const financialOutlay = {
+        households_count: households,
+        total_crores: totalCrores,
+        pmay_housing_crores: pmayCrores,
+        land_development_crores: landCrores,
+        infrastructure_crores: infraCrores,
+        ndrf_central_share_crores: ndrfCrores,
+        sdrf_state_share_crores: sdrfCrores,
+      };
+
+      const deptMatrix = [
+        {
+          department: "Revenue & Land Records",
+          designation: "Tehsildar / Sub-Collector",
+          mandate: `Cadastral demarcation of ${site ? site.name : "candidate site"}, survey of ${households} residential plots (3 cents each), and issuance of freehold title deeds (Pattas).`,
+          timeline: "30 Days",
+        },
+        {
+          department: "Public Works Department (PWD)",
+          designation: "Executive Engineer (Roads & Bridges)",
+          mandate: `Topographical grading, construction of ${site ? site.distanceKm : 15} km all-weather bituminous road connectivity, and reinforced retaining walls.`,
+          timeline: "60 Days",
+        },
+        {
+          department: "Public Health Engineering / Jal Shakti",
+          designation: "Executive Engineer (PHED)",
+          mandate: `Drilling deep bore-well, overhead distribution reservoir, and piped drinking water grid for ${hab.pop} residents under Jal Jeevan Mission.`,
+          timeline: "45 Days",
+        },
+        {
+          department: "Health & Family Welfare",
+          designation: "District Medical Officer (DMO)",
+          mandate: "Operationalization of Ayushman Bharat Health & Wellness Centre (Sub-Centre) with cold-chain vaccination & mobile outreach clinic.",
+          timeline: "60 Days",
+        },
+        {
+          department: "School Education & Literacy",
+          designation: "District Education Officer (DEO)",
+          mandate: `Expansion of classroom capacity at nearest Government Primary School and establishment of Anganwadi feeding center.`,
+          timeline: "90 Days",
+        },
+      ];
+
       return {
-        title: `SURAKSHA Relocation Executive Brief: ${hab.name}`,
+        title: `OFFICE MEMORANDUM: Statutory Relocation Order for ${hab.name}`,
         habitation_name: hab.name,
         region: hab.region,
         risk_score: hab.score,
         priority_tier: hab.tier,
         primary_hazard: hab.hazard,
         population: hab.pop,
-        executive_summary: `${hab.name} in ${hab.region} has been designated for ${hab.tier.toLowerCase()} relocation under the SURAKSHA Multi-Hazard framework. Composite vulnerability is driven by recurring ${hab.hazard.toLowerCase()} hazards affecting ${hab.pop.toLocaleString()} residents.`,
+        executive_summary: `${hab.name} in ${hab.region} has been designated for ${hab.tier.toLowerCase()} relocation under Section 30(2)(v) of the Disaster Management Act, 2005. Composite vulnerability is driven by recurring ${hab.hazard.toLowerCase()} hazards affecting ${hab.pop.toLocaleString()} residents (${households} households). Total estimated resettlement outlay is ₹${totalCrores.toFixed(2)} Cr under 75:25 NDRF-SDRF statutory sharing.`,
         risk_driver_analysis: `PostGIS spatial intersect indicates severe slope steepness (>28°) combined with saturated catchment precipitation. Historical records demonstrate ${hab.events} previous displacement events with high likelihood of slope mobilization during monsoon peaks.`,
         relocation_site_assessment: site
-          ? `Candidate site ${site.name} exhibits an effective carrying capacity of ${site.eff.value} additional residents, strictly governed by ${site.eff.bottleneck}. Transit distance is ${site.distanceKm} km.`
+          ? `Designated candidate site ${site.name} exhibits an effective carrying capacity of ${site.eff.value} additional residents, governed by ${site.eff.bottleneck} threshold. Transit distance is ${site.distanceKm} km.`
           : undefined,
         policy_recommendations: [
-          `Authorize immediate demarcation of Red Zone exclusion buffer around ${hab.name}.`,
+          `Authorize immediate demarcation of Red Zone exclusion buffer around ${hab.name} under Section 34(b) DM Act.`,
           `Instruct District Disaster Management Authority (DDMA) to initiate phased rehabilitation to ${site ? site.name : "designated safe layout"}.`,
-          `Mobilize rural development funding to expand ${site ? site.eff.bottleneck : "drinking water & sanitation"} infrastructure prior to final resettlement.`,
-          `Deploy community engagement officers to support livelihood transition and title registration.`,
+          `Mobilize rural development and Jal Jeevan Mission funding to expand ${site ? site.eff.bottleneck : "drinking water & sanitation"} infrastructure prior to final resettlement.`,
+          `Deploy community engagement revenue officers for cadastral survey, patta title issuance, and livelihood transition.`,
         ],
+        memorandum_number: `F.No. SDMA/DM-ACT/2026/RELOC-${hab.id}`,
+        statutory_authority: "Disaster Management Act, 2005 (Sections 30 & 34)",
+        financial_outlay: financialOutlay,
+        department_action_matrix: deptMatrix,
         generated_at: new Date().toLocaleDateString("en-IN", {
           year: "numeric",
           month: "short",

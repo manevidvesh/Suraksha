@@ -171,12 +171,47 @@ export function useRiskData() {
     api.createHabitation(hab).catch((err) => console.warn("Background sync failed:", err));
   }, [habitations.length, weights]);
 
+  const triggerDynamicHazardExpansion = useCallback(async (params: {
+    latitude: number;
+    longitude: number;
+    radiusKm: number;
+    hazardType: string;
+    zoneName: string;
+    severity?: string;
+  }) => {
+    try {
+      const newFeature = await api.simulateDynamicRedZoneBuffer({
+        latitude: params.latitude,
+        longitude: params.longitude,
+        radius_km: params.radiusKm,
+        zone_name: params.zoneName,
+        hazard_type: params.hazardType,
+        severity: params.severity || "Critical",
+      });
+
+      setRedZonesGeoJSON((prev: any) => ({
+        type: "FeatureCollection",
+        features: [newFeature, ...(prev?.features || [])],
+      }));
+
+      return newFeature;
+    } catch (err) {
+      console.error("Failed to simulate dynamic buffer:", err);
+      return null;
+    }
+  }, []);
+
+  const resetRedZones = useCallback(() => {
+    setRedZonesGeoJSON(ensureRedZonesForHabitations(FALLBACK_RED_ZONES, habitations));
+  }, [habitations]);
+
   return {
     habitations,
     sites,
     history,
     sources,
     redZonesGeoJSON,
+    setRedZonesGeoJSON,
     selectedHabitationId,
     setSelectedHabitationId,
     minCap,
@@ -190,5 +225,7 @@ export function useRiskData() {
     flyToTarget,
     setFlyToTarget,
     addHabitation,
+    triggerDynamicHazardExpansion,
+    resetRedZones,
   };
 }

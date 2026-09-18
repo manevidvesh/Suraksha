@@ -51,6 +51,60 @@ def simulate_relocation(hab: Dict[str, Any], site: Dict[str, Any]) -> Simulation
             f"{eff.value - pop} spare capacity before reaching {bottleneck_label.lower()} bottleneck."
         )
 
+    import math
+    from backend.schemas.simulation import FinancialOutlayBreakdown, DepartmentActionTask
+
+    households = max(1, int(math.ceil(pop / 4.2)))
+    pmay_crores = round((households * 1.30) / 100, 2)
+    land_dev_crores = round((households * 0.80) / 100, 2)
+    infra_crores = round((households * 1.20) / 100, 2)
+    total_crores = round(pmay_crores + land_dev_crores + infra_crores, 2)
+    ndrf_crores = round(total_crores * 0.75, 2)
+    sdrf_crores = round(total_crores - ndrf_crores, 2)
+
+    fin_outlay = FinancialOutlayBreakdown(
+        households_count=households,
+        total_crores=total_crores,
+        pmay_housing_crores=pmay_crores,
+        land_development_crores=land_dev_crores,
+        infrastructure_crores=infra_crores,
+        ndrf_central_share_crores=ndrf_crores,
+        sdrf_state_share_crores=sdrf_crores,
+    )
+
+    dept_matrix = [
+        DepartmentActionTask(
+            department="Revenue & Land Records",
+            designation="Tehsildar / Sub-Collector",
+            mandate=f"Cadastral survey of {site['name']}, demarcation of {households} plots (3 cents each), and distribution of freehold title deeds (Pattas).",
+            timeline="30 Days"
+        ),
+        DepartmentActionTask(
+            department="Public Works Department (PWD)",
+            designation="Executive Engineer (Roads & Bridges)",
+            mandate=f"Slope grading, construction of all-weather bituminous access road ({dist_km} km transit link), and stormwater masonry drains.",
+            timeline="60 Days"
+        ),
+        DepartmentActionTask(
+            department="Public Health Engineering / Jal Shakti",
+            designation="Executive Engineer (PHED)",
+            mandate=f"Drilling deep bore-well, overhead distribution reservoir, and piped drinking water grid for {pop} residents under Jal Jeevan Mission.",
+            timeline="45 Days"
+        ),
+        DepartmentActionTask(
+            department="Health & Family Welfare",
+            designation="District Medical Officer (DMO)",
+            mandate="Operationalization of Ayushman Bharat Health & Wellness Sub-Centre with cold-chain immunization and bi-weekly mobile medical unit.",
+            timeline="60 Days"
+        ),
+        DepartmentActionTask(
+            department="School Education & Literacy",
+            designation="District Education Officer (DEO)",
+            mandate=f"Expansion of classroom capacity at nearest Government Primary School and establishment of Anganwadi feeding centre.",
+            timeline="90 Days"
+        ),
+    ]
+
     return SimulationResponse(
         habitation_id=hab["id"],
         habitation_name=hab["name"],
@@ -66,4 +120,6 @@ def simulate_relocation(hab: Dict[str, Any], site: Dict[str, Any]) -> Simulation
         capacity_exceeded=capacity_exceeded,
         radar_data=radar_data,
         summary_message=summary_msg,
+        financial_outlay=fin_outlay,
+        department_matrix=dept_matrix,
     )

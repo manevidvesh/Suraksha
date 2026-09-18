@@ -67,6 +67,8 @@ async def generate_sdma_executive_brief(
                         "Activate emergency evacuation contingency protocols.",
                         "Initiate gazette notification for SURAKSHA Hazard Zone demarcation.",
                     ],
+                    memorandum_number=f"F.No. SDMA/DM-ACT/2026/RELOC-{hab.get('id', 'HAB')}",
+                    statutory_authority="Disaster Management Act, 2005 (Sections 30 & 34)",
                 )
         except Exception:
             pass  # Fallback to deterministic expert engine
@@ -111,8 +113,65 @@ async def generate_sdma_executive_brief(
     if site:
         recommendations.append(f"Upgrade {bottleneck} capacity at {site['name']} prior to final residential handover.")
 
+    import math
+    from backend.schemas.simulation import FinancialOutlayBreakdown, DepartmentActionTask
+
+    households = max(1, int(math.ceil(pop / 4.2)))
+    pmay_crores = round((households * 1.30) / 100, 2)
+    land_dev_crores = round((households * 0.80) / 100, 2)
+    infra_crores = round((households * 1.20) / 100, 2)
+    total_crores = round(pmay_crores + land_dev_crores + infra_crores, 2)
+    ndrf_crores = round(total_crores * 0.75, 2)
+    sdrf_crores = round(total_crores - ndrf_crores, 2)
+
+    fin_outlay = FinancialOutlayBreakdown(
+        households_count=households,
+        total_crores=total_crores,
+        pmay_housing_crores=pmay_crores,
+        land_development_crores=land_dev_crores,
+        infrastructure_crores=infra_crores,
+        ndrf_central_share_crores=ndrf_crores,
+        sdrf_state_share_crores=sdrf_crores,
+    )
+
+    dest_name = site["name"] if site else "Designated District Resettlement Site"
+    transit_dist = site.get("distanceKm", 15) if site else 15
+
+    dept_matrix = [
+        DepartmentActionTask(
+            department="Revenue & Land Records",
+            designation="Tehsildar / Sub-Collector",
+            mandate=f"Cadastral survey of {dest_name}, demarcation of {households} plots (3 cents each), and distribution of freehold title deeds (Pattas).",
+            timeline="30 Days"
+        ),
+        DepartmentActionTask(
+            department="Public Works Department (PWD)",
+            designation="Executive Engineer (Roads & Bridges)",
+            mandate=f"Slope grading, construction of all-weather bituminous access road ({transit_dist} km transit link), and stormwater masonry drains.",
+            timeline="60 Days"
+        ),
+        DepartmentActionTask(
+            department="Public Health Engineering / Jal Shakti",
+            designation="Executive Engineer (PHED)",
+            mandate=f"Drilling deep bore-well, overhead distribution reservoir, and piped drinking water grid for {pop} residents under Jal Jeevan Mission.",
+            timeline="45 Days"
+        ),
+        DepartmentActionTask(
+            department="Health & Family Welfare",
+            designation="District Medical Officer (DMO)",
+            mandate="Operationalization of Ayushman Bharat Health & Wellness Sub-Centre with cold-chain immunization and bi-weekly mobile medical unit.",
+            timeline="60 Days"
+        ),
+        DepartmentActionTask(
+            department="School Education & Literacy",
+            designation="District Education Officer (DEO)",
+            mandate=f"Expansion of classroom capacity at nearest Government Primary School and establishment of Anganwadi feeding centre.",
+            timeline="90 Days"
+        ),
+    ]
+
     return ReportBriefResponse(
-        title=f"SURAKSHA SDMA Executive Relocation Brief: {hab['name']}",
+        title=f"OFFICE MEMORANDUM: Statutory Relocation Order for {hab['name']}",
         generated_at=datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC"),
         habitation_name=hab["name"],
         region=hab["region"],
@@ -124,4 +183,8 @@ async def generate_sdma_executive_brief(
         risk_driver_analysis=driver_analysis,
         relocation_site_assessment=site_assessment,
         policy_recommendations=recommendations,
+        memorandum_number=f"F.No. SDMA/DM-ACT/2026/RELOC-{hab.get('id', 'HAB')}",
+        statutory_authority="Disaster Management Act, 2005 (Sections 30 & 34)",
+        financial_outlay=fin_outlay,
+        department_action_matrix=dept_matrix,
     )

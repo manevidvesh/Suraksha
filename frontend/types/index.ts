@@ -38,6 +38,15 @@ export interface SiteEffectiveCapacity {
   bottleneck: "land" | "water" | "sanitation" | "healthcare" | "schools";
 }
 
+export interface LandTenureInfo {
+  classification: "Revenue Land (Clear Title)" | "Vested Government Poramboke" | "Private Agricultural (LARR 2013)" | "Reserve Forest (MoEFCC FCA 1980)";
+  surveyNumber: string;
+  encumbranceStatus: "Zero Encumbrance / Verified" | "Gram Sabha Consent Pending" | "Statutory Forest Clearance (36mo)" | "Disputed / Civil Injunction";
+  litigationRisk: "Low" | "Moderate" | "High";
+  clearanceTimelineMonths: number;
+  nodalDepartment: string;
+}
+
 export interface CandidateSite {
   id: string;
   name: string;
@@ -51,6 +60,7 @@ export interface CandidateSite {
   eff: SiteEffectiveCapacity;
   allocated_population: number;
   available_capacity: number;
+  landTenure?: LandTenureInfo;
 }
 
 export interface DisasterEvent {
@@ -89,6 +99,23 @@ export interface MetricComparison {
   After: number;
 }
 
+export interface FinancialOutlayBreakdown {
+  households_count: number;
+  total_crores: number;
+  pmay_housing_crores: number;
+  land_development_crores: number;
+  infrastructure_crores: number;
+  ndrf_central_share_crores: number;
+  sdrf_state_share_crores: number;
+}
+
+export interface DepartmentActionTask {
+  department: string;
+  designation: string;
+  mandate: string;
+  timeline: string;
+}
+
 export interface SimulationResult {
   habitation_id: string;
   habitation_name: string;
@@ -105,6 +132,8 @@ export interface SimulationResult {
   radar_data: MetricComparison[];
   summary_message: string;
   llm_rationale?: string;
+  financial_outlay?: FinancialOutlayBreakdown;
+  department_matrix?: DepartmentActionTask[];
 }
 
 export interface ExecutiveBrief {
@@ -120,6 +149,10 @@ export interface ExecutiveBrief {
   risk_driver_analysis: string;
   relocation_site_assessment?: string;
   policy_recommendations: string[];
+  memorandum_number?: string;
+  statutory_authority?: string;
+  financial_outlay?: FinancialOutlayBreakdown;
+  department_action_matrix?: DepartmentActionTask[];
 }
 
 export interface UploadResult {
@@ -131,3 +164,4 @@ export interface UploadResult {
   status: "success" | "error";
   message: string;
 }
+

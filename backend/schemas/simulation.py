@@ -11,6 +11,21 @@ class SimulationRequest(BaseModel):
     habitation_id: str
     site_id: str
 
+class FinancialOutlayBreakdown(BaseModel):
+    households_count: int
+    total_crores: float
+    pmay_housing_crores: float
+    land_development_crores: float
+    infrastructure_crores: float
+    ndrf_central_share_crores: float
+    sdrf_state_share_crores: float
+
+class DepartmentActionTask(BaseModel):
+    department: str
+    designation: str
+    mandate: str
+    timeline: str
+
 class SimulationResponse(BaseModel):
     habitation_id: str
     habitation_name: str
@@ -27,6 +42,8 @@ class SimulationResponse(BaseModel):
     radar_data: List[MetricComparison]
     summary_message: str
     llm_rationale: Optional[str] = None
+    financial_outlay: Optional[FinancialOutlayBreakdown] = None
+    department_matrix: Optional[List[DepartmentActionTask]] = None
 
 class ScenarioCreate(BaseModel):
     title: str
@@ -64,3 +81,7 @@ class ReportBriefResponse(BaseModel):
     risk_driver_analysis: str
     relocation_site_assessment: Optional[str] = None
     policy_recommendations: List[str]
+    memorandum_number: Optional[str] = None
+    statutory_authority: Optional[str] = None
+    financial_outlay: Optional[FinancialOutlayBreakdown] = None
+    department_action_matrix: Optional[List[DepartmentActionTask]] = None

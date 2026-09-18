@@ -72,20 +72,23 @@ export function Sidebar({
 
   const body = (
     <div className="flex flex-col h-full">
-      <div className="px-5 py-5 border-b" style={{ borderColor: C.line }}>
+      <div className="px-5 py-4 border-b border-[#152331]">
         <Link href="/" className="group block">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-sm bg-[#B5462F] flex items-center justify-center text-white font-bold text-xs">
-              <ShieldAlert size={16} />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-sm bg-[#B5462F] flex items-center justify-center text-white font-bold text-xs shadow-xs shrink-0">
+              <ShieldAlert size={18} />
             </div>
             <div>
-              <p className="f-serif text-lg font-bold tracking-tight text-[#F7F5F1] group-hover:text-white transition-colors">
+              <p className="text-[9px] uppercase tracking-[0.16em] font-bold text-[#9BA8AE]">
+                Government of India
+              </p>
+              <p className="f-serif text-lg font-bold tracking-tight text-[#F7F5F1] group-hover:text-white transition-colors leading-none mt-0.5">
                 SURAKSHA
               </p>
             </div>
           </div>
-          <p className="f-sans text-[11px] mt-1 text-[#9BA8AE] leading-tight">
-            Spatial Unified Risk Assessment & Settlement Housing Allocation
+          <p className="f-sans text-[10.5px] mt-2 text-[#9BA8AE] leading-tight">
+            SDMA / DDMA Disaster Relocation Decision Support System
           </p>
         </Link>
       </div>
@@ -190,9 +193,19 @@ export function Sidebar({
         })}
       </div>
 
-      <div className="mt-auto px-5 py-4 border-t f-sans text-[11px]" style={{ borderColor: C.line, color: "#9BA8AE" }}>
-        <p className="font-medium text-[#C7D0D4]">National Command · All-India</p>
-        <p className="mt-0.5 text-[10px] text-[#9BA8AE]/80">5 Regional Planning Corridors</p>
+      <div className="mt-auto px-4 py-3.5 border-t border-[#152331] f-sans text-[11px] bg-[#101C27]/60">
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="w-2 h-2 rounded-full bg-[#3D6B5C] animate-pulse" />
+          <p className="text-[10px] uppercase font-bold tracking-wider text-[#9BA8AE]">
+            Authorized Official
+          </p>
+        </div>
+        <p className="font-semibold text-[#F7F5F1] leading-tight">
+          District Collector & DDMA Chairperson
+        </p>
+        <p className="mt-0.5 text-[10px] text-[#9BA8AE]/80">
+          Disaster Management Act 2005 · All-India
+        </p>
       </div>
     </div>
   );

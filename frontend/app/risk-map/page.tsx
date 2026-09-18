@@ -9,6 +9,12 @@ import {
   ShieldAlert,
   Sliders,
   LifeBuoy,
+  Radio,
+  CloudRain,
+  Waves,
+  RotateCcw,
+  BellRing,
+  Loader2,
 } from "lucide-react";
 import { useRiskData } from "@/hooks/useRiskData";
 import { C } from "@/components/Common/constants";
@@ -35,7 +41,10 @@ export default function RiskMapPage() {
     selectedHabitationId,
     setSelectedHabitationId,
     flyToTarget,
+    setFlyToTarget,
     addHabitation,
+    triggerDynamicHazardExpansion,
+    resetRedZones,
   } = useRiskData();
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -43,6 +52,15 @@ export default function RiskMapPage() {
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
   const [strategyModalOpen, setStrategyModalOpen] = useState(false);
   const [activeStrategyEntity, setActiveStrategyEntity] = useState<any>(null);
+
+  // Early warning telemetry simulation state
+  const [telemetryAlert, setTelemetryAlert] = useState<{
+    type: "cloudburst" | "flood";
+    message: string;
+    details: string;
+    targetName: string;
+  } | null>(null);
+  const [isSimulating, setIsSimulating] = useState(false);
 
   const currentCorridor = useMemo(() => {
     return CORRIDORS.find((c) => c.id === selectedCorridor) || CORRIDORS[0];
@@ -69,6 +87,71 @@ export default function RiskMapPage() {
     displayedHabitations[0] ||
     habitations.find((h) => h.id === selectedHabitationId) ||
     habitations[0];
+
+  const handleTriggerCloudburstAlert = async () => {
+    if (!selectedHabitation) return;
+    setIsSimulating(true);
+    try {
+      await triggerDynamicHazardExpansion({
+        latitude: selectedHabitation.latitude,
+        longitude: selectedHabitation.longitude,
+        radiusKm: 5.5,
+        hazardType: "IMD Extreme Cloudburst Surge",
+        zoneName: `IMD Live Cloudburst Dynamic Buffer: ${selectedHabitation.name}`,
+        severity: "Critical Cloudburst Surge",
+      });
+
+      setFlyToTarget({
+        latitude: selectedHabitation.latitude,
+        longitude: selectedHabitation.longitude,
+        name: selectedHabitation.name,
+      });
+
+      setTelemetryAlert({
+        type: "cloudburst",
+        targetName: selectedHabitation.name,
+        message: `IMD DOPPLER RADAR TRIGGER: Extreme Precipitation (>68.5 mm/hr) over ${selectedHabitation.name}`,
+        details: `Dynamic multi-hazard Red Zone expanded by 5.5 km buffer in real time. Under Section 34(b) of Disaster Management Act, mandatory pre-emptive evacuation to pucca shelters is activated for all ${selectedHabitation.pop.toLocaleString()} residents.`,
+      });
+    } finally {
+      setIsSimulating(false);
+    }
+  };
+
+  const handleTriggerRiverineSurge = async () => {
+    if (!selectedHabitation) return;
+    setIsSimulating(true);
+    try {
+      await triggerDynamicHazardExpansion({
+        latitude: selectedHabitation.latitude,
+        longitude: selectedHabitation.longitude,
+        radiusKm: 4.5,
+        hazardType: "CWC Riverine Flood Inundation Surge",
+        zoneName: `CWC Stage-III Flood Inundation Buffer: ${selectedHabitation.name}`,
+        severity: "Severe Inundation",
+      });
+
+      setFlyToTarget({
+        latitude: selectedHabitation.latitude,
+        longitude: selectedHabitation.longitude,
+        name: selectedHabitation.name,
+      });
+
+      setTelemetryAlert({
+        type: "flood",
+        targetName: selectedHabitation.name,
+        message: `CWC HYDROLOGICAL DISCHARGE ALERT: Stage-III Riverine High Inundation at ${selectedHabitation.name}`,
+        details: `Catchment discharge exceeded High Flood Level (HFL). Red Zone dynamically expanded by 4.5 km buffer. DDMA quick-response rescue watercraft dispatched.`,
+      });
+    } finally {
+      setIsSimulating(false);
+    }
+  };
+
+  const handleResetTelemetry = () => {
+    resetRedZones();
+    setTelemetryAlert(null);
+  };
 
   return (
     <div className="f-sans flex min-h-screen" style={{ backgroundColor: C.paper }}>
@@ -112,11 +195,92 @@ export default function RiskMapPage() {
           />
 
           {/* Regional Planning Corridor Selector */}
-          <div className="mb-5 bg-white border p-3.5 rounded-sm" style={{ borderColor: C.line }}>
+          <div className="mb-4 bg-white border p-3.5 rounded-sm" style={{ borderColor: C.line }}>
             <CorridorSelector
               selectedCorridor={selectedCorridor}
               onSelectCorridor={handleSelectCorridor}
             />
+          </div>
+
+          {/* IMD / CWC Live Early Warning Telemetry Feed & Dynamic Trigger Console */}
+          <div className="mb-5 bg-white border rounded-sm p-4 space-y-3" style={{ borderColor: C.line }}>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2.5">
+                <Radio size={16} className="text-[#B5462F] animate-pulse shrink-0" />
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#1C2420]">
+                    IMD & CWC Live Telemetry Feed · Dynamic Hazard Triggers
+                  </h3>
+                  <p className="text-[11px] text-[#565F58]">
+                    Real-time radar & hydrological sensor feed for dynamic Red Zone perimeter adjustment under Section 34(b) DM Act.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={handleTriggerCloudburstAlert}
+                  disabled={isSimulating}
+                  className="px-3 py-1.5 bg-[#B5462F] hover:bg-[#9B3C27] text-white text-xs font-medium rounded-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                  title="Simulate localized extreme precipitation (>65mm/hr) expanding Red Zone buffer"
+                >
+                  {isSimulating ? <Loader2 size={13} className="animate-spin" /> : <CloudRain size={13} />}
+                  Simulate IMD Cloudburst Alert (&gt;65 mm/hr)
+                </button>
+
+                <button
+                  onClick={handleTriggerRiverineSurge}
+                  disabled={isSimulating}
+                  className="px-3 py-1.5 bg-[#22364A] hover:bg-[#3E5E82] text-white text-xs font-medium rounded-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                  title="Simulate high hydrological riverine discharge expanding inundation zone"
+                >
+                  {isSimulating ? <Loader2 size={13} className="animate-spin" /> : <Waves size={13} />}
+                  Simulate CWC Flood Surge
+                </button>
+
+                {telemetryAlert && (
+                  <button
+                    onClick={handleResetTelemetry}
+                    className="px-2.5 py-1.5 border border-[#D9D4C7] hover:bg-[#F7F5F1] text-[#565F58] text-xs font-medium rounded-xs inline-flex items-center gap-1 cursor-pointer transition-colors"
+                    title="Restore gazetted baseline Red Zones"
+                  >
+                    <RotateCcw size={13} /> Reset Baseline
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Active Telemetry Urgent Banner */}
+            {telemetryAlert && (
+              <div
+                className="p-3.5 rounded-sm border flex items-start justify-between gap-3 animate-fadeIn"
+                style={{
+                  borderColor: telemetryAlert.type === "cloudburst" ? "#B5462F" : "#22364A",
+                  backgroundColor: telemetryAlert.type === "cloudburst" ? "#FFF8F6" : "#F4F7FA",
+                }}
+              >
+                <div className="flex items-start gap-2.5">
+                  <BellRing
+                    size={18}
+                    className={`shrink-0 mt-0.5 animate-bounce ${
+                      telemetryAlert.type === "cloudburst" ? "text-[#B5462F]" : "text-[#22364A]"
+                    }`}
+                  />
+                  <div>
+                    <p className="text-xs font-bold" style={{ color: telemetryAlert.type === "cloudburst" ? "#B5462F" : "#22364A" }}>
+                      {telemetryAlert.message}
+                    </p>
+                    <p className="text-[11px] text-[#565F58] mt-0.5 leading-relaxed">
+                      {telemetryAlert.details}
+                    </p>
+                  </div>
+                </div>
+
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-xs bg-white border border-[#D9D4C7] text-[#1C2420] font-semibold shrink-0">
+                  RED ZONE EXPANDED LIVE
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="border rounded-sm p-4 mb-6" style={{ borderColor: C.line, backgroundColor: C.paper }}>

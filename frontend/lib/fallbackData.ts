@@ -105,42 +105,90 @@ export const FALLBACK_SITES: CandidateSite[] = [
     latitude: 11.6600, longitude: 76.1700, x: 45, y: 45, distanceKm: 12,
     cap: { land: 500, water: 420, sanitation: 380, healthcare: 300, schools: 250 },
     eff: { value: 250, bottleneck: "schools" },
-    allocated_population: 0, available_capacity: 250
+    allocated_population: 0, available_capacity: 250,
+    landTenure: {
+      classification: "Revenue Land (Clear Title)",
+      surveyNumber: "Sy. 142/2B (Vested Govt)",
+      encumbranceStatus: "Zero Encumbrance / Verified",
+      litigationRisk: "Low",
+      clearanceTimelineMonths: 1,
+      nodalDepartment: "Revenue Department (Tehsildar Sulthan Bathery)"
+    }
   },
   {
     id: "S2", name: "Perumbavoor Resettlement Layout", region: "Ernakulam Midland",
     latitude: 10.1100, longitude: 76.4780, x: 55, y: 60, distanceKm: 26,
     cap: { land: 800, water: 650, sanitation: 700, healthcare: 600, schools: 550 },
     eff: { value: 550, bottleneck: "schools" },
-    allocated_population: 0, available_capacity: 550
+    allocated_population: 0, available_capacity: 550,
+    landTenure: {
+      classification: "Vested Government Poramboke",
+      surveyNumber: "Sy. 88/1A (Kunnathunad)",
+      encumbranceStatus: "Zero Encumbrance / Verified",
+      litigationRisk: "Low",
+      clearanceTimelineMonths: 2,
+      nodalDepartment: "Revenue & LSGD District Cell"
+    }
   },
   {
     id: "S3", name: "Bankura Transit Township", region: "Bankura Plains",
     latitude: 23.2300, longitude: 87.0700, x: 65, y: 25, distanceKm: 41,
     cap: { land: 300, water: 280, sanitation: 260, healthcare: 150, schools: 200 },
     eff: { value: 150, bottleneck: "healthcare" },
-    allocated_population: 0, available_capacity: 150
+    allocated_population: 0, available_capacity: 150,
+    landTenure: {
+      classification: "Private Agricultural (LARR 2013)",
+      surveyNumber: "RS Plot 412/901 (Khatiyan 44)",
+      encumbranceStatus: "Gram Sabha Consent Pending",
+      litigationRisk: "Moderate",
+      clearanceTimelineMonths: 14,
+      nodalDepartment: "Land & Land Reforms Dept (BL&LRO Bankura)"
+    }
   },
   {
     id: "S4", name: "Kannur Highland Plots", region: "North Malabar Midland",
     latitude: 11.8700, longitude: 75.3700, x: 25, y: 20, distanceKm: 18,
     cap: { land: 420, water: 390, sanitation: 350, healthcare: 320, schools: 300 },
     eff: { value: 300, bottleneck: "schools" },
-    allocated_population: 0, available_capacity: 300
+    allocated_population: 0, available_capacity: 300,
+    landTenure: {
+      classification: "Reserve Forest (MoEFCC FCA 1980)",
+      surveyNumber: "RF Compartment 54 (Taliparamba)",
+      encumbranceStatus: "Statutory Forest Clearance (36mo)",
+      litigationRisk: "High",
+      clearanceTimelineMonths: 36,
+      nodalDepartment: "Divisional Forest Officer (DFO Kannur)"
+    }
   },
   {
     id: "S5", name: "Gopeshwar Resettlement Colony", region: "Chamoli Plains",
     latitude: 30.4100, longitude: 79.3300, x: 50, y: 15, distanceKm: 24,
     cap: { land: 900, water: 750, sanitation: 700, healthcare: 650, schools: 600 },
     eff: { value: 600, bottleneck: "schools" },
-    allocated_population: 0, available_capacity: 600
+    allocated_population: 0, available_capacity: 600,
+    landTenure: {
+      classification: "Revenue Land (Clear Title)",
+      surveyNumber: "Khata 29 / Khasra 110 (Gopeshwar)",
+      encumbranceStatus: "Zero Encumbrance / Verified",
+      litigationRisk: "Low",
+      clearanceTimelineMonths: 1,
+      nodalDepartment: "Sub-Divisional Magistrate (SDM Chamoli)"
+    }
   },
   {
     id: "S6", name: "Jorhat Elevated Relief Township", region: "Upper Assam",
     latitude: 26.7509, longitude: 94.2037, x: 80, y: 25, distanceKm: 32,
     cap: { land: 1200, water: 1000, sanitation: 950, healthcare: 800, schools: 750 },
     eff: { value: 750, bottleneck: "schools" },
-    allocated_population: 0, available_capacity: 750
+    allocated_population: 0, available_capacity: 750,
+    landTenure: {
+      classification: "Vested Government Poramboke",
+      surveyNumber: "Dag 312 / Patta 14 (Jorhat East)",
+      encumbranceStatus: "Zero Encumbrance / Verified",
+      litigationRisk: "Low",
+      clearanceTimelineMonths: 2,
+      nodalDepartment: "Circle Officer (Revenue) Jorhat"
+    }
   },
 ];
 

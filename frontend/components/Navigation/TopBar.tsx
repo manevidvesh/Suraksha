@@ -27,12 +27,17 @@ export function TopBar({
       </button>
 
       <div className="flex items-center gap-2">
-        <div className="w-5 h-5 rounded-xs bg-[#B5462F] flex items-center justify-center text-white text-[10px] font-bold">
-          <ShieldAlert size={12} />
+        <div className="w-6 h-6 rounded-xs bg-[#B5462F] flex items-center justify-center text-white text-[10px] font-bold">
+          <ShieldAlert size={14} />
         </div>
-        <p className="f-serif text-base font-semibold" style={{ color: C.ink }}>
-          {title || "SURAKSHA DSS"}
-        </p>
+        <div>
+          <p className="f-serif text-sm font-bold leading-tight" style={{ color: C.ink }}>
+            {title || "SURAKSHA DSS"}
+          </p>
+          <p className="text-[9px] uppercase tracking-wider text-[#565F58] leading-none">
+            Govt of India · SDMA / DDMA
+          </p>
+        </div>
       </div>
 
       <span className="w-8" />
