@@ -12,14 +12,18 @@ import {
   FALLBACK_SITES,
   FALLBACK_HISTORY,
   FALLBACK_SOURCES,
+  FALLBACK_RED_ZONES,
 } from '../lib/fallbackData';
+import { ensureRedZonesForHabitations } from '../lib/map';
 
 export function useRiskData() {
   const [habitations, setHabitations] = useState<Habitation[]>(FALLBACK_HABITATIONS);
   const [sites, setSites] = useState<CandidateSite[]>(FALLBACK_SITES);
   const [history, setHistory] = useState<DisasterEvent[]>(FALLBACK_HISTORY);
   const [sources, setSources] = useState<DataSource[]>(FALLBACK_SOURCES);
-  const [redZonesGeoJSON, setRedZonesGeoJSON] = useState<any>(null);
+  const [redZonesGeoJSON, setRedZonesGeoJSON] = useState<any>(() =>
+    ensureRedZonesForHabitations(FALLBACK_RED_ZONES, FALLBACK_HABITATIONS)
+  );
 
   const [selectedHabitationId, setSelectedHabitationId] = useState<string>("H1");
   const [minCap, setMinCap] = useState<number>(0);
@@ -68,8 +72,9 @@ export function useRiskData() {
           if (srcRes.status === "fulfilled" && srcRes.value.items.length > 0) {
             setSources(srcRes.value.items);
           }
-          if (rzRes.status === "fulfilled") {
-            setRedZonesGeoJSON(rzRes.value);
+          if (rzRes.status === "fulfilled" && rzRes.value && rzRes.value.features?.length > 0) {
+            const currentHabs = habsRes.status === "fulfilled" && habsRes.value.items.length > 0 ? habsRes.value.items : habitations;
+            setRedZonesGeoJSON(ensureRedZonesForHabitations(rzRes.value, currentHabs));
           }
         }
       } catch (err: any) {
@@ -156,6 +161,9 @@ export function useRiskData() {
     };
 
     setHabitations((prev) => [hab, ...prev]);
+    if (tier === "Immediate") {
+      setRedZonesGeoJSON((prev: any) => ensureRedZonesForHabitations(prev, [hab]));
+    }
     setSelectedHabitationId(id);
     setFlyToTarget({ latitude: newHab.latitude, longitude: newHab.longitude, name: newHab.name });
 

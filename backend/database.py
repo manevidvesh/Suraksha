@@ -638,6 +638,84 @@ SEED_RED_ZONES = [
             "rainfall_intensity_mm": 180.0,
         },
     },
+    {
+        "type": "Feature",
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [79.02, 30.70],
+                    [79.11, 30.70],
+                    [79.12, 30.78],
+                    [79.04, 30.78],
+                    [79.02, 30.70],
+                ]
+            ],
+        },
+        "properties": {
+            "id": "RZ-UK-02",
+            "zone_code": "RED-UK-01-KED",
+            "name": "Kedarnath Glacial Outburst & Flash Flood Valley Zone",
+            "hazard_type": "Flash flood & cloudburst",
+            "severity": "Critical",
+            "description": "Chorabari moraine-dammed glacial breach and Mandakini headwater flood fan. High risk of torrential flash flooding. Encompasses Kedarnath Valley Hamlet.",
+            "source_agency": "Wadia Institute of Himalayan Geology & IMD",
+            "slope_angle_deg": 38.0,
+            "rainfall_intensity_mm": 360.0,
+        },
+    },
+    {
+        "type": "Feature",
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [94.12, 26.90],
+                    [94.28, 26.90],
+                    [94.30, 27.01],
+                    [94.14, 27.01],
+                    [94.12, 26.90],
+                ]
+            ],
+        },
+        "properties": {
+            "id": "RZ-AS-01",
+            "zone_code": "RED-AS-02-MAJ",
+            "name": "Majuli Island Brahmaputra Active Riverbank Erosion Zone",
+            "hazard_type": "Riverine flood & erosion",
+            "severity": "Critical",
+            "description": "Unconsolidated fluvial sandbar subject to catastrophic dynamic riverbank scouring and seasonal high-discharge submergence. Encompasses Majuli Island River Settlement.",
+            "source_agency": "Brahmaputra Board & Assam SDMA",
+            "slope_angle_deg": 1.2,
+            "rainfall_intensity_mm": 340.0,
+        },
+    },
+    {
+        "type": "Feature",
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [74.53, 14.70],
+                    [74.63, 14.70],
+                    [74.64, 14.77],
+                    [74.54, 14.78],
+                    [74.53, 14.70],
+                ]
+            ],
+        },
+        "properties": {
+            "id": "RZ-KA-01",
+            "zone_code": "RED-KA-05-SHI",
+            "name": "Shirur Western Ghats Hillside Debris Slide Zone",
+            "hazard_type": "Landslide",
+            "severity": "High",
+            "description": "Lateritic slope with deep regolith cutting across NH-66 corridor prone to sudden rain-induced mass wasting. Encompasses Shirur Hillside Settlement.",
+            "source_agency": "GSI & Karnataka SDMA",
+            "slope_angle_deg": 39.0,
+            "rainfall_intensity_mm": 310.0,
+        },
+    },
 ]
 
 class DataRepository:

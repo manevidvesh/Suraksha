@@ -66,6 +66,7 @@ export function RiskMapSvg({
         const color = tierColor(h.tier);
         const r = 1.6 + h.pop / 500;
         const isSel = selected === h.id;
+        const isImmediate = h.tier === "Immediate";
         return (
           <g
             key={h.id}
@@ -77,6 +78,26 @@ export function RiskMapSvg({
             aria-label={`${h.name}, ${h.tier} priority`}
             onKeyDown={(e) => e.key === "Enter" && onSelect && onSelect(h.id)}
           >
+            {/* Multi-hazard Red Zone perimeter around Immediate settlements */}
+            {isImmediate && (
+              <g>
+                <circle
+                  r={r + 6}
+                  fill="#DC2626"
+                  fillOpacity="0.22"
+                  stroke="#991B1B"
+                  strokeWidth="0.45"
+                  strokeDasharray="1.2 0.8"
+                />
+                <circle
+                  r={r + 6}
+                  fill="none"
+                  stroke="#EF4444"
+                  strokeWidth="1.2"
+                  strokeOpacity="0.3"
+                />
+              </g>
+            )}
             {isSel && <circle r={r + 2.2} fill="none" stroke={color} strokeWidth="0.5" />}
             <circle r={r} fill={color} stroke={C.paper} strokeWidth="0.5" />
           </g>

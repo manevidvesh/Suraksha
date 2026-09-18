@@ -161,3 +161,281 @@ export const FALLBACK_SOURCES: DataSource[] = [
   { name: "Survey of India", covers: "Topographic sheets, cadastral boundaries", updated: "Aug 2023", confidence: "High" },
   { name: "OpenStreetMap", covers: "Road access, settlement footprints", updated: "Community-maintained", confidence: "Medium" },
 ];
+
+export const FALLBACK_RED_ZONES = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [76.09, 11.42],
+            [76.17, 11.42],
+            [76.18, 11.49],
+            [76.12, 11.51],
+            [76.08, 11.47],
+            [76.09, 11.42],
+          ],
+        ],
+      },
+      properties: {
+        id: "RZ-WAY-01",
+        habitation_id: "H1",
+        zone_code: "RED-KL-07-WAY",
+        name: "Wayanad Slope High-Risk Landslide Basin",
+        hazard_type: "Landslide",
+        severity: "Critical",
+        description: "Steep debris flow corridor with slope > 38° and recurrent failure history. Encompasses Kavalapara Hamlet.",
+        source_agency: "Geological Survey of India (GSI)",
+        slope_angle_deg: 41.5,
+        rainfall_intensity_mm: 285.0,
+      },
+    },
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [76.24, 9.76],
+            [76.30, 9.76],
+            [76.29, 9.86],
+            [76.23, 9.85],
+            [76.24, 9.76],
+          ],
+        ],
+      },
+      properties: {
+        id: "RZ-ERN-01",
+        habitation_id: "H2",
+        zone_code: "RED-KL-07-CHE",
+        name: "Chellanam Severe Inundation & Seawall Breach Strip",
+        hazard_type: "Coastal erosion",
+        severity: "High",
+        description: "Active littoral drift zone experiencing severe wave overtopping and shoreline retreat. Encompasses Chellanam Coastal Ward.",
+        source_agency: "IMD & Survey of India",
+        slope_angle_deg: 2.1,
+        rainfall_intensity_mm: 195.0,
+      },
+    },
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [77.02, 10.04],
+            [77.10, 10.04],
+            [77.11, 10.13],
+            [77.03, 10.14],
+            [77.02, 10.04],
+          ],
+        ],
+      },
+      properties: {
+        id: "RZ-IDK-01",
+        habitation_id: "H4",
+        zone_code: "RED-KL-07-MUN",
+        name: "Munnar Highlands Valley Landslide Escarpment",
+        hazard_type: "Landslide",
+        severity: "Critical",
+        description: "Heavily fractured metamorphic rock slopes prone to translational failure during continuous monsoon rains. Encompasses Munnar Tea Estate Line.",
+        source_agency: "GSI & IMD",
+        slope_angle_deg: 46.0,
+        rainfall_intensity_mm: 320.0,
+      },
+    },
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [88.37, 26.93],
+            [88.47, 26.93],
+            [88.48, 27.03],
+            [88.38, 27.02],
+            [88.37, 26.93],
+          ],
+        ],
+      },
+      properties: {
+        id: "RZ-WB-01",
+        habitation_id: "H3",
+        zone_code: "RED-WB-03-TST",
+        name: "Teesta River Active Flash Flood Channel",
+        hazard_type: "Flood",
+        severity: "High",
+        description: "Glacial lake outburst and cloudburst discharge zone subject to rapid water level surges. Encompasses Teesta Riverside Colony.",
+        source_agency: "MOSDAC & Survey of India",
+        slope_angle_deg: 12.0,
+        rainfall_intensity_mm: 240.0,
+      },
+    },
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [88.72, 21.88],
+            [88.89, 21.88],
+            [88.90, 22.02],
+            [88.73, 22.02],
+            [88.72, 21.88],
+          ],
+        ],
+      },
+      properties: {
+        id: "RZ-WB-02",
+        habitation_id: "H5",
+        zone_code: "RED-WB-03-SUN",
+        name: "Sundarbans Tidal Inundation & Embankment Breach Zone",
+        hazard_type: "Cyclone & flood",
+        severity: "Critical",
+        description: "Low-elevation delta mudflats susceptible to storm surge and saline inundation. Encompasses Sundarbans Char Basti.",
+        source_agency: "IMD & MOSDAC",
+        slope_angle_deg: 0.8,
+        rainfall_intensity_mm: 310.0,
+      },
+    },
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [76.34, 9.29],
+            [76.48, 9.29],
+            [76.49, 9.43],
+            [76.35, 9.44],
+            [76.34, 9.29],
+          ],
+        ],
+      },
+      properties: {
+        id: "RZ-ALP-01",
+        habitation_id: "H14",
+        zone_code: "RED-KL-07-KUT",
+        name: "Kuttanad Lowland Polder Submergence Belt",
+        hazard_type: "Submergence & flood",
+        severity: "High",
+        description: "Sub-sea-level agrarian polder system subject to chronic monsoon backwater inundation with no feasible upland relocation sites nearby. Mandates in-situ amphibious adaptation.",
+        source_agency: "Central Water Commission (CWC) & Kerala SDMA",
+        slope_angle_deg: 0.2,
+        rainfall_intensity_mm: 290.0,
+      },
+    },
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [79.52, 30.51],
+            [79.61, 30.51],
+            [79.62, 30.60],
+            [79.53, 30.59],
+            [79.52, 30.51],
+          ],
+        ],
+      },
+      properties: {
+        id: "RZ-UK-01",
+        habitation_id: "H9",
+        zone_code: "RED-UK-01-JOS",
+        name: "Joshimath Himalayan Escarpment Subsidence Zone",
+        hazard_type: "Land subsidence",
+        severity: "Critical",
+        description: "Tectonically active moraine slope undergoing differential ground sinking and foundation fissures requiring immediate evacuation and slope drainage. Encompasses Joshimath Upper Ward.",
+        source_agency: "CBRI & Geological Survey of India (GSI)",
+        slope_angle_deg: 36.5,
+        rainfall_intensity_mm: 180.0,
+      },
+    },
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [79.02, 30.70],
+            [79.11, 30.70],
+            [79.12, 30.78],
+            [79.04, 30.78],
+            [79.02, 30.70],
+          ],
+        ],
+      },
+      properties: {
+        id: "RZ-UK-02",
+        habitation_id: "H10",
+        zone_code: "RED-UK-01-KED",
+        name: "Kedarnath Glacial Outburst & Flash Flood Valley Zone",
+        hazard_type: "Flash flood & cloudburst",
+        severity: "Critical",
+        description: "Chorabari moraine-dammed glacial breach and Mandakini headwater flood fan. High risk of torrential flash flooding. Encompasses Kedarnath Valley Hamlet.",
+        source_agency: "Wadia Institute of Himalayan Geology & IMD",
+        slope_angle_deg: 38.0,
+        rainfall_intensity_mm: 360.0,
+      },
+    },
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [94.12, 26.90],
+            [94.28, 26.90],
+            [94.30, 27.01],
+            [94.14, 27.01],
+            [94.12, 26.90],
+          ],
+        ],
+      },
+      properties: {
+        id: "RZ-AS-01",
+        habitation_id: "H11",
+        zone_code: "RED-AS-02-MAJ",
+        name: "Majuli Island Brahmaputra Active Riverbank Erosion Zone",
+        hazard_type: "Riverine flood & erosion",
+        severity: "Critical",
+        description: "Unconsolidated fluvial sandbar subject to catastrophic dynamic riverbank scouring and seasonal high-discharge submergence. Encompasses Majuli Island River Settlement.",
+        source_agency: "Brahmaputra Board & Assam SDMA",
+        slope_angle_deg: 1.2,
+        rainfall_intensity_mm: 340.0,
+      },
+    },
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [74.53, 14.70],
+            [74.63, 14.70],
+            [74.64, 14.77],
+            [74.54, 14.78],
+            [74.53, 14.70],
+          ],
+        ],
+      },
+      properties: {
+        id: "RZ-KA-01",
+        habitation_id: "H12",
+        zone_code: "RED-KA-05-SHI",
+        name: "Shirur Western Ghats Hillside Debris Slide Zone",
+        hazard_type: "Landslide",
+        severity: "High",
+        description: "Lateritic slope with deep regolith cutting across NH-66 corridor prone to sudden rain-induced mass wasting. Encompasses Shirur Hillside Settlement.",
+        source_agency: "GSI & Karnataka SDMA",
+        slope_angle_deg: 39.0,
+        rainfall_intensity_mm: 310.0,
+      },
+    },
+  ],
+};
+

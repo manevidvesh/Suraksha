@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Search, X, Loader2, MapPin, Plus, RotateCcw } from 'lucide-react';
 import { Habitation, CandidateSite } from '@/types';
+import { FALLBACK_RED_ZONES } from '@/lib/fallbackData';
 
 interface SearchResult {
   place_id: number;
@@ -39,6 +40,7 @@ export default function MapLibreView({
 }: MapLibreViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
+  const maplibreglRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const searchMarkerRef = useRef<any>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -63,6 +65,7 @@ export default function MapLibreView({
       if (!mapContainer.current || mapInstance.current) return;
       try {
         const maplibregl = (await import('maplibre-gl')).default;
+        maplibreglRef.current = maplibregl;
 
         const map = new maplibregl.Map({
           container: mapContainer.current,
@@ -86,8 +89,8 @@ export default function MapLibreView({
               },
             ],
           },
-          center: [76.5, 10.5], // Centered around Southern Peninsula Zone 7 corridor
-          zoom: 6.8,
+          center: corridorCenter || [76.5, 10.5],
+          zoom: corridorZoom || 6.8,
         });
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -127,33 +130,53 @@ export default function MapLibreView({
     if (!map || !mapLoaded) return;
 
     try {
-      if (redZonesGeoJSON && redZonesGeoJSON.features) {
+      const geojson =
+        redZonesGeoJSON && redZonesGeoJSON.features && redZonesGeoJSON.features.length > 0
+          ? redZonesGeoJSON
+          : FALLBACK_RED_ZONES;
+
+      if (geojson && geojson.features) {
         if (map.getSource('red-zones-source')) {
-          map.getSource('red-zones-source').setData(redZonesGeoJSON);
+          map.getSource('red-zones-source').setData(geojson);
         } else {
           map.addSource('red-zones-source', {
             type: 'geojson',
-            data: redZonesGeoJSON,
+            data: geojson,
           });
 
+          // Glowing hazard aura casing
+          map.addLayer({
+            id: 'red-zones-casing',
+            type: 'line',
+            source: 'red-zones-source',
+            paint: {
+              'line-color': '#EF4444',
+              'line-width': 5,
+              'line-opacity': 0.45,
+              'line-blur': 2,
+            },
+          });
+
+          // Primary red zone polygon fill
           map.addLayer({
             id: 'red-zones-fill',
             type: 'fill',
             source: 'red-zones-source',
             paint: {
-              'fill-color': '#B5462F',
-              'fill-opacity': 0.22,
+              'fill-color': '#DC2626',
+              'fill-opacity': 0.32,
             },
           });
 
+          // High-visibility dashed boundary perimeter line
           map.addLayer({
             id: 'red-zones-line',
             type: 'line',
             source: 'red-zones-source',
             paint: {
-              'line-color': '#B5462F',
-              'line-width': 1.8,
-              'line-dasharray': [2, 1],
+              'line-color': '#991B1B',
+              'line-width': 2.2,
+              'line-dasharray': [3, 2],
             },
           });
 
@@ -168,11 +191,39 @@ export default function MapLibreView({
             }
           });
 
-          map.on('mouseenter', 'red-zones-fill', () => {
+          const maplibregl = maplibreglRef.current;
+          let hoverPopup: any = null;
+          if (maplibregl) {
+            hoverPopup = new maplibregl.Popup({
+              closeButton: false,
+              closeOnClick: false,
+              offset: 10,
+            });
+          }
+
+          map.on('mouseenter', 'red-zones-fill', (e: any) => {
             map.getCanvas().style.cursor = 'pointer';
+            if (hoverPopup && e.features && e.features.length > 0) {
+              const p = e.features[0].properties || {};
+              hoverPopup
+                .setLngLat(e.lngLat)
+                .setHTML(`
+                  <div style="font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; padding: 4px; max-width: 220px;">
+                    <div style="font-weight: 700; color: #991B1B; font-size: 12px; display: flex; items-center; gap: 4px;">
+                      ⚠️ ${p.name || 'Multi-Hazard Red Zone'}
+                    </div>
+                    <div style="color: #1C2420; font-weight: 600; margin-top: 3px;">Hazard: ${p.hazard_type || 'Critical Hazard'} (${p.severity || 'Critical'})</div>
+                    <div style="color: #565F58; font-size: 10px; margin-top: 2px;">${p.description || 'Designated uninhabitable high-risk perimeter requiring immediate relocation.'}</div>
+                    ${p.source_agency ? `<div style="color: #3E5E82; font-size: 9px; margin-top: 3px;">Source: ${p.source_agency}</div>` : ''}
+                  </div>
+                `)
+                .addTo(map);
+            }
           });
+
           map.on('mouseleave', 'red-zones-fill', () => {
             map.getCanvas().style.cursor = '';
+            if (hoverPopup) hoverPopup.remove();
           });
         }
       }
@@ -194,28 +245,49 @@ export default function MapLibreView({
       // Add Habitation Markers
       habitations.forEach((hab) => {
         if (!hab.latitude || !hab.longitude) return;
+
+        const isImmediate = hab.tier === 'Immediate';
+        const color = isImmediate
+          ? '#B5462F'
+          : hab.tier === 'Short-term'
+          ? '#C0872B'
+          : '#3E5E82';
+        const radius = Math.max(14, Math.min(28, 14 + hab.pop / 80));
+
+        // Outer positioning anchor: MUST NOT have CSS transitions or transforms
         const el = document.createElement('div');
-        el.className = 'hab-marker cursor-pointer transition-transform hover:scale-125';
-
-        const color =
-          hab.tier === 'Immediate'
-            ? '#B5462F'
-            : hab.tier === 'Short-term'
-            ? '#C0872B'
-            : '#3E5E82';
-        const radius = Math.max(12, Math.min(26, 12 + hab.pop / 80));
-
+        el.className = 'hab-marker-anchor';
         el.style.width = `${radius}px`;
         el.style.height = `${radius}px`;
-        el.style.borderRadius = '50%';
-        el.style.backgroundColor = color;
-        el.style.border = '2px solid #F7F5F1';
-        el.style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)';
+        el.style.cursor = 'pointer';
+        el.style.pointerEvents = 'auto';
+
+        // Inner visual dot: safely handles scaling and styles
+        const dot = document.createElement('div');
+        dot.className = 'hab-marker-dot';
+        dot.style.width = '100%';
+        dot.style.height = '100%';
+        dot.style.borderRadius = '50%';
+        dot.style.backgroundColor = color;
+        dot.style.border = '2px solid #F7F5F1';
+        dot.style.boxShadow = isImmediate
+          ? '0 0 0 3px rgba(181, 70, 47, 0.4), 0 2px 8px rgba(0,0,0,0.35)'
+          : '0 1px 4px rgba(0,0,0,0.3)';
+        dot.style.transition = 'transform 0.15s ease-out';
 
         if (hab.id === selectedId) {
-          el.style.outline = `3px solid ${color}`;
-          el.style.outlineOffset = '2px';
+          dot.style.outline = `3px solid ${color}`;
+          dot.style.outlineOffset = '2px';
         }
+
+        dot.addEventListener('mouseenter', () => {
+          dot.style.transform = 'scale(1.25)';
+        });
+        dot.addEventListener('mouseleave', () => {
+          dot.style.transform = 'scale(1)';
+        });
+
+        el.appendChild(dot);
 
         const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
           <div style="font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; padding: 4px;">
@@ -225,11 +297,18 @@ export default function MapLibreView({
               Score: ${hab.score}/100 (${hab.tier})
             </div>
             <div style="color: #565F58; font-size: 11px;">Pop: ${hab.pop.toLocaleString()}</div>
+            ${isImmediate ? '<div style="margin-top: 4px; color: #B5462F; font-weight: 700; font-size: 10px;">⚠️ ACTIVE MULTI-HAZARD RED ZONE</div>' : ''}
           </div>
         `);
 
         el.addEventListener('click', () => {
           onSelectHabitation(hab.id);
+          map.flyTo({
+            center: [hab.longitude, hab.latitude],
+            zoom: Math.max(map.getZoom(), 11.5),
+            speed: 1.2,
+            essential: true,
+          });
         });
 
         const marker = new maplibregl.Marker({ element: el })
@@ -243,14 +322,32 @@ export default function MapLibreView({
       // Add Candidate Site Markers
       sites.forEach((site) => {
         if (!site.latitude || !site.longitude) return;
+
         const el = document.createElement('div');
-        el.className = 'site-marker cursor-pointer transition-transform hover:scale-125';
-        el.style.width = '14px';
-        el.style.height = '14px';
-        el.style.backgroundColor = '#3D6B5C';
-        el.style.border = '2px solid #F7F5F1';
-        el.style.transform = 'rotate(45deg)';
-        el.style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)';
+        el.className = 'site-marker-anchor';
+        el.style.width = '18px';
+        el.style.height = '18px';
+        el.style.cursor = 'pointer';
+        el.style.pointerEvents = 'auto';
+
+        const diamond = document.createElement('div');
+        diamond.className = 'site-marker-diamond';
+        diamond.style.width = '13px';
+        diamond.style.height = '13px';
+        diamond.style.backgroundColor = '#3D6B5C';
+        diamond.style.border = '2px solid #F7F5F1';
+        diamond.style.transform = 'rotate(45deg)';
+        diamond.style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)';
+        diamond.style.transition = 'transform 0.15s ease-out';
+
+        diamond.addEventListener('mouseenter', () => {
+          diamond.style.transform = 'rotate(45deg) scale(1.25)';
+        });
+        diamond.addEventListener('mouseleave', () => {
+          diamond.style.transform = 'rotate(45deg) scale(1)';
+        });
+
+        el.appendChild(diamond);
 
         const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
           <div style="font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; padding: 4px;">
@@ -262,6 +359,15 @@ export default function MapLibreView({
             <div style="color: #B5462F; font-size: 11px;">Bottleneck: ${site.eff.bottleneck}</div>
           </div>
         `);
+
+        el.addEventListener('click', () => {
+          map.flyTo({
+            center: [site.longitude, site.latitude],
+            zoom: Math.max(map.getZoom(), 11.5),
+            speed: 1.2,
+            essential: true,
+          });
+        });
 
         const marker = new maplibregl.Marker({ element: el })
           .setLngLat([site.longitude, site.latitude])

@@ -13,10 +13,13 @@ import {
   FALLBACK_SITES,
   FALLBACK_HISTORY,
   FALLBACK_SOURCES,
+  FALLBACK_RED_ZONES,
 } from "./fallbackData";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:8000";
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -120,9 +123,13 @@ export const api = {
   // 2. Hazards & Red Zones
   async getRedZonesGeoJSON(): Promise<any> {
     try {
-      return await request<any>("/api/hazards/red-zones");
+      const data = await request<any>("/api/hazards/red-zones");
+      if (data && data.features && data.features.length > 0) {
+        return data;
+      }
+      return FALLBACK_RED_ZONES;
     } catch {
-      return null;
+      return FALLBACK_RED_ZONES;
     }
   },
 
