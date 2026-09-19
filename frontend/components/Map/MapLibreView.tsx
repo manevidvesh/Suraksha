@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Search, X, Loader2, MapPin, Plus, RotateCcw, Maximize2, Minimize2 } from 'lucide-react';
+import { Search, X, Loader2, MapPin, Plus, RotateCcw } from 'lucide-react';
 import { Habitation, CandidateSite } from '@/types';
 import { FALLBACK_RED_ZONES } from '@/lib/fallbackData';
 
@@ -118,8 +118,8 @@ export default function MapLibreView({
               },
             ],
           },
-          center: corridorCenter || [76.5, 10.5],
-          zoom: corridorZoom || 6.8,
+          center: corridorCenter || [82.5, 21.5],
+          zoom: corridorZoom || 4.1,
         });
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -310,7 +310,7 @@ export default function MapLibreView({
         el.style.height = `${radius}px`;
         el.style.cursor = 'pointer';
         el.style.pointerEvents = 'auto';
-        el.style.zIndex = isImmediate ? '30' : '15';
+        el.style.zIndex = isImmediate ? '15' : '10';
 
         // Inner visual dot: safely handles scaling and styles
         const dot = document.createElement('div');
@@ -402,7 +402,7 @@ export default function MapLibreView({
           el.style.height = '20px';
           el.style.cursor = 'pointer';
           el.style.pointerEvents = 'auto';
-          el.style.zIndex = '35';
+          el.style.zIndex = '15';
 
           const dot = document.createElement('div');
           dot.className = 'hab-marker-dot';
@@ -679,8 +679,8 @@ export default function MapLibreView({
   const handleResetMapView = () => {
     if (mapInstance.current) {
       mapInstance.current.flyTo({
-        center: [78.5, 20.5],
-        zoom: 4.8,
+        center: [82.5, 21.5],
+        zoom: 4.1,
         speed: 1.0,
       });
     }
@@ -802,7 +802,7 @@ export default function MapLibreView({
         )}
       </div>
 
-      {/* 🧭 Reset View & Fullscreen Map Controls (bottom-left) */}
+      {/* 🧭 Reset View Controls (bottom-left) */}
       <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
         <button
           onClick={handleResetMapView}
@@ -810,22 +810,6 @@ export default function MapLibreView({
           title="Reset map to national view"
         >
           <RotateCcw size={12} className="text-[#565F58]" /> India Overview
-        </button>
-
-        <button
-          onClick={toggleFullscreen}
-          className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F7F5F1]/90 hover:bg-white text-[#1C2420] text-xs font-medium rounded-sm border border-[#D9D4C7] shadow-sm transition-colors cursor-pointer"
-          title={isFullscreen ? "Exit Fullscreen (Esc)" : "Expand Map to Fullscreen"}
-        >
-          {isFullscreen ? (
-            <>
-              <Minimize2 size={12} className="text-[#B5462F]" /> Exit Fullscreen
-            </>
-          ) : (
-            <>
-              <Maximize2 size={12} className="text-[#565F58]" /> Fullscreen
-            </>
-          )}
         </button>
       </div>
 

@@ -19,8 +19,8 @@ export const CORRIDORS: Corridor[] = [
     name: "All India · Complete National Overview",
     shortLabel: "Complete Overview",
     stateDesc: "All 4 national pilot corridors active",
-    center: [78.9, 20.5],
-    zoom: 4.6,
+    center: [82.5, 21.5],
+    zoom: 4.1,
   },
   {
     id: "western_ghats",
