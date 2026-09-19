@@ -189,10 +189,19 @@ export function useRiskData() {
         severity: params.severity || "Critical",
       });
 
-      setRedZonesGeoJSON((prev: any) => ({
-        type: "FeatureCollection",
-        features: [newFeature, ...(prev?.features || [])],
-      }));
+      setRedZonesGeoJSON((prev: any) => {
+        const existing = prev?.features || [];
+        // De-duplicate: replace any prior dynamic simulation buffer for this zone to avoid stacking opacity
+        const filtered = existing.filter((f: any) => {
+          if (f.properties?.name === params.zoneName) return false;
+          if (f.properties?.hazard_type === params.hazardType && f.properties?.source_agency?.includes("Dynamic")) return false;
+          return true;
+        });
+        return {
+          type: "FeatureCollection",
+          features: [newFeature, ...filtered],
+        };
+      });
 
       return newFeature;
     } catch (err) {

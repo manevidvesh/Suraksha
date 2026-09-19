@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Search, X, Loader2, MapPin, Plus, RotateCcw } from 'lucide-react';
+import { Search, X, Loader2, MapPin, Plus, RotateCcw, Maximize2, Minimize2 } from 'lucide-react';
 import { Habitation, CandidateSite } from '@/types';
 import { FALLBACK_RED_ZONES } from '@/lib/fallbackData';
 
@@ -45,6 +45,7 @@ export default function MapLibreView({
   const searchMarkerRef = useRef<any>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Global search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,6 +57,34 @@ export default function MapLibreView({
     lat: number;
     lon: number;
   } | null>(null);
+
+  const toggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => {
+      const next = !prev;
+      setTimeout(() => {
+        if (mapInstance.current) {
+          mapInstance.current.resize();
+        }
+      }, 120);
+      return next;
+    });
+  }, []);
+
+  // Keyboard shortcut: Esc to exit fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+        setTimeout(() => {
+          if (mapInstance.current) {
+            mapInstance.current.resize();
+          }
+        }, 120);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
 
   // 1. Initialize MapLibre GL instance ONCE
   useEffect(() => {
@@ -94,6 +123,7 @@ export default function MapLibreView({
         });
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
+        map.addControl(new maplibregl.FullscreenControl(), 'top-right');
 
         map.on('load', () => {
           if (!isMounted) return;
@@ -560,7 +590,29 @@ export default function MapLibreView({
   }
 
   return (
-    <div className="relative w-full h-full min-h-[340px] rounded-sm overflow-hidden border border-[#D9D4C7]">
+    <div
+      className={
+        isFullscreen
+          ? "fixed inset-0 z-50 w-screen h-screen bg-[#F7F5F1] overflow-hidden"
+          : "relative w-full h-full min-h-[340px] rounded-sm overflow-hidden border border-[#D9D4C7]"
+      }
+    >
+      {/* Fullscreen Tactical View Status Banner */}
+      {isFullscreen && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 px-3.5 py-1 bg-[#152331]/95 backdrop-blur-md text-white rounded-full text-xs flex items-center gap-2 shadow-xl border border-[#22364A]">
+          <span className="w-2 h-2 rounded-full bg-[#B5462F] animate-pulse" />
+          <span className="font-semibold">Fullscreen Tactical GIS View</span>
+          <span className="text-[10px] text-[#9BA8AE]">(Press Esc or Click Exit)</span>
+          <button
+            onClick={toggleFullscreen}
+            className="ml-1 p-0.5 hover:bg-white/20 rounded-full cursor-pointer text-white"
+            title="Exit Fullscreen"
+          >
+            <X size={12} />
+          </button>
+        </div>
+      )}
+
       {/* 🔍 Global Location Search Bar Overlay */}
       <div className="absolute top-3 left-3 z-10 w-72 sm:w-80">
         <div className="relative flex items-center bg-[#F7F5F1]/95 backdrop-blur-md rounded-sm border border-[#D9D4C7] shadow-md px-2.5 py-1.5 transition-all focus-within:border-[#22364A] focus-within:ring-1 focus-within:ring-[#22364A]">
@@ -644,8 +696,8 @@ export default function MapLibreView({
         )}
       </div>
 
-      {/* 🧭 Reset View Button (bottom-left) */}
-      <div className="absolute bottom-3 left-3 z-10">
+      {/* 🧭 Reset View & Fullscreen Map Controls (bottom-left) */}
+      <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
         <button
           onClick={handleResetMapView}
           className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F7F5F1]/90 hover:bg-white text-[#1C2420] text-xs font-medium rounded-sm border border-[#D9D4C7] shadow-sm transition-colors cursor-pointer"
@@ -653,10 +705,26 @@ export default function MapLibreView({
         >
           <RotateCcw size={12} className="text-[#565F58]" /> India Overview
         </button>
+
+        <button
+          onClick={toggleFullscreen}
+          className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F7F5F1]/90 hover:bg-white text-[#1C2420] text-xs font-medium rounded-sm border border-[#D9D4C7] shadow-sm transition-colors cursor-pointer"
+          title={isFullscreen ? "Exit Fullscreen (Esc)" : "Expand Map to Fullscreen"}
+        >
+          {isFullscreen ? (
+            <>
+              <Minimize2 size={12} className="text-[#B5462F]" /> Exit Fullscreen
+            </>
+          ) : (
+            <>
+              <Maximize2 size={12} className="text-[#565F58]" /> Fullscreen
+            </>
+          )}
+        </button>
       </div>
 
       {/* MapLibre DOM container */}
-      <div ref={mapContainer} className="w-full h-full" style={{ minHeight: '340px' }} />
+      <div ref={mapContainer} className="w-full h-full" style={{ minHeight: isFullscreen ? '100vh' : '340px' }} />
 
       {!mapLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#F7F5F1]/80 backdrop-blur-xs text-xs text-[#565F58]">
