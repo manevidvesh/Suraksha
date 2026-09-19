@@ -26,6 +26,11 @@ body {
   pointer-events: auto;
 }
 
+.maplibregl-ctrl-bottom-right {
+  bottom: 14px !important;
+  right: 14px !important;
+}
+
 .maplibregl-ctrl-top-right {
   top: 14px !important;
   right: 14px !important;

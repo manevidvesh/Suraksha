@@ -118,12 +118,13 @@ export default function MapLibreView({
               },
             ],
           },
+          attributionControl: false,
           center: corridorCenter || [82.5, 21.5],
           zoom: corridorZoom || 4.1,
         });
 
-        map.addControl(new maplibregl.NavigationControl(), 'top-right');
-        map.addControl(new maplibregl.FullscreenControl(), 'top-right');
+        map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+        map.addControl(new maplibregl.FullscreenControl(), 'bottom-right');
 
         map.on('load', () => {
           if (!isMounted) return;
