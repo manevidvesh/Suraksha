@@ -203,6 +203,29 @@ export function useRiskData() {
         };
       });
 
+      // Escalate target habitation to Immediate priority (Red point)
+      setHabitations((prev) =>
+        prev.map((h) => {
+          const dist = Math.hypot(h.latitude - params.latitude, h.longitude - params.longitude);
+          if (dist < 0.08 || params.zoneName.toLowerCase().includes(h.name.toLowerCase().slice(0, 6))) {
+            return {
+              ...h,
+              tier: "Immediate" as const,
+              score: Math.max(h.score, 88),
+              hazard: params.hazardType.includes("Cloudburst")
+                ? "Extreme Cloudburst Surge"
+                : "Stage-III Riverine Flood Inundation",
+              f: {
+                ...h.f,
+                hazard: Math.max(h.f.hazard, 95),
+                exposure: Math.max(h.f.exposure, 90),
+              },
+            };
+          }
+          return h;
+        })
+      );
+
       return newFeature;
     } catch (err) {
       console.error("Failed to simulate dynamic buffer:", err);

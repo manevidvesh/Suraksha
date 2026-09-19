@@ -35,6 +35,7 @@ import {
   filterHabitationsByCorridor,
   filterSitesByCorridor,
   filterHistoryByCorridor,
+  filterRedZonesByCorridor,
   CORRIDORS,
   AdaptationStrategyModal,
 } from "@/components/Common";
@@ -76,6 +77,10 @@ function DashboardContent() {
   const displayedSites = useMemo(() => {
     return filterSitesByCorridor(sites, selectedCorridor);
   }, [sites, selectedCorridor]);
+
+  const displayedRedZones = useMemo(() => {
+    return filterRedZonesByCorridor(redZonesGeoJSON, selectedCorridor, displayedHabitations);
+  }, [redZonesGeoJSON, selectedCorridor, displayedHabitations]);
 
   const displayedHistory = useMemo(() => {
     return filterHistoryByCorridor(history, selectedCorridor);
@@ -263,7 +268,7 @@ function DashboardContent() {
                   <MapLibreView
                     habitations={displayedHabitations}
                     sites={displayedSites}
-                    redZonesGeoJSON={redZonesGeoJSON}
+                    redZonesGeoJSON={displayedRedZones}
                     selectedId={selectedHabitationId}
                     onSelectHabitation={setSelectedHabitationId}
                     flyToTarget={flyToTarget}

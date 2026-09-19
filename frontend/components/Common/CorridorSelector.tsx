@@ -197,6 +197,88 @@ export function filterHistoryByCorridor(
   });
 }
 
+export function filterRedZonesByCorridor(
+  redZonesGeoJSON: any,
+  corridorId: string,
+  matchingHabitations?: Habitation[]
+): any {
+  if (!corridorId || corridorId === "all") return redZonesGeoJSON;
+  if (!redZonesGeoJSON || !Array.isArray(redZonesGeoJSON.features)) return redZonesGeoJSON;
+
+  const validHabIds = matchingHabitations ? new Set(matchingHabitations.map((h) => h.id)) : null;
+
+  const filteredFeatures = redZonesGeoJSON.features.filter((f: any) => {
+    const p = f.properties || {};
+    // If matching habitations were provided, match habitation_id
+    if (validHabIds && p.habitation_id && validHabIds.has(p.habitation_id)) {
+      return true;
+    }
+
+    const text = `${p.id || ""} ${p.zone_code || ""} ${p.name || ""} ${p.description || ""} ${p.habitation_id || ""}`.toLowerCase();
+    if (corridorId === "western_ghats") {
+      return (
+        text.includes("way") ||
+        text.includes("ern") ||
+        text.includes("mun") ||
+        text.includes("kut") ||
+        text.includes("shi") ||
+        text.includes("kl") ||
+        text.includes("ka") ||
+        text.includes("wayanad") ||
+        text.includes("chellanam") ||
+        text.includes("munnar") ||
+        text.includes("kuttanad") ||
+        text.includes("shirur") ||
+        text.includes("idukki") ||
+        text.includes("kodagu") ||
+        text.includes("kerala") ||
+        text.includes("karnataka")
+      );
+    }
+    if (corridorId === "himalayas") {
+      return (
+        text.includes("jos") ||
+        text.includes("ked") ||
+        text.includes("uk") ||
+        text.includes("joshimath") ||
+        text.includes("kedarnath") ||
+        text.includes("chamoli") ||
+        text.includes("uttarakhand") ||
+        text.includes("garhwal") ||
+        text.includes("dharasu")
+      );
+    }
+    if (corridorId === "eastern_plains") {
+      return (
+        text.includes("tst") ||
+        text.includes("sun") ||
+        text.includes("wb") ||
+        text.includes("teesta") ||
+        text.includes("sundarbans") ||
+        text.includes("digha") ||
+        text.includes("bengal")
+      );
+    }
+    if (corridorId === "northeast") {
+      return (
+        text.includes("maj") ||
+        text.includes("as") ||
+        text.includes("majuli") ||
+        text.includes("jorhat") ||
+        text.includes("assam") ||
+        text.includes("brahmaputra") ||
+        text.includes("champhai")
+      );
+    }
+    return false;
+  });
+
+  return {
+    ...redZonesGeoJSON,
+    features: filteredFeatures,
+  };
+}
+
 export interface CorridorSelectorProps {
   selectedCorridor: string;
   onSelectCorridor: (corridorId: string) => void;

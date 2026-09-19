@@ -16,8 +16,8 @@ export const FALLBACK_HABITATIONS: Habitation[] = [
   {
     id: "H3", name: "Teesta Riverside Colony", region: "Darjeeling Terai", hazard: "Flood", pop: 560,
     x: 40, y: 20, latitude: 26.9800, longitude: 88.4200,
-    f: { hazard: 64, exposure: 58, vulnerability: 55, history: 60, access: 48 },
-    events: 4, score: 58, tier: "Short-term"
+    f: { hazard: 88, exposure: 80, vulnerability: 76, history: 84, access: 40 },
+    events: 4, score: 78, tier: "Immediate"
   },
   {
     id: "H4", name: "Munnar Tea Estate Line", region: "Idukki Highlands", hazard: "Landslide", pop: 210,
@@ -70,8 +70,8 @@ export const FALLBACK_HABITATIONS: Habitation[] = [
   {
     id: "H12", name: "Shirur Hillside Settlement", region: "Uttara Kannada Ghats", hazard: "Landslide", pop: 310,
     x: 18, y: 68, latitude: 14.7350, longitude: 74.5820,
-    f: { hazard: 85, exposure: 55, vulnerability: 68, history: 65, access: 38 },
-    events: 2, score: 68, tier: "Short-term"
+    f: { hazard: 90, exposure: 70, vulnerability: 74, history: 80, access: 35 },
+    events: 3, score: 75, tier: "Immediate"
   },
   {
     id: "H13", name: "Rohru Apple Belt Settlement", region: "Shimla Hills", hazard: "Cloudburst & flash flood", pop: 480,
@@ -82,8 +82,8 @@ export const FALLBACK_HABITATIONS: Habitation[] = [
   {
     id: "H14", name: "Kuttanad Lowland Polder", region: "Alappuzha Backwaters", hazard: "Submergence & flood", pop: 980,
     x: 20, y: 76, latitude: 9.3564, longitude: 76.4024,
-    f: { hazard: 68, exposure: 82, vulnerability: 64, history: 75, access: 55 },
-    events: 4, score: 68, tier: "Short-term"
+    f: { hazard: 84, exposure: 88, vulnerability: 78, history: 85, access: 50 },
+    events: 5, score: 79, tier: "Immediate"
   },
   {
     id: "H15", name: "Champhai Border Settlement", region: "Champhai Hills", hazard: "Earthquake & slope failure", pop: 510,

@@ -47,7 +47,7 @@ SEED_HABITATIONS = [
         "longitude": 88.4200,
         "x": 40,
         "y": 20,
-        "f": {"hazard": 64, "exposure": 58, "vulnerability": 55, "history": 60, "access": 48},
+        "f": {"hazard": 88, "exposure": 80, "vulnerability": 76, "history": 84, "access": 40},
         "events": 4,
     },
     {
@@ -182,8 +182,8 @@ SEED_HABITATIONS = [
         "longitude": 74.5820,
         "x": 18,
         "y": 68,
-        "f": {"hazard": 85, "exposure": 55, "vulnerability": 68, "history": 65, "access": 38},
-        "events": 2,
+        "f": {"hazard": 90, "exposure": 70, "vulnerability": 74, "history": 80, "access": 35},
+        "events": 3,
     },
     {
         "id": "H13",
@@ -212,8 +212,8 @@ SEED_HABITATIONS = [
         "longitude": 76.4024,
         "x": 20,
         "y": 76,
-        "f": {"hazard": 68, "exposure": 82, "vulnerability": 64, "history": 75, "access": 55},
-        "events": 4,
+        "f": {"hazard": 84, "exposure": 88, "vulnerability": 78, "history": 85, "access": 50},
+        "events": 5,
     },
     {
         "id": "H15",

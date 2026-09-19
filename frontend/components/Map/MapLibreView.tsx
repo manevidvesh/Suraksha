@@ -272,11 +272,30 @@ export default function MapLibreView({
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
 
+      // Track rendered Habitation IDs to prevent duplicate markers
+      const renderedHabIds = new Set<string>();
+
       // Add Habitation Markers
       habitations.forEach((hab) => {
         if (!hab.latitude || !hab.longitude) return;
+        renderedHabIds.add(hab.id);
 
-        const isImmediate = hab.tier === 'Immediate';
+        const hasRedZone =
+          hab.tier === 'Immediate' ||
+          (redZonesGeoJSON?.features &&
+            redZonesGeoJSON.features.some((f: any) => {
+              if (f.properties?.habitation_id === hab.id) return true;
+              if (
+                f.properties?.name &&
+                hab.name &&
+                f.properties.name.toLowerCase().includes(hab.name.toLowerCase().slice(0, 6))
+              ) {
+                return true;
+              }
+              return false;
+            }));
+
+        const isImmediate = hab.tier === 'Immediate' || hasRedZone;
         const color = isImmediate
           ? '#B5462F'
           : hab.tier === 'Short-term'
@@ -291,6 +310,7 @@ export default function MapLibreView({
         el.style.height = `${radius}px`;
         el.style.cursor = 'pointer';
         el.style.pointerEvents = 'auto';
+        el.style.zIndex = isImmediate ? '30' : '15';
 
         // Inner visual dot: safely handles scaling and styles
         const dot = document.createElement('div');
@@ -301,7 +321,7 @@ export default function MapLibreView({
         dot.style.backgroundColor = color;
         dot.style.border = '2px solid #F7F5F1';
         dot.style.boxShadow = isImmediate
-          ? '0 0 0 3px rgba(181, 70, 47, 0.4), 0 2px 8px rgba(0,0,0,0.35)'
+          ? '0 0 0 4px rgba(181, 70, 47, 0.45), 0 2px 10px rgba(0,0,0,0.4)'
           : '0 1px 4px rgba(0,0,0,0.3)';
         dot.style.transition = 'transform 0.15s ease-out';
 
@@ -324,7 +344,7 @@ export default function MapLibreView({
             <div style="font-weight: 600; color: #1C2420;">${hab.name}</div>
             <div style="color: #565F58; margin-top: 2px;">${hab.region} · ${hab.hazard}</div>
             <div style="margin-top: 4px; font-weight: 500; color: ${color};">
-              Score: ${hab.score}/100 (${hab.tier})
+              Score: ${hab.score}/100 (${isImmediate ? 'Immediate' : hab.tier})
             </div>
             <div style="color: #565F58; font-size: 11px;">Pop: ${hab.pop.toLocaleString()}</div>
             ${isImmediate ? '<div style="margin-top: 4px; color: #B5462F; font-weight: 700; font-size: 10px;">⚠️ ACTIVE MULTI-HAZARD RED ZONE</div>' : ''}
@@ -349,6 +369,91 @@ export default function MapLibreView({
         markersRef.current.push(marker);
       });
 
+      // Safeguard: For any feature in redZonesGeoJSON without a rendered habitation,
+      // synthesize a high-visibility Red Zone point marker so NO Red Zone polygon is ever without its red point!
+      if (redZonesGeoJSON?.features) {
+        redZonesGeoJSON.features.forEach((feat: any) => {
+          const p = feat.properties || {};
+          const habId = p.habitation_id;
+          if (habId && renderedHabIds.has(habId)) return;
+
+          const coords = feat.geometry?.coordinates?.[0];
+          if (!coords || coords.length === 0) return;
+
+          let sumLon = 0;
+          let sumLat = 0;
+          const count = coords.length > 1 ? coords.length - 1 : coords.length;
+          for (let i = 0; i < count; i++) {
+            sumLon += coords[i][0];
+            sumLat += coords[i][1];
+          }
+          const centerLon = sumLon / count;
+          const centerLat = sumLat / count;
+
+          // Check if already covered by an existing rendered marker close by (< 0.015 deg)
+          const alreadyRendered = habitations.some(
+            (h) => Math.hypot(h.longitude - centerLon, h.latitude - centerLat) < 0.015
+          );
+          if (alreadyRendered) return;
+
+          const el = document.createElement('div');
+          el.className = 'hab-marker-anchor';
+          el.style.width = '20px';
+          el.style.height = '20px';
+          el.style.cursor = 'pointer';
+          el.style.pointerEvents = 'auto';
+          el.style.zIndex = '35';
+
+          const dot = document.createElement('div');
+          dot.className = 'hab-marker-dot';
+          dot.style.width = '100%';
+          dot.style.height = '100%';
+          dot.style.borderRadius = '50%';
+          dot.style.backgroundColor = '#B5462F';
+          dot.style.border = '2px solid #F7F5F1';
+          dot.style.boxShadow = '0 0 0 4px rgba(181, 70, 47, 0.45), 0 2px 10px rgba(0,0,0,0.4)';
+          dot.style.transition = 'transform 0.15s ease-out';
+
+          dot.addEventListener('mouseenter', () => {
+            dot.style.transform = 'scale(1.25)';
+          });
+          dot.addEventListener('mouseleave', () => {
+            dot.style.transform = 'scale(1)';
+          });
+
+          el.appendChild(dot);
+
+          const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
+            <div style="font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; padding: 4px; max-width: 220px;">
+              <div style="font-weight: 700; color: #991B1B; font-size: 12px;">⚠️ ${p.name || 'Multi-Hazard Red Zone Settlement'}</div>
+              <div style="color: #1C2420; font-weight: 600; margin-top: 3px;">Hazard: ${p.hazard_type || 'Critical Hazard'}</div>
+              <div style="margin-top: 4px; font-weight: 600; color: #B5462F; font-size: 11px;">
+                Priority: Immediate (Designated Red Zone Area)
+              </div>
+              <div style="color: #565F58; font-size: 10px; margin-top: 2px;">${p.description || 'Designated uninhabitable high-risk perimeter requiring immediate relocation.'}</div>
+            </div>
+          `);
+
+          el.addEventListener('click', () => {
+            if (habId) onSelectHabitation(habId);
+            if (onSelectRedZone) onSelectRedZone(p);
+            map.flyTo({
+              center: [centerLon, centerLat],
+              zoom: Math.max(map.getZoom(), 11.5),
+              speed: 1.2,
+              essential: true,
+            });
+          });
+
+          const marker = new maplibregl.Marker({ element: el })
+            .setLngLat([centerLon, centerLat])
+            .setPopup(popup)
+            .addTo(map);
+
+          markersRef.current.push(marker);
+        });
+      }
+
       // Add Candidate Site Markers
       sites.forEach((site) => {
         if (!site.latitude || !site.longitude) return;
@@ -359,6 +464,7 @@ export default function MapLibreView({
         el.style.height = '18px';
         el.style.cursor = 'pointer';
         el.style.pointerEvents = 'auto';
+        el.style.zIndex = '20';
 
         const diamond = document.createElement('div');
         diamond.className = 'site-marker-diamond';
@@ -407,7 +513,7 @@ export default function MapLibreView({
         markersRef.current.push(marker);
       });
     });
-  }, [habitations, sites, selectedId, mapLoaded, onSelectHabitation]);
+  }, [habitations, sites, redZonesGeoJSON, selectedId, mapLoaded, onSelectHabitation, onSelectRedZone]);
 
   // 4. Handle External flyTo Target
   useEffect(() => {

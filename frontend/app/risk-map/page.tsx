@@ -28,6 +28,7 @@ import {
   CorridorSelector,
   filterHabitationsByCorridor,
   filterSitesByCorridor,
+  filterRedZonesByCorridor,
   CORRIDORS,
   AdaptationStrategyModal,
 } from "@/components/Common";
@@ -73,6 +74,10 @@ export default function RiskMapPage() {
   const displayedSites = useMemo(() => {
     return filterSitesByCorridor(sites, selectedCorridor);
   }, [sites, selectedCorridor]);
+
+  const displayedRedZones = useMemo(() => {
+    return filterRedZonesByCorridor(redZonesGeoJSON, selectedCorridor, displayedHabitations);
+  }, [redZonesGeoJSON, selectedCorridor, displayedHabitations]);
 
   const handleSelectCorridor = (corridorId: string) => {
     setSelectedCorridor(corridorId);
@@ -299,7 +304,7 @@ export default function RiskMapPage() {
                 <MapLibreView
                   habitations={displayedHabitations}
                   sites={displayedSites}
-                  redZonesGeoJSON={redZonesGeoJSON}
+                  redZonesGeoJSON={displayedRedZones}
                   selectedId={selectedHabitationId}
                   onSelectHabitation={setSelectedHabitationId}
                   flyToTarget={flyToTarget}
