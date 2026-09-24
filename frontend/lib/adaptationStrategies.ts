@@ -21,7 +21,7 @@ export interface ZoneAdaptationStrategy {
   hazardType: string;
   region: string;
   whyNoRelocation: string;
-  status: "Active SDMA Guidelines" | "Pilot Deployment" | "Approved Framework";
+  status: "Candidate Measure for Technical Review" | "Pilot Deployment" | "Proposed In-Situ Framework";
   costBenefitVsRelocation: {
     estimatedInSituCost: string;
     estimatedRelocationCost: string;
@@ -38,8 +38,8 @@ export const ADAPTATION_STRATEGIES: Record<string, ZoneAdaptationStrategy> = {
     hazardType: "Submergence & Chronic Flood",
     region: "Alappuzha Backwaters & Vembanad Basin",
     whyNoRelocation:
-      "Kuttanad is India's only sub-sea-level farming ecosystem (FAO Globally Important Agricultural Heritage System) and a Ramsar wetland. Complete relocation is rejected by traditional agrarian communities, causes massive loss of paddy food security, and is land-infeasible across Kerala. SDMA mandates the Dutch 'Room for the River' model with in-situ flood adaptation.",
-    status: "Active SDMA Guidelines",
+      "Kuttanad is India's only sub-sea-level farming ecosystem (FAO Globally Important Agricultural Heritage System) and a Ramsar wetland. Complete relocation is rejected by traditional agrarian communities, causes massive loss of paddy food security, and is land-infeasible across Kerala. In-situ flood adaptation models ('Room for the River') are evaluated for technical authority review rather than forced resettlement.",
+    status: "Candidate Measure for Technical Review",
     costBenefitVsRelocation: {
       estimatedInSituCost: "₹ 4.80 Cr per Polder Unit",
       estimatedRelocationCost: "₹ 24.50 Cr (Land + Reconstruction)",
@@ -151,8 +151,8 @@ export const ADAPTATION_STRATEGIES: Record<string, ZoneAdaptationStrategy> = {
     hazardType: "Coastal Erosion & High-Tide Surge",
     region: "Ernakulam Coast",
     whyNoRelocation:
-      "Chellanam is home to an indigenous artisanal fishing community that requires direct coastal sea access for daily livelihood. Inland land in Ernakulam is extremely scarce. SDMA prioritizes offshore wave attenuation and engineered coastal defense over forced inland relocation.",
-    status: "Active SDMA Guidelines",
+      "Chellanam is home to an indigenous artisanal fishing community that requires direct coastal sea access for daily livelihood. Inland land in Ernakulam is extremely scarce. Candidate adaptation measures evaluate offshore wave attenuation and engineered coastal defense as alternatives to forced inland relocation.",
+    status: "Candidate Measure for Technical Review",
     costBenefitVsRelocation: {
       estimatedInSituCost: "₹ 6.20 Cr per km",
       estimatedRelocationCost: "₹ 38.00 Cr (Inland land acquisition)",
@@ -233,7 +233,7 @@ export const ADAPTATION_STRATEGIES: Record<string, ZoneAdaptationStrategy> = {
     region: "Wayanad & Idukki Highlands",
     whyNoRelocation:
       "While habitations situated directly in critical debris flow channels require planned relocation, intermediate buffer habitations require in-situ slope stabilization to prevent the failure zone from expanding into broader agricultural valleys.",
-    status: "Active SDMA Guidelines",
+    status: "Candidate Measure for Technical Review",
     costBenefitVsRelocation: {
       estimatedInSituCost: "₹ 2.50 Cr per Slope Sector",
       estimatedRelocationCost: "₹ 18.00 Cr",
@@ -253,7 +253,7 @@ export const ADAPTATION_STRATEGIES: Record<string, ZoneAdaptationStrategy> = {
             engineeringType: "Structural",
             timeline: "Immediate (0–6 mos)",
             estimatedCost: "₹ 65 Lakh per slope",
-            implementingAgency: "Geological Survey of India (GSI) & PWD",
+            implementingAgency: "Competent Geotechnical Authority / PWD",
           },
           {
             name: "Vetiver Grass & Geomat Bio-Turfing",
@@ -313,8 +313,8 @@ export const ADAPTATION_STRATEGIES: Record<string, ZoneAdaptationStrategy> = {
     hazardType: "Land Subsidence & Slope Insecurity",
     region: "Chamoli, Uttarakhand",
     whyNoRelocation:
-      "Joshimath is an ancient pilgrim nexus and vital strategic defense corridor. Wholesale abandonment of the town is socio-economically and geopolitically untenable. NDMA focuses on structural underpinning and surface hydrology interception.",
-    status: "Active SDMA Guidelines",
+      "Joshimath is an ancient pilgrim nexus and vital strategic defense corridor. Wholesale abandonment of the town is socio-economically and geopolitically untenable. Candidate measures focus on structural underpinning and surface hydrology interception for technical authority review.",
+    status: "Candidate Measure for Technical Review",
     costBenefitVsRelocation: {
       estimatedInSituCost: "₹ 18.50 Cr per Sector",
       estimatedRelocationCost: "₹ 110.00 Cr",
@@ -387,7 +387,7 @@ export const ADAPTATION_STRATEGIES: Record<string, ZoneAdaptationStrategy> = {
     region: "South 24 Parganas, West Bengal",
     whyNoRelocation:
       "Over 4 million people inhabit the delta relying on estuarine fisheries and agriculture. Inland land is non-existent. In-situ embankment hardening and cyclone shelters are the established lifeline.",
-    status: "Active SDMA Guidelines",
+    status: "Candidate Measure for Technical Review",
     costBenefitVsRelocation: {
       estimatedInSituCost: "₹ 5.50 Cr per Island",
       estimatedRelocationCost: "₹ 42.00 Cr",
@@ -445,6 +445,119 @@ export const ADAPTATION_STRATEGIES: Record<string, ZoneAdaptationStrategy> = {
       },
     ],
   },
+  majuli: {
+    zoneId: "RZ-AS-01",
+    zoneName: "Majuli Island Brahmaputra Active Riverbank Erosion Zone",
+    hazardType: "Riverine Flood & Dynamic Bank Erosion",
+    region: "Majuli & Upper Assam Riverine Belt, Assam",
+    whyNoRelocation:
+      "Majuli is the world's largest populated river island, the cultural epicenter of Neo-Vaishnavite Satra culture (heritage recognition under UNESCO tentative list), and home to Mishing and indigenous riparian communities. Forced mass relocation to the mainland would erase 500-year-old monastic satras and indigenous wetland agro-ecosystems. Candidate in-situ measures (geo-bag revetments, porcupine screens, and elevated Chang Ghar stilt habitations) are evaluated for technical authority review rather than mainland resettlement.",
+    status: "Candidate Measure for Technical Review",
+    costBenefitVsRelocation: {
+      estimatedInSituCost: "₹ 5.20 Cr per River Reach",
+      estimatedRelocationCost: "₹ 34.50 Cr (Mainland Land Acquisition & Resettlement)",
+      costSavingsPercent: 85,
+      socialAcceptanceScore: 97,
+    },
+    pillars: [
+      {
+        pillarNumber: 1,
+        title: "Riverbank Armoring & Thalweg Current Deflection",
+        category: "In-Situ Structural Protection",
+        summary: "Permeable RCC porcupine screens, geo-bag revetments, and underwater mattress pitching to stop bank shearing.",
+        interventions: [
+          {
+            name: "RCC Tetrahedral Porcupine Screen Dikes",
+            description: "Deploying interlocking concrete porcupines along vulnerable bank curves to induce flow deceleration, causing heavy silt deposition and natural bank reclamation.",
+            engineeringType: "Structural",
+            timeline: "Immediate (0–6 mos)",
+            estimatedCost: "₹ 1.80 Cr per reach",
+            implementingAgency: "Brahmaputra Board & Water Resources Dept Assam",
+          },
+          {
+            name: "Non-Woven Geotextile Mega-Bag Revetment",
+            description: "Multi-tiered sand-filled geotextile bags laid on graded riverbanks with toe pitching below scour depth to arrest catastrophic rotational bank collapse.",
+            engineeringType: "Structural",
+            timeline: "Immediate (0–6 mos)",
+            estimatedCost: "₹ 2.60 Cr per km",
+            implementingAgency: "Water Resources Department, Govt of Assam",
+          },
+          {
+            name: "Submerged Deflecting Micro-Spurs",
+            description: "Low-height boulder spurs angled against main river currents to divert high-velocity thalweg flow away from inhabited riverine settlements.",
+            engineeringType: "Structural",
+            timeline: "Short-term (6–18 mos)",
+            estimatedCost: "₹ 80 Lakh per spur",
+            implementingAgency: "Central Water Commission (CWC) & Brahmaputra Board",
+          },
+        ],
+      },
+      {
+        pillarNumber: 2,
+        title: "Elevated Chang Ghar Architecture & High-Plinth Safe Havens",
+        category: "Elevated Safe Havens & Transit",
+        summary: "Traditional elevated stilt dwellings, raised cattle plinths, and motorized emergency evacuation flotilla.",
+        interventions: [
+          {
+            name: "Mishing 'Chang Ghar' Resilient Stilt Housing Retrofit",
+            description: "Elevating rural homes 3.0m on treated bamboo-composite or reinforced concrete pillars above 100-year High Flood Level (HFL), allowing flood waters to pass underneath harmlessly.",
+            engineeringType: "Structural",
+            timeline: "Short-term (6–18 mos)",
+            estimatedCost: "₹ 7.5 Lakh per unit",
+            implementingAgency: "PMAY-G & Assam State Disaster Management Authority (ASDMA)",
+          },
+          {
+            name: "High-Ground 'Earthen Plinths' for Livestock & Grain Silos",
+            description: "Constructing 5-meter raised communal earthen mounds to safeguard cattle herds, agricultural seed banks, and farm machinery during peak monsoon inundation.",
+            engineeringType: "Structural",
+            timeline: "Immediate (0–6 mos)",
+            estimatedCost: "₹ 45 Lakh per village",
+            implementingAgency: "Majuli District Administration & Animal Husbandry Dept",
+          },
+          {
+            name: "Shallow-Draft Mechanized Flotilla (Bhut-bhuti Network)",
+            description: "Stationing a dedicated fleet of 15-passenger diesel watercraft and mobile medical relief boats at Salmora and Kamalabari ghats for rapid zero-hour transit.",
+            engineeringType: "Non-Structural",
+            timeline: "Immediate (0–6 mos)",
+            estimatedCost: "₹ 35 Lakh per cluster",
+            implementingAgency: "Inland Water Transport (IWT) & Majuli DDMA",
+          },
+        ],
+      },
+      {
+        pillarNumber: 3,
+        title: "Riparian Bio-Shielding & Wetland Flood Attenuation",
+        category: "Nature-Based & Eco-Hydrology",
+        summary: "Bio-turfing with deep-root riparian grasses, eco-hydrological beel restoration, and real-time radar telemetry.",
+        interventions: [
+          {
+            name: "Nal & Khagori Grass Bio-Revetment Belts",
+            description: "Planting native Arundo donax (Nal) and Phragmites karka (Khagori) along high-water margins to form a dense root mattress that dampens wave scour and traps fertile silt.",
+            engineeringType: "Nature-Based",
+            timeline: "Immediate (0–6 mos)",
+            estimatedCost: "₹ 12 Lakh per km",
+            implementingAgency: "Social Forestry Division & Assam Environment Dept",
+          },
+          {
+            name: "Beel (Wetland) Retention Re-connection",
+            description: "Desilting natural feeder channels connecting river reaches to inland wetlands (beels), creating safe natural spillway reservoirs that buffer peak monsoon discharges.",
+            engineeringType: "Nature-Based",
+            timeline: "Medium-term (1–3 yrs)",
+            estimatedCost: "₹ 1.20 Cr",
+            implementingAgency: "Assam Wetland Authority & Irrigation Dept",
+          },
+          {
+            name: "IoT Telemetric Hydrological Surge Siren Network",
+            description: "Ultrasonic river stage sensors installed at Nemati Ghat and Garamur linked to automated solar sirens providing 8-hour advance flash flood alerts.",
+            engineeringType: "Institutional",
+            timeline: "Immediate (0–6 mos)",
+            estimatedCost: "₹ 15 Lakh per station",
+            implementingAgency: "CWC, IMD & ASDMA State Emergency Operations Centre",
+          },
+        ],
+      },
+    ],
+  },
 };
 
 export function getAdaptationStrategyForEntity(entity: {
@@ -455,18 +568,47 @@ export function getAdaptationStrategyForEntity(entity: {
 }): ZoneAdaptationStrategy {
   const text = `${entity.id || ''} ${entity.name || ''} ${entity.hazard || ''} ${entity.region || ''}`.toLowerCase();
 
+  // 1. Majuli Island & Brahmaputra Basin (MUST be matched before generic 'erosion')
+  if (
+    text.includes('majuli') ||
+    text.includes('brahmaputra') ||
+    text.includes('jorhat') ||
+    text.includes('assam') ||
+    text.includes('rz-as') ||
+    text.includes('h11')
+  ) {
+    return ADAPTATION_STRATEGIES.majuli;
+  }
+
+  // 2. Kuttanad Submergence Polder
   if (text.includes('kuttanad') || text.includes('alappuzha') || text.includes('polder') || text.includes('submergence') || text.includes('h14')) {
     return ADAPTATION_STRATEGIES.kuttanad;
   }
-  if (text.includes('chellanam') || text.includes('coastal') || text.includes('erosion') || text.includes('seawall') || text.includes('h2') || text.includes('rz-ern')) {
+
+  // 3. Chellanam: coastal erosion specific (NOT generic riverine erosion)
+  if (
+    text.includes('chellanam') ||
+    text.includes('coastal') ||
+    text.includes('seawall') ||
+    text.includes('tetrapod') ||
+    text.includes('h2') ||
+    text.includes('rz-ern') ||
+    (text.includes('erosion') && (text.includes('coast') || text.includes('sea') || text.includes('marine') || text.includes('ernakulam') || text.includes('kerala')))
+  ) {
     return ADAPTATION_STRATEGIES.chellanam;
   }
-  if (text.includes('joshimath') || text.includes('subsidence') || text.includes('chamoli') || text.includes('moraine') || text.includes('h9')) {
+
+  // 4. Joshimath Subsidence
+  if (text.includes('joshimath') || text.includes('subsidence') || text.includes('chamoli') || text.includes('moraine') || text.includes('h9') || text.includes('rz-uk-01')) {
     return ADAPTATION_STRATEGIES.subsidence;
   }
+
+  // 5. Sundarbans Delta
   if (text.includes('sundarban') || text.includes('cyclone') || text.includes('delta') || text.includes('saline') || text.includes('h5') || text.includes('rz-wb-02')) {
     return ADAPTATION_STRATEGIES.sundarbans;
   }
+
+  // 6. Western Ghats Landslide Corridor
   if (
     text.includes('landslide') ||
     text.includes('wayanad') ||
@@ -480,7 +622,8 @@ export function getAdaptationStrategyForEntity(entity: {
     text.includes('h4') ||
     text.includes('h8') ||
     text.includes('rz-way') ||
-    text.includes('rz-idk')
+    text.includes('rz-idk') ||
+    text.includes('rz-ka')
   ) {
     return ADAPTATION_STRATEGIES.landslide;
   }

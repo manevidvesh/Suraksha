@@ -77,28 +77,28 @@ async def get_disaster_history(
     logger.info(f"Returning {len(events)} disaster events")
     return [DisasterEvent(**e) for e in events]
 
-@router.get("/layers", response_model=List[HazardLayerInfo], summary="Catalog of official GIS hazard layers")
+@router.get("/layers", response_model=List[HazardLayerInfo], summary="Catalog of reference GIS hazard layers")
 async def list_hazard_layers():
     """
-    Catalog of official GIS hazard layers (GSI Landslide, IMD Precipitation, MOSDAC Cloudburst, Survey of India).
+    Catalog of reference GIS hazard layer specifications (GSI Landslide, IMD Precipitation, MOSDAC Cloudburst, Survey of India).
     """
     logger.info("Fetching available GIS hazard layers metadata")
     return [
         HazardLayerInfo(
             id="gsi-landslide-2024",
-            name="GSI Macro Landslide Susceptibility Grid (1:50k)",
-            agency="Geological Survey of India",
+            name="GSI Macro Landslide Susceptibility Grid (1:50k Reference)",
+            agency="Geological Survey of India (Reference Specification)",
             layer_type="vector",
-            updated="March 2024",
+            updated="March 2024 Reference",
             description="Slope stability, geotechnical fracture lines, and debris flow susceptibility.",
         ),
         HazardLayerInfo(
             id="imd-rainfall-radar",
-            name="IMD Doppler Weather Radar Precipitation",
-            agency="India Meteorological Department",
+            name="IMD Doppler Weather Radar Precipitation (Specification)",
+            agency="India Meteorological Department (Reference Standards)",
             layer_type="raster",
-            updated="Live (15 min interval)",
-            description="Real-time convective cell cloudburst precipitation intensity in mm/hr.",
+            updated="Demonstration Standard",
+            description="Demonstration rainfall intensity criteria based on IMD convective precipitation specifications.",
         ),
         HazardLayerInfo(
             id="mosdac-satellite-cloud",

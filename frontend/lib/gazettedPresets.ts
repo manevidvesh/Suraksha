@@ -1,6 +1,6 @@
 import { RiskWeights } from "@/types";
 
-export interface GazettedPreset {
+export interface ReferenceScenarioPreset {
   id: string;
   name: string;
   shortName: string;
@@ -11,14 +11,19 @@ export interface GazettedPreset {
   applicableHazards: string[];
 }
 
-export const GAZETTED_PRESETS: GazettedPreset[] = [
+/**
+ * Illustrative Scenario Reference Presets (Demonstration Configurations)
+ * NOTE: These presets represent illustrative scenario weights modeled after published guidelines,
+ * and do not constitute gazetted statutory rules.
+ */
+export const REFERENCE_SCENARIO_PRESETS: ReferenceScenarioPreset[] = [
   {
     id: "NDMA-WG-2019",
-    name: "NDMA Western Ghats Landslide Protocol (2019)",
-    shortName: "NDMA Landslide Zonation",
-    authority: "National Disaster Management Authority & Geological Survey of India",
-    statutoryBasis: "National Landslide Risk Management Strategy §4.2",
-    description: "Prioritizes slope gradient (>38°) and historical geotechnical mass wasting for high-precipitation escarpments.",
+    name: "Western Ghats Landslide Reference Model (Illustrative)",
+    shortName: "Landslide Zonation Reference",
+    authority: "Modeled after NDMA & Geological Survey of India Guidelines",
+    statutoryBasis: "Reference: National Landslide Risk Management Strategy §4.2",
+    description: "Prioritizes slope gradient (>38°) and historical mass wasting for high-precipitation escarpments.",
     applicableHazards: ["Landslide", "Debris flow", "Slope subsidence"],
     weights: {
       hazard: 40,
@@ -30,10 +35,10 @@ export const GAZETTED_PRESETS: GazettedPreset[] = [
   },
   {
     id: "CWC-FLD-2023",
-    name: "CWC High-Discharge Riverine Flood Standard",
-    shortName: "CWC Flood Exposure Model",
-    authority: "Central Water Commission & Ministry of Jal Shakti",
-    statutoryBasis: "CWC River Inundation & Population Exposure Framework (2023)",
+    name: "High-Discharge Riverine Flood Reference Model (Illustrative)",
+    shortName: "Riverine Flood Reference",
+    authority: "Modeled after Central Water Commission Frameworks",
+    statutoryBasis: "Reference: CWC River Inundation & Population Exposure Guidelines (2023)",
     description: "Heavily weights population density and embankment breach vulnerability along major river basins.",
     applicableHazards: ["Flood", "Riverine flood", "Flash flood"],
     weights: {
@@ -46,10 +51,10 @@ export const GAZETTED_PRESETS: GazettedPreset[] = [
   },
   {
     id: "CRZ-COAST-2021",
-    name: "MoEFCC Coastal Vulnerability Index (CRZ-IV)",
-    shortName: "CRZ Coastal Erosion Protocol",
-    authority: "Ministry of Environment, Forest & Climate Change",
-    statutoryBasis: "Coastal Regulation Zone Notification 2019 & CVI Guidelines",
+    name: "Coastal Vulnerability Reference Model (Illustrative)",
+    shortName: "Coastal Inundation Reference",
+    authority: "Modeled after Coastal Regulation Zone Notification & CVI Studies",
+    statutoryBasis: "Reference: Coastal Regulation Zone & CVI Assessment Methodologies",
     description: "Evaluates chronic shoreline retreat, tidal surge exposure, and recurrent saline breach history.",
     applicableHazards: ["Coastal erosion", "Cyclone", "Tidal inundation"],
     weights: {
@@ -62,10 +67,10 @@ export const GAZETTED_PRESETS: GazettedPreset[] = [
   },
   {
     id: "HIMALAYA-GLOF-2024",
-    name: "NDMA Himalayan Glacial & Cloudburst Framework",
-    shortName: "Himalayan GLOF / Flash Flood",
-    authority: "NDMA & Wadia Institute of Himalayan Geology",
-    statutoryBasis: "Standard Operating Procedure for Glacial Lake Outburst Floods §6",
+    name: "Himalayan Glacial & Cloudburst Reference Model (Illustrative)",
+    shortName: "Himalayan GLOF Reference",
+    authority: "Modeled after Himalayan Disaster Management Studies & WIHG Protocols",
+    statutoryBasis: "Reference: Glacial Lake Outburst Flood Standard Operating Guidance",
     description: "Focuses on extreme elevation gradient, rapid discharge velocity, and valley bottleneck isolation.",
     applicableHazards: ["Flash flood & cloudburst", "GLOF", "Land subsidence"],
     weights: {
@@ -77,3 +82,7 @@ export const GAZETTED_PRESETS: GazettedPreset[] = [
     },
   },
 ];
+
+// Backward-compatibility aliases
+export type GazettedPreset = ReferenceScenarioPreset;
+export const GAZETTED_PRESETS = REFERENCE_SCENARIO_PRESETS;

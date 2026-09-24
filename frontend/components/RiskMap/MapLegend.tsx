@@ -20,7 +20,7 @@ export function MapLegend() {
       <span className="text-[#D9D4C7]">|</span>
       <span className="inline-flex items-center gap-1">
         <span className="h-2 w-2 rotate-45" style={{ backgroundColor: C.pine }} />
-        <span className="font-medium text-[#1C2420]">Safe Relocation Site</span>
+        <span className="font-medium text-[#1C2420]">Candidate Relocation Site</span>
       </span>
     </div>
   );

@@ -105,6 +105,39 @@ def simulate_relocation(hab: Dict[str, Any], site: Dict[str, Any]) -> Simulation
         ),
     ]
 
+    if capacity_exceeded:
+        decision_status = "NO SUITABLE RELOCATION OPTION IDENTIFIED WITH CURRENT EVIDENCE"
+        blockers = [
+            f"Carrying capacity exceeded: population of {pop} exceeds site limit of {eff.value} residents",
+            f"Constrained by {bottleneck_label.lower()} infrastructure threshold",
+            "Cadastral land ownership is UNKNOWN (FIELD VERIFICATION REQUIRED)",
+        ]
+        why_not = [
+            f"Cannot accommodate complete population of {pop} (capacity shortfall of {pop - eff.value} residents).",
+            f"Primary infrastructure bottleneck is {bottleneck_label.lower()} at {eff.value} residents.",
+            "Cadastral land ownership and legal encumbrances are UNKNOWN.",
+            "Livelihood continuity is NOT ASSESSED (requires socioeconomic field survey).",
+        ]
+    else:
+        decision_status = "VIABLE CANDIDATE MATCH"
+        blockers = [
+            "Cadastral land ownership is UNKNOWN (FIELD VERIFICATION REQUIRED)",
+            "Livelihood continuity requires local socioeconomic survey",
+        ]
+        why_not = [
+            f"Future settlement expansion strictly bounded by {bottleneck_label.lower()} bottleneck ({eff.value} max).",
+            "Land title, encumbrance, and Gram Sabha consent are UNKNOWN.",
+            "Livelihood continuity is NOT ASSESSED in prototype dataset.",
+        ]
+
+    why_this = [
+        f"Significant hazard reduction: estimated {hazard_reduction_pct}% reduction in multi-hazard vulnerability.",
+        f"Road transit distance: {dist_km} km between origin and candidate resettlement site.",
+        f"Liebig effective carrying capacity can absorb {min(pop, eff.value)} residents.",
+    ]
+
+    assessment_id = f"SRK-2026-{hab.get('id', 'HAB')}-{site.get('id', 'SITE')}"
+
     return SimulationResponse(
         habitation_id=hab["id"],
         habitation_name=hab["name"],
@@ -122,4 +155,12 @@ def simulate_relocation(hab: Dict[str, Any], site: Dict[str, Any]) -> Simulation
         summary_message=summary_msg,
         financial_outlay=fin_outlay,
         department_matrix=dept_matrix,
+        decision_status=decision_status,
+        why_this_site=why_this,
+        why_not_this_site=why_not,
+        primary_blockers=blockers,
+        source_assessment_id=assessment_id,
+        source_evidence_version="2026.09-demo",
+        explanation_layer="SURAKSHA AI Explainer",
+        human_review_status="PENDING DDMA REVIEW",
     )

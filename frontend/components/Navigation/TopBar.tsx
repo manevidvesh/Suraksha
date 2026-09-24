@@ -40,7 +40,12 @@ export function TopBar({
         </div>
       </div>
 
-      <span className="w-8" />
+      <div
+        className="text-[9px] font-mono font-bold px-2 py-1 rounded-xs bg-[#FFF1F0] text-[#B5462F] border border-[#B5462F]/30 tracking-wider"
+        title="Simulated Event Feeds · Prototype Datasets · Decision-Support Outputs"
+      >
+        SIH DEMO MODE
+      </div>
     </div>
   );
 }

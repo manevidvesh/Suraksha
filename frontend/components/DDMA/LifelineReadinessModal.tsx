@@ -146,7 +146,7 @@ export function LifelineReadinessModal({
               </p>
               <p className="text-[11px] text-[#565F58]">
                 {deficitsCount === 0
-                  ? "All statutory emergency relief categories meet 100% of DDMA norms."
+                  ? "All emergency relief categories meet prototype DDMA planning norms."
                   : `${deficitsCount} critical equipment or relief stock items are below emergency norm.`}
               </p>
             </div>

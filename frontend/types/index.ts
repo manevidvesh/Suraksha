@@ -6,6 +6,69 @@ export interface HabitationFactors {
   access: number;
 }
 
+export interface RiskWeights {
+  hazard: number;
+  exposure: number;
+  vulnerability: number;
+  history: number;
+  access: number;
+}
+
+export interface MetricComparison {
+  metric: string;
+  Before: number;
+  After: number;
+  source?: number;
+  candidate?: number;
+}
+
+export interface FinancialOutlayBreakdown {
+  households_count: number;
+  total_crores: number;
+  pmay_housing_crores: number;
+  land_development_crores: number;
+  infrastructure_crores: number;
+  ndrf_central_share_crores: number;
+  sdrf_state_share_crores: number;
+}
+
+export interface DepartmentActionTask {
+  department: string;
+  designation: string;
+  mandate: string;
+  timeline: string;
+}
+
+export interface DisasterEvent {
+  id?: string;
+  habitation_id?: string;
+  habitation_name?: string;
+  place: string;
+  type: string;
+  year: number;
+  impact: string;
+  event_type?: string;
+  severity?: string;
+  description?: string;
+  fatalities?: number;
+  displaced?: number;
+  source?: string;
+  verified?: boolean;
+}
+
+export interface DataSource {
+  id?: string;
+  name: string;
+  covers: string;
+  updated: string;
+  confidence: string;
+  stale?: boolean;
+  provenanceType?: string;
+  provenanceLabel?: string;
+  dataType?: string;
+  processing?: string;
+}
+
 export interface Habitation {
   id: string;
   name: string;
@@ -47,6 +110,59 @@ export interface LandTenureInfo {
   nodalDepartment: string;
 }
 
+export interface SiteScreeningMatrix {
+  hazard_screening: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  carrying_capacity: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  drinking_water: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  sanitation: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  healthcare: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  schools: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  transit_access: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  land_ownership: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  legal_encumbrance: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  environmental_restrictions: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  land_acquisition_feasibility: "PASS" | "FAIL" | "UNKNOWN" | "NOT ASSESSED";
+  field_verification: "PASS" | "FAIL" | "UNKNOWN" | "REQUIRED" | "NOT ASSESSED";
+}
+
+export interface HumanFieldReview {
+  habitationId: string;
+  status: "CONFIRMED" | "CHALLENGED" | "REQUIRES FIELD VERIFICATION" | "DATA OUTDATED" | "NOT APPLICABLE";
+  reviewerDesignation: string;
+  notes: string;
+  timestamp: string;
+}
+
+export interface FactorBreakdownItem {
+  factor: string;
+  value: number;
+  contribution: number;
+  raw_value?: string;
+  source?: string;
+  vintage?: string;
+  method?: string;
+  status?: string;
+  indicator_note?: string;
+}
+
+export interface HabitationRiskBreakdown {
+  habitation_id: string;
+  name: string;
+  region: string;
+  score: number;
+  tier: string;
+  events: number;
+  factors: FactorBreakdownItem[];
+  primary_driver: string;
+  secondary_driver: string;
+  explanation: string;
+  assessment_id?: string;
+  data_version?: string;
+  evidence_status?: string;
+  evidence_note?: string;
+  provenance_chain?: string[];
+}
+
 export interface CandidateSite {
   id: string;
   name: string;
@@ -61,59 +177,28 @@ export interface CandidateSite {
   allocated_population: number;
   available_capacity: number;
   landTenure?: LandTenureInfo;
-}
-
-export interface DisasterEvent {
-  id?: string;
-  year: number;
-  place: string;
-  type: string;
-  severity: "High" | "Medium" | "Low";
-  impact: string;
-  displaced?: number;
-  fatalities?: number;
-  latitude?: number;
-  longitude?: number;
-}
-
-export interface DataSource {
-  name: string;
-  covers: string;
-  updated: string;
-  confidence: "High" | "Medium" | "Low";
-  stale?: boolean;
-  endpoint_status?: string;
-}
-
-export interface RiskWeights {
-  hazard: number;
-  exposure: number;
-  vulnerability: number;
-  history: number;
-  access: number;
-}
-
-export interface MetricComparison {
-  metric: string;
-  Before: number;
-  After: number;
-}
-
-export interface FinancialOutlayBreakdown {
-  households_count: number;
-  total_crores: number;
-  pmay_housing_crores: number;
-  land_development_crores: number;
-  infrastructure_crores: number;
-  ndrf_central_share_crores: number;
-  sdrf_state_share_crores: number;
-}
-
-export interface DepartmentActionTask {
-  department: string;
-  designation: string;
-  mandate: string;
-  timeline: string;
+  site_status?: string;
+  screening_matrix?: Partial<SiteScreeningMatrix>;
+  why_this_site?: string[];
+  why_not_this_site?: string[];
+  primary_blockers?: string[];
+  land_administrative_screening?: {
+    land_ownership: string;
+    legal_encumbrance: string;
+    environmental_restrictions: string;
+    land_acquisition_feasibility: string;
+    field_verification: string;
+    note?: string;
+  };
+  livelihood_continuity?: {
+    status: string;
+    employment_access: string;
+    agricultural_access: string;
+    marine_access: string;
+    market_access: string;
+    field_validation: string;
+    note: string;
+  };
 }
 
 export interface SimulationResult {
@@ -134,6 +219,14 @@ export interface SimulationResult {
   llm_rationale?: string;
   financial_outlay?: FinancialOutlayBreakdown;
   department_matrix?: DepartmentActionTask[];
+  decision_status?: string;
+  why_this_site?: string[];
+  why_not_this_site?: string[];
+  primary_blockers?: string[];
+  source_assessment_id?: string;
+  source_evidence_version?: string;
+  explanation_layer?: string;
+  human_review_status?: string;
 }
 
 export interface ExecutiveBrief {
@@ -153,6 +246,13 @@ export interface ExecutiveBrief {
   statutory_authority?: string;
   financial_outlay?: FinancialOutlayBreakdown;
   department_action_matrix?: DepartmentActionTask[];
+  source_assessment_id?: string;
+  source_evidence_version?: string;
+  explanation_layer?: string;
+  human_review_status?: string;
+  is_verified_against_evidence?: boolean;
+  unverified_claims?: string[];
+  evidence_grounding_summary?: Record<string, any>;
 }
 
 export interface UploadResult {

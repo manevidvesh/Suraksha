@@ -44,6 +44,14 @@ class SimulationResponse(BaseModel):
     llm_rationale: Optional[str] = None
     financial_outlay: Optional[FinancialOutlayBreakdown] = None
     department_matrix: Optional[List[DepartmentActionTask]] = None
+    decision_status: Optional[str] = Field("VIABLE CANDIDATE MATCH", description="Decision engine outcome status")
+    why_this_site: List[str] = Field(default_factory=list, description="Specific computational rationale")
+    why_not_this_site: List[str] = Field(default_factory=list, description="Identified bottlenecks and limitations")
+    primary_blockers: List[str] = Field(default_factory=list, description="Primary capacity or access blockers")
+    source_assessment_id: Optional[str] = Field(None, description="Deterministic assessment ID")
+    source_evidence_version: Optional[str] = Field("2026.09-demo", description="Data version")
+    explanation_layer: Optional[str] = Field("SURAKSHA AI Explainer", description="Explanation layer provenance")
+    human_review_status: Optional[str] = Field("PENDING DDMA REVIEW", description="Human review status")
 
 class ScenarioCreate(BaseModel):
     title: str
@@ -85,3 +93,10 @@ class ReportBriefResponse(BaseModel):
     statutory_authority: Optional[str] = None
     financial_outlay: Optional[FinancialOutlayBreakdown] = None
     department_action_matrix: Optional[List[DepartmentActionTask]] = None
+    source_assessment_id: Optional[str] = Field(None, description="Deterministic assessment identifier")
+    source_evidence_version: Optional[str] = Field("2026.09-demo", description="Underlying dataset version")
+    explanation_layer: Optional[str] = Field("SURAKSHA AI Explainer", description="Explanation layer provenance")
+    human_review_status: Optional[str] = Field("PENDING DDMA REVIEW", description="Human review status")
+    is_verified_against_evidence: bool = Field(True, description="Whether numerical claims match structured source data")
+    unverified_claims: List[str] = Field(default_factory=list, description="Any detected numerical discrepancies")
+    evidence_grounding_summary: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Structured facts used for grounding")

@@ -193,19 +193,34 @@ export function Sidebar({
         })}
       </div>
 
-      <div className="mt-auto px-4 py-3.5 border-t border-[#152331] f-sans text-[11px] bg-[#101C27]/60">
-        <div className="flex items-center gap-2 mb-1.5">
-          <div className="w-2 h-2 rounded-full bg-[#3D6B5C] animate-pulse" />
-          <p className="text-[10px] uppercase font-bold tracking-wider text-[#9BA8AE]">
-            Authorized Official
+      <div className="mt-auto border-t border-[#152331]">
+        <div className="px-4 py-2 bg-[#0c141d] border-b border-[#152331]">
+          <div
+            className="flex items-center justify-between text-[10px] font-mono px-2 py-1 rounded-xs bg-[#1A2837] border border-[#22364A] text-[#EFECE4]"
+            title="Simulated Event Feeds · Prototype Datasets · Decision-Support Outputs"
+          >
+            <span className="flex items-center gap-1.5 font-bold tracking-wider text-[#E07A5F]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E07A5F] animate-pulse" />
+              SIH DEMO MODE
+            </span>
+            <span className="text-[9px] text-[#9BA8AE]">Simulated/DSS</span>
+          </div>
+        </div>
+
+        <div className="px-4 py-3 f-sans text-[11px] bg-[#101C27]/60">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="w-2 h-2 rounded-full bg-[#3D6B5C] animate-pulse" />
+            <p className="text-[10px] uppercase font-bold tracking-wider text-[#9BA8AE]">
+              Authorized Official
+            </p>
+          </div>
+          <p className="font-semibold text-[#F7F5F1] leading-tight">
+            District Collector & DDMA Chairperson
+          </p>
+          <p className="mt-0.5 text-[10px] text-[#9BA8AE]/80">
+            Disaster Management Act 2005 · All-India
           </p>
         </div>
-        <p className="font-semibold text-[#F7F5F1] leading-tight">
-          District Collector & DDMA Chairperson
-        </p>
-        <p className="mt-0.5 text-[10px] text-[#9BA8AE]/80">
-          Disaster Management Act 2005 · All-India
-        </p>
       </div>
     </div>
   );

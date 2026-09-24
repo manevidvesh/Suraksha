@@ -25,29 +25,12 @@ class CandidateSiteOut(BaseModel):
     eff: SiteEffectiveCapacity
     allocated_population: int = 0
     available_capacity: int = 0
+    site_status: str = Field("CANDIDATE SITE — EXTERNAL VALIDATION REQUIRED", description="Hierarchical site status")
+    screening_matrix: Optional[Dict[str, str]] = Field(default_factory=dict, description="12-dimension candidate site screening matrix with PASS/FAIL/UNKNOWN/NOT ASSESSED")
+    why_this_site: List[str] = Field(default_factory=list, description="Computational reasons in favor of site")
+    why_not_this_site: List[str] = Field(default_factory=list, description="Computational limitations and unverified factors")
+    primary_blockers: List[str] = Field(default_factory=list, description="Primary capacity or access blockers")
+    land_administrative_screening: Optional[Dict[str, str]] = Field(default_factory=dict, description="Honest unverified land status")
+    livelihood_continuity: Optional[Dict[str, str]] = Field(default_factory=dict, description="Unassessed livelihood continuity structure")
 
-class SimulationRequest(BaseModel):
-    habitation_id: str
-    site_id: str
-
-class MetricComparison(BaseModel):
-    metric: str
-    Before: float
-    After: float
-
-class SimulationResponse(BaseModel):
-    habitation_id: str
-    habitation_name: str
-    site_id: str
-    site_name: str
-    population: int
-    effective_capacity: int
-    bottleneck: str
-    travel_distance_km: float
-    hazard_reduction_pct: int
-    exposure_reduction_pct: int
-    access_improvement_pct: int
-    capacity_exceeded: bool
-    radar_data: List[MetricComparison]
-    summary_message: str
-    llm_rationale: Optional[str] = None
+from backend.schemas.simulation import MetricComparison, SimulationRequest, SimulationResponse

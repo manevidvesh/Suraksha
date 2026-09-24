@@ -86,7 +86,7 @@ PILLAR ${p.pillarNumber}: ${p.title} (${p.category})
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded-xs bg-white/15 text-[#F7F5F1] uppercase tracking-wider font-semibold">
-                  SDMA In-Situ Directives
+                  Candidate In-Situ Adaptation Measures
                 </span>
                 <span className="text-[11px] px-2 py-0.5 rounded-xs bg-[#C0872B] text-white font-medium">
                   Alternative to Relocation
@@ -117,7 +117,7 @@ PILLAR ${p.pillarNumber}: ${p.title} (${p.category})
             <Info size={18} className="text-[#C0872B] shrink-0 mt-0.5" />
             <div className="text-xs leading-relaxed text-[#1C2420]">
               <span className="font-semibold text-[#B5462F]">
-                Why SDMA Prioritizes In-Situ Adaptation Over Permanent Relocation:
+                Why Candidate In-Situ Adaptation Measures Are Evaluated Over Permanent Relocation:
               </span>
               <p className="mt-1 text-[#565F58]">{strategy.whyNoRelocation}</p>
             </div>
@@ -268,7 +268,7 @@ PILLAR ${p.pillarNumber}: ${p.title} (${p.category})
               </>
             ) : (
               <>
-                <FileDown size={13} /> Copy Directive for SDMA Memo
+                <FileDown size={13} /> Copy Candidate In-Situ Summary
               </>
             )}
           </button>

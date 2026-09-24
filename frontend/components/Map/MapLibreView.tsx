@@ -267,10 +267,18 @@ export default function MapLibreView({
   useEffect(() => {
     const map = mapInstance.current;
     if (!map || !mapLoaded) return;
+    const maplibregl = maplibreglRef.current;
+    if (!maplibregl) return;
 
-    import('maplibre-gl').then(({ default: maplibregl }) => {
-      // Remove existing markers
-      markersRef.current.forEach((m) => m.remove());
+    try {
+      // Remove existing markers cleanly
+      markersRef.current.forEach((m) => {
+        try {
+          m.remove();
+        } catch {
+          // Ignore marker cleanup edge case
+        }
+      });
       markersRef.current = [];
 
       // Track rendered Habitation IDs to prevent duplicate markers
@@ -278,7 +286,7 @@ export default function MapLibreView({
 
       // Add Habitation Markers
       habitations.forEach((hab) => {
-        if (!hab.latitude || !hab.longitude) return;
+        if (typeof hab.latitude !== 'number' || typeof hab.longitude !== 'number' || isNaN(hab.latitude) || isNaN(hab.longitude)) return;
         renderedHabIds.add(hab.id);
 
         const hasRedZone =
@@ -302,7 +310,7 @@ export default function MapLibreView({
           : hab.tier === 'Short-term'
           ? '#C0872B'
           : '#3E5E82';
-        const radius = Math.max(14, Math.min(28, 14 + hab.pop / 80));
+        const radius = Math.max(14, Math.min(28, 14 + (hab.pop || 100) / 80));
 
         // Outer positioning anchor: MUST NOT have CSS transitions or transforms
         const el = document.createElement('div');
@@ -347,7 +355,7 @@ export default function MapLibreView({
             <div style="margin-top: 4px; font-weight: 500; color: ${color};">
               Score: ${hab.score}/100 (${isImmediate ? 'Immediate' : hab.tier})
             </div>
-            <div style="color: #565F58; font-size: 11px;">Pop: ${hab.pop.toLocaleString()}</div>
+            <div style="color: #565F58; font-size: 11px;">Pop: ${(hab.pop || 0).toLocaleString()}</div>
             ${isImmediate ? '<div style="margin-top: 4px; color: #B5462F; font-weight: 700; font-size: 10px;">⚠️ ACTIVE MULTI-HAZARD RED ZONE</div>' : ''}
           </div>
         `);
@@ -379,17 +387,23 @@ export default function MapLibreView({
           if (habId && renderedHabIds.has(habId)) return;
 
           const coords = feat.geometry?.coordinates?.[0];
-          if (!coords || coords.length === 0) return;
+          if (!coords || !Array.isArray(coords) || coords.length === 0) return;
 
           let sumLon = 0;
           let sumLat = 0;
-          const count = coords.length > 1 ? coords.length - 1 : coords.length;
-          for (let i = 0; i < count; i++) {
-            sumLon += coords[i][0];
-            sumLat += coords[i][1];
+          let validCount = 0;
+          for (let i = 0; i < coords.length; i++) {
+            const pt = coords[i];
+            if (Array.isArray(pt) && typeof pt[0] === 'number' && typeof pt[1] === 'number' && !isNaN(pt[0]) && !isNaN(pt[1])) {
+              sumLon += pt[0];
+              sumLat += pt[1];
+              validCount++;
+            }
           }
-          const centerLon = sumLon / count;
-          const centerLat = sumLat / count;
+          if (validCount === 0) return;
+          const centerLon = sumLon / validCount;
+          const centerLat = sumLat / validCount;
+          if (isNaN(centerLon) || isNaN(centerLat)) return;
 
           // Check if already covered by an existing rendered marker close by (< 0.015 deg)
           const alreadyRendered = habitations.some(
@@ -455,30 +469,30 @@ export default function MapLibreView({
         });
       }
 
-      // Add Candidate Site Markers
+      // Add Candidate Site Markers (Safe Relocation Points)
       sites.forEach((site) => {
-        if (!site.latitude || !site.longitude) return;
+        if (typeof site.latitude !== 'number' || typeof site.longitude !== 'number' || isNaN(site.latitude) || isNaN(site.longitude)) return;
 
         const el = document.createElement('div');
         el.className = 'site-marker-anchor';
-        el.style.width = '18px';
-        el.style.height = '18px';
+        el.style.width = '20px';
+        el.style.height = '20px';
         el.style.cursor = 'pointer';
         el.style.pointerEvents = 'auto';
         el.style.zIndex = '20';
 
         const diamond = document.createElement('div');
         diamond.className = 'site-marker-diamond';
-        diamond.style.width = '13px';
-        diamond.style.height = '13px';
+        diamond.style.width = '14px';
+        diamond.style.height = '14px';
         diamond.style.backgroundColor = '#3D6B5C';
         diamond.style.border = '2px solid #F7F5F1';
         diamond.style.transform = 'rotate(45deg)';
-        diamond.style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)';
+        diamond.style.boxShadow = '0 0 0 3px rgba(61, 107, 92, 0.35), 0 2px 6px rgba(0,0,0,0.3)';
         diamond.style.transition = 'transform 0.15s ease-out';
 
         diamond.addEventListener('mouseenter', () => {
-          diamond.style.transform = 'rotate(45deg) scale(1.25)';
+          diamond.style.transform = 'rotate(45deg) scale(1.3)';
         });
         diamond.addEventListener('mouseleave', () => {
           diamond.style.transform = 'rotate(45deg) scale(1)';
@@ -486,14 +500,17 @@ export default function MapLibreView({
 
         el.appendChild(diamond);
 
+        const effValue = site.eff?.value !== undefined ? site.eff.value : (site.available_capacity ?? 'N/A');
+        const effBottleneck = site.eff?.bottleneck || 'None Identified';
+
         const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
           <div style="font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; padding: 4px;">
-            <div style="font-weight: 600; color: #3D6B5C;">${site.name}</div>
-            <div style="color: #565F58; margin-top: 2px;">Candidate Resettlement Site</div>
+            <div style="font-weight: 700; color: #3D6B5C; font-size: 13px;">🛡️ ${site.name}</div>
+            <div style="color: #565F58; margin-top: 2px;">Safe Resettlement Site (${site.region || 'Pilot Zone'})</div>
             <div style="margin-top: 4px; font-size: 11px; font-weight: 600; color: #1C2420;">
-              Effective Capacity: ${site.eff.value}
+              Effective Capacity: <span style="color: #3D6B5C; font-weight: 700;">${effValue}</span>
             </div>
-            <div style="color: #B5462F; font-size: 11px;">Bottleneck: ${site.eff.bottleneck}</div>
+            <div style="color: #B5462F; font-size: 11px;">Primary Constraint: ${effBottleneck}</div>
           </div>
         `);
 
@@ -513,10 +530,26 @@ export default function MapLibreView({
 
         markersRef.current.push(marker);
       });
-    });
+    } catch (err) {
+      console.warn('Marker rendering encounter non-fatal issue:', err);
+    }
   }, [habitations, sites, redZonesGeoJSON, selectedId, mapLoaded, onSelectHabitation, onSelectRedZone]);
 
-  // 4. Handle External flyTo Target
+  // 4. Smoothly pan/fly to selected planning corridor center & zoom when corridor changes
+  useEffect(() => {
+    if (!mapInstance.current || !mapLoaded || !corridorCenter) return;
+    const [lng, lat] = corridorCenter;
+    if (typeof lng !== 'number' || typeof lat !== 'number' || isNaN(lng) || isNaN(lat)) return;
+
+    mapInstance.current.flyTo({
+      center: corridorCenter,
+      zoom: corridorZoom || 7.5,
+      speed: 1.2,
+      essential: true,
+    });
+  }, [corridorCenter, corridorZoom, mapLoaded]);
+
+  // 5. Handle External flyTo Target
   useEffect(() => {
     if (!flyToTarget || !mapInstance.current || !mapLoaded) return;
     const map = mapInstance.current;

@@ -144,7 +144,7 @@ export function HabitationModal({ isOpen, onClose, onAdd }: HabitationModalProps
               </span>
             </div>
             <p className="text-[11px] text-[#565F58]">
-              Authoritative revenue cadastral indexing for PostGIS multi-hazard Red Zone modeling
+              Revenue cadastral indexing for PostGIS multi-hazard candidate Red Zone modeling
             </p>
           </div>
         </div>

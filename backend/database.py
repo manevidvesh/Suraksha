@@ -411,7 +411,7 @@ SEED_SOURCES = [
         "id": "src-imd",
         "name": "India Meteorological Department (IMD)",
         "covers": "Rainfall intensity, cyclone tracking",
-        "updated": "Live feed",
+        "updated": "Demonstration Standards",
         "confidence": "High",
         "stale": False,
         "endpoint_status": "active",
@@ -472,6 +472,7 @@ SEED_RED_ZONES = [
         },
         "properties": {
             "id": "RZ-WAY-01",
+            "habitation_id": "H1",
             "zone_code": "RED-KL-07-WAY",
             "name": "Wayanad Slope High-Risk Landslide Basin",
             "hazard_type": "Landslide",
@@ -498,6 +499,7 @@ SEED_RED_ZONES = [
         },
         "properties": {
             "id": "RZ-ERN-01",
+            "habitation_id": "H2",
             "zone_code": "RED-KL-07-CHE",
             "name": "Chellanam Severe Inundation & Seawall Breach Strip",
             "hazard_type": "Coastal erosion",
@@ -524,6 +526,7 @@ SEED_RED_ZONES = [
         },
         "properties": {
             "id": "RZ-IDK-01",
+            "habitation_id": "H4",
             "zone_code": "RED-KL-07-MUN",
             "name": "Munnar Highlands Valley Landslide Escarpment",
             "hazard_type": "Landslide",
@@ -550,6 +553,7 @@ SEED_RED_ZONES = [
         },
         "properties": {
             "id": "RZ-WB-01",
+            "habitation_id": "H3",
             "zone_code": "RED-WB-03-TST",
             "name": "Teesta River Active Flash Flood Channel",
             "hazard_type": "Flood",
@@ -576,6 +580,7 @@ SEED_RED_ZONES = [
         },
         "properties": {
             "id": "RZ-WB-02",
+            "habitation_id": "H5",
             "zone_code": "RED-WB-03-SUN",
             "name": "Sundarbans Tidal Inundation & Embankment Breach Zone",
             "hazard_type": "Cyclone & flood",
@@ -602,6 +607,7 @@ SEED_RED_ZONES = [
         },
         "properties": {
             "id": "RZ-ALP-01",
+            "habitation_id": "H14",
             "zone_code": "RED-KL-07-KUT",
             "name": "Kuttanad Lowland Polder Submergence Belt",
             "hazard_type": "Submergence & flood",
@@ -628,6 +634,7 @@ SEED_RED_ZONES = [
         },
         "properties": {
             "id": "RZ-UK-01",
+            "habitation_id": "H9",
             "zone_code": "RED-UK-01-JOS",
             "name": "Joshimath Himalayan Escarpment Subsidence Zone",
             "hazard_type": "Land subsidence",
@@ -654,6 +661,7 @@ SEED_RED_ZONES = [
         },
         "properties": {
             "id": "RZ-UK-02",
+            "habitation_id": "H10",
             "zone_code": "RED-UK-01-KED",
             "name": "Kedarnath Glacial Outburst & Flash Flood Valley Zone",
             "hazard_type": "Flash flood & cloudburst",
@@ -680,6 +688,7 @@ SEED_RED_ZONES = [
         },
         "properties": {
             "id": "RZ-AS-01",
+            "habitation_id": "H11",
             "zone_code": "RED-AS-02-MAJ",
             "name": "Majuli Island Brahmaputra Active Riverbank Erosion Zone",
             "hazard_type": "Riverine flood & erosion",
@@ -706,6 +715,7 @@ SEED_RED_ZONES = [
         },
         "properties": {
             "id": "RZ-KA-01",
+            "habitation_id": "H12",
             "zone_code": "RED-KA-05-SHI",
             "name": "Shirur Western Ghats Hillside Debris Slide Zone",
             "hazard_type": "Landslide",

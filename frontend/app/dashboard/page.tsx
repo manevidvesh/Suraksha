@@ -38,6 +38,9 @@ import {
   filterRedZonesByCorridor,
   CORRIDORS,
   AdaptationStrategyModal,
+  HowSurakshaDecides,
+  DataConfidencePanel,
+  PopulationVintageBadge,
 } from "@/components/Common";
 import { getAdaptationStrategyForEntity } from "@/lib/adaptationStrategies";
 
@@ -185,7 +188,7 @@ function DashboardContent() {
           {/* Top Section */}
           <SectionHead
             title="Multi-Hazard Decision Support"
-            sub="Monitored settlements across national hazard corridors scored live against PostGIS multi-hazard layers."
+            sub="Monitored settlements across national hazard corridors evaluated against PostGIS multi-hazard layers."
             action={
               <div className="flex items-center gap-2">
                 <button
@@ -250,6 +253,11 @@ function DashboardContent() {
             ))}
           </div>
 
+          {/* How SURAKSHA Decides: 10-Stage Decision Pipeline */}
+          <div className="mb-6">
+            <HowSurakshaDecides />
+          </div>
+
           {/* Map + Detail Card Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mb-8">
             <div
@@ -292,7 +300,7 @@ function DashboardContent() {
                 )}
               </div>
               <p className="f-sans text-xs mt-2" style={{ color: C.inkSoft }}>
-                Red polygons denote high-susceptibility Red Zones. Click any marker or red zone to view settlement profile and in-situ adaptation strategies.
+                Red polygons denote model-identified high-susceptibility Candidate Risk Zones (decision-support outputs; not statutory designations). Click any marker or red zone to inspect settlement profile and in-situ adaptation directives.
               </p>
             </div>
 
@@ -324,9 +332,11 @@ function DashboardContent() {
                       <dt style={{ color: C.inkSoft }}>Composite Risk</dt>
                       <dd className="f-mono font-semibold">{selectedHabitation.score} / 100</dd>
                     </div>
-                    <div className="flex justify-between border-b pb-1" style={{ borderColor: C.line }}>
-                      <dt style={{ color: C.inkSoft }}>Population</dt>
-                      <dd className="f-mono">{selectedHabitation.pop.toLocaleString()}</dd>
+                    <div className="flex justify-between border-b pb-1 items-center" style={{ borderColor: C.line }}>
+                      <dt style={{ color: C.inkSoft }}>Demographics</dt>
+                      <dd>
+                        <PopulationVintageBadge count={selectedHabitation.pop} />
+                      </dd>
                     </div>
                     <div className="flex justify-between border-b pb-1" style={{ borderColor: C.line }}>
                       <dt style={{ color: C.inkSoft }}>Primary Hazard</dt>
@@ -351,9 +361,9 @@ function DashboardContent() {
                         setStrategyModalOpen(true);
                       }}
                       className="w-full inline-flex items-center justify-center gap-1.5 f-sans text-xs py-2 rounded-sm bg-[#FFF9EE] border border-[#C0872B] hover:bg-[#FFF3D6] text-[#22364A] font-medium cursor-pointer transition-colors"
-                      title="Inspect 3-Pillar In-Situ Adaptation & Mitigation Strategies"
+                      title="Inspect 3-Pillar Candidate In-Situ Adaptation Measures"
                     >
-                      <LifeBuoy size={13} className="text-[#C0872B]" /> In-Situ SDMA Strategies
+                      <LifeBuoy size={13} className="text-[#C0872B]" /> Candidate In-Situ Measures
                     </button>
                     <Link
                       href={`/habitations`}
@@ -495,7 +505,7 @@ function DashboardContent() {
           {activeTab === "sources" && (
             <div className="border rounded-sm divide-y bg-white" style={{ borderColor: C.line }}>
               <div className="p-3 bg-[#EFECE4]/50 flex items-center justify-between text-xs">
-                <span className="font-semibold text-[#1C2420]">Authoritative Data Sources ({sources.length})</span>
+                <span className="font-semibold text-[#1C2420]">Configured Data Sources ({sources.length})</span>
                 <Link
                   href="/sources"
                   className="text-[#22364A] font-medium hover:underline inline-flex items-center gap-1"
@@ -631,6 +641,11 @@ function DashboardContent() {
               </div>
             </div>
           )}
+
+          {/* Data Confidence & Provenance Audit */}
+          <div className="mt-8">
+            <DataConfidencePanel />
+          </div>
         </main>
       </div>
 
@@ -641,7 +656,7 @@ function DashboardContent() {
         onAdd={addHabitation}
       />
 
-      {/* SDMA In-Situ Adaptation & Non-Relocation Strategies Modal */}
+      {/* Candidate In-Situ Adaptation Measures Modal */}
       <AdaptationStrategyModal
         isOpen={strategyModalOpen}
         onClose={() => setStrategyModalOpen(false)}

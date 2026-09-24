@@ -88,7 +88,7 @@ export default function LandingPage() {
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-[#9BA8AE]">
               <span className="w-2 h-2 rounded-full bg-[#2A6B52]" />
-              <span>TERRAIN ALTITUDE & HAZARD GRADIENT MODELING</span>
+              <span>POSTGIS GIS · DETERMINISTIC MCDA · AI EXPLANATION</span>
             </div>
 
             <h1 className="f-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.08] text-[#F7F5F1] font-bold tracking-tight">
@@ -114,8 +114,8 @@ export default function LandingPage() {
                 <p className="text-[11px] text-[#9BA8AE] mt-0.5">Regional Corridors</p>
               </div>
               <div>
-                <p className="f-mono text-2xl sm:text-3xl font-bold text-[#C0872B]">100%</p>
-                <p className="text-[11px] text-[#9BA8AE] mt-0.5">PostGIS & ML Backed</p>
+                <p className="f-sans text-xs font-bold text-[#C0872B] leading-tight">GIS-Powered</p>
+                <p className="text-[10px] text-[#9BA8AE] mt-0.5">Explainable · AI-Assisted</p>
               </div>
             </div>
 
@@ -171,10 +171,10 @@ export default function LandingPage() {
               <AlertTriangle size={18} />
             </div>
             <h3 className="text-white font-semibold text-base mb-1">
-              1. Multi-Hazard Red Zones
+              1. Model-Identified High-Risk Zones
             </h3>
             <p className="text-xs text-[#9BA8AE] leading-relaxed">
-              Delineates severe hazard zones using slope gradients, flood levels, and historical disaster recurrence with zero blind-spot approximations.
+              Delineates high-susceptibility zones using slope gradients, flood levels, and historical disaster recurrence for decision-support screening.
             </p>
           </div>
 
@@ -183,10 +183,10 @@ export default function LandingPage() {
               <MapPin size={18} />
             </div>
             <h3 className="text-white font-semibold text-base mb-1">
-              2. Bottleneck Capacity Matching
+              2. Liebig Bottleneck Capacity Matching
             </h3>
             <p className="text-xs text-[#9BA8AE] leading-relaxed">
-              Applies Liebig&apos;s Law: resettlement carrying capacity is strictly determined by the tightest infrastructure bottleneck (water, sanitation, schools).
+              Applies Liebig&apos;s Law: resettlement carrying capacity is strictly determined by the tightest infrastructure bottleneck (water, sanitation, schools, healthcare).
             </p>
           </div>
 
@@ -195,10 +195,10 @@ export default function LandingPage() {
               <ClipboardCheck size={18} />
             </div>
             <h3 className="text-white font-semibold text-base mb-1">
-              3. In-Situ Adaptation & DDMA Readiness
+              3. Decision Engine & Human Authority
             </h3>
             <p className="text-xs text-[#9BA8AE] leading-relaxed">
-              Provides non-relocation protection directives and generates 1-click printable A4 evacuation cards for offline field operations during zero hour.
+              Calculates deterministic MCDA priority tiers, provides AI-assisted policy brief explanations, and preserves final authority with competent SDMA/DDMA officials.
             </p>
           </div>
         </div>
@@ -206,8 +206,8 @@ export default function LandingPage() {
 
       {/* Simple Clean Footer */}
       <footer className="border-t border-white/10 bg-[#0E1721] px-6 sm:px-12 py-5 text-xs text-[#7C8A90] flex flex-wrap items-center justify-between gap-4">
-        <span>SURAKSHA · Decision Support System for Disaster Mitigation & Resettlement</span>
-        <span>Data Ingested: GSI, IMD, NRSC/Bhuvan, CWC, Census of India</span>
+        <span>SURAKSHA · Decision Support System · &ldquo;AI explains. GIS measures. The decision engine calculates. Humans decide.&rdquo;</span>
+        <span>Notice: Model-generated outputs; not statutory designations. Data: GSI, IMD, NRSC/Bhuvan, CWC, Census baseline</span>
       </footer>
     </div>
   );

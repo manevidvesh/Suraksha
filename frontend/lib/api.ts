@@ -162,8 +162,8 @@ export const api = {
           name: payload.zone_name,
           hazard_type: payload.hazard_type,
           severity: payload.severity,
-          description: `Live Dynamic Early Warning alert: ${payload.radius_km} km radius buffer around epicenter (${payload.latitude.toFixed(3)}, ${payload.longitude.toFixed(3)}). Enforced zero-hour evacuation perimeter under Section 34(b) DM Act.`,
-          source_agency: "IMD Doppler Radar / CWC Telemetry Feed",
+          description: `Dynamic Early Warning scenario simulation: ${payload.radius_km} km radius buffer around coordinates (${payload.latitude.toFixed(3)}, ${payload.longitude.toFixed(3)}). For contingency assessment under Section 34(b) DM Act (Demonstration Run).`,
+          source_agency: "SURAKSHA Dynamic Hazard Engine (Simulation)",
           radius_km: payload.radius_km,
         },
       };
@@ -445,26 +445,26 @@ export const api = {
       ];
 
       return {
-        title: `OFFICE MEMORANDUM: Statutory Relocation Order for ${hab.name}`,
+        title: `EXECUTIVE DECISION-SUPPORT BRIEF: Relocation Planning Assessment for ${hab.name}`,
         habitation_name: hab.name,
         region: hab.region,
         risk_score: hab.score,
         priority_tier: hab.tier,
         primary_hazard: hab.hazard,
         population: hab.pop,
-        executive_summary: `${hab.name} in ${hab.region} has been designated for ${hab.tier.toLowerCase()} relocation under Section 30(2)(v) of the Disaster Management Act, 2005. Composite vulnerability is driven by recurring ${hab.hazard.toLowerCase()} hazards affecting ${hab.pop.toLocaleString()} residents (${households} households). Total estimated resettlement outlay is ₹${totalCrores.toFixed(2)} Cr under 75:25 NDRF-SDRF statutory sharing.`,
+        executive_summary: `${hab.name} in ${hab.region} is prioritized for ${hab.tier.toLowerCase()} relocation planning and decision-support evaluation under Section 30(2)(v) of the Disaster Management Act, 2005. Composite vulnerability is driven by recurring ${hab.hazard.toLowerCase()} hazards affecting ${hab.pop.toLocaleString()} residents (${households} households). Total estimated resettlement outlay is ₹${totalCrores.toFixed(2)} Cr under 75:25 NDRF-SDRF planning model.`,
         risk_driver_analysis: `PostGIS spatial intersect indicates severe slope steepness (>28°) combined with saturated catchment precipitation. Historical records demonstrate ${hab.events} previous displacement events with high likelihood of slope mobilization during monsoon peaks.`,
         relocation_site_assessment: site
           ? `Designated candidate site ${site.name} exhibits an effective carrying capacity of ${site.eff.value} additional residents, governed by ${site.eff.bottleneck} threshold. Transit distance is ${site.distanceKm} km.`
           : undefined,
         policy_recommendations: [
-          `Authorize immediate demarcation of Red Zone exclusion buffer around ${hab.name} under Section 34(b) DM Act.`,
-          `Instruct District Disaster Management Authority (DDMA) to initiate phased rehabilitation to ${site ? site.name : "designated safe layout"}.`,
-          `Mobilize rural development and Jal Jeevan Mission funding to expand ${site ? site.eff.bottleneck : "drinking water & sanitation"} infrastructure prior to final resettlement.`,
-          `Deploy community engagement revenue officers for cadastral survey, patta title issuance, and livelihood transition.`,
+          `Recommend technical evaluation of candidate High-Risk Zone advisory around ${hab.name} by the competent authority.`,
+          `Recommend review by the competent disaster management authority for phased rehabilitation to ${site ? site.name : "candidate resettlement sites"}.`,
+          `Mobilize rural development and drinking water program allocations to expand ${site ? site.eff.bottleneck : "drinking water & sanitation"} infrastructure prior to final resettlement handover.`,
+          `Deploy revenue officers for cadastral survey, patta title verification, and livelihood transition assessment.`,
         ],
-        memorandum_number: `F.No. SDMA/DM-ACT/2026/RELOC-${hab.id}`,
-        statutory_authority: "Disaster Management Act, 2005 (Sections 30 & 34)",
+        memorandum_number: `SRK-2026-RELOC-${hab.id}`,
+        statutory_authority: "Disaster Management Planning Framework · Decision-Support Output (Not a Statutory Order)",
         financial_outlay: financialOutlay,
         department_action_matrix: deptMatrix,
         generated_at: new Date().toLocaleDateString("en-IN", {

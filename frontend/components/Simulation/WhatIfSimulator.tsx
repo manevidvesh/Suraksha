@@ -298,7 +298,7 @@ export function WhatIfSimulator({
         </button>
       </div>
 
-      {/* Special In-Situ Directive for Zero/No-Relocation-Site Habitats (e.g. Kuttanad) */}
+      {/* Candidate In-Situ Measures for Zero/No-Relocation-Site Habitats (e.g. Kuttanad) */}
       {selectedHab &&
         (selectedHab.id === "H14" ||
           selectedHab.name.toLowerCase().includes("kuttanad")) && (
@@ -307,10 +307,10 @@ export function WhatIfSimulator({
               <LifeBuoy size={20} className="text-[#C0872B] shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-[#B5462F]">
-                  Special Zone Directive: {selectedHab.name} has no designated upland relocation site.
+                  Special Zone Assessment: {selectedHab.name} has no designated upland relocation site.
                 </span>
                 <p className="text-[11px] text-[#565F58] mt-1 leading-relaxed">
-                  Kuttanad is India's sub-sea-level agrarian heritage polder. Total population relocation is rejected by local farming communities and unviable under state land constraints. The SDMA mandates <strong>In-Situ Adaptation Strategies</strong> (amphibious dwellings, reinforced polder ring dykes, canal de-silting, and high-ground rescue flood shelters) rather than forced resettlement.
+                  Kuttanad is India's sub-sea-level agrarian heritage polder. Total population relocation is rejected by local farming communities and unviable under state land constraints. <strong>Candidate In-Situ Adaptation Measures</strong> (amphibious dwellings, reinforced polder ring dykes, canal de-silting, and high-ground rescue flood shelters) are evaluated for technical authority review rather than forced resettlement.
                 </p>
               </div>
             </div>
@@ -318,7 +318,7 @@ export function WhatIfSimulator({
               onClick={() => setStrategyModalOpen(true)}
               className="px-3.5 py-1.5 text-xs font-semibold rounded-sm text-[#22364A] bg-[#FFF3D6] border border-[#C0872B] hover:bg-[#FFE8B3] transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0"
             >
-              <LifeBuoy size={13} className="text-[#C0872B]" /> Inspect SDMA In-Situ Strategies
+              <LifeBuoy size={13} className="text-[#C0872B]" /> Inspect Candidate In-Situ Measures
             </button>
           </div>
         )}
@@ -399,14 +399,83 @@ export function WhatIfSimulator({
               onClick={generateBrief}
               disabled={briefLoading}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#22364A] text-white text-xs font-medium rounded-xs hover:bg-[#3E5E82] cursor-pointer transition-colors"
+              title="Synthesizes structured relocation findings into an AI explanation brief for DDMA review"
             >
               {briefLoading ? (
                 <Loader2 size={13} className="animate-spin" />
               ) : (
                 <FileText size={13} />
               )}
-              Generate SDMA Decision Brief
+              Generate AI Decision Brief (DDMA Review)
             </button>
+          </div>
+
+          {/* Decision Support Status & Audit Metadata */}
+          <div className="flex items-center justify-between gap-2 flex-wrap text-xs px-1">
+            <div className="flex items-center gap-2">
+              <span
+                className={`px-2 py-0.5 rounded-xs font-semibold text-[11px] border ${
+                  simResult.decision_status?.includes("NO SUITABLE")
+                    ? "bg-[#FFF3D6] text-[#C0872B] border-[#C0872B]/40"
+                    : "bg-[#E8F0EC] text-[#2A6B52] border-[#2A6B52]/40"
+                }`}
+              >
+                {simResult.decision_status || (simResult.capacity_exceeded ? "CAPACITY DEFICIT DETECTED" : "VIABLE CANDIDATE MATCH")}
+              </span>
+              <span className="font-mono text-[10px] text-[#565F58] bg-[#FAF9F5] px-2 py-0.5 rounded-xs border border-[#D9D4C7]">
+                Ref: {simResult.source_assessment_id || "SRK-2026-SIM-v1"}
+              </span>
+            </div>
+            <span className="text-[10px] text-[#565F58] font-mono">
+              {simResult.explanation_layer || "AI EXPLANATION LAYER — FOR HUMAN DECISION-MAKER REVIEW"}
+            </span>
+          </div>
+
+          {/* Viability Drivers, Bottlenecks & Decision Blockers Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs bg-[#FAF9F5] p-3.5 rounded-sm border border-[#D9D4C7]">
+            <div className="space-y-1">
+              <p className="font-bold text-[#2A6B52] uppercase text-[10px] tracking-wider">
+                Why This Site (Viability Drivers)
+              </p>
+              <ul className="list-disc pl-4 space-y-0.5 text-[#1C2420] text-[11px]">
+                {(simResult.why_this_site || [
+                  `Reduces hazard exposure by ${simResult.hazard_reduction_pct}%`,
+                  `Effective capacity supports ${simResult.effective_capacity} persons`
+                ]).map((w, idx) => (
+                  <li key={idx}>{w}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="space-y-1">
+              <p className="font-bold text-[#C0872B] uppercase text-[10px] tracking-wider">
+                Constraints & Bottlenecks
+              </p>
+              <ul className="list-disc pl-4 space-y-0.5 text-[#1C2420] text-[11px]">
+                {(simResult.why_not_this_site || [
+                  `Primary capacity bottleneck: ${simResult.bottleneck}`,
+                  `Transit distance: ${simResult.travel_distance_km} km`
+                ]).map((w, idx) => (
+                  <li key={idx}>{w}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="space-y-1">
+              <p className="font-bold text-[#B5462F] uppercase text-[10px] tracking-wider">
+                Primary Decision Blockers
+              </p>
+              <ul className="list-disc pl-4 space-y-0.5 text-[#1C2420] text-[11px]">
+                {(simResult.primary_blockers && simResult.primary_blockers.length > 0 ? simResult.primary_blockers : [
+                  simResult.capacity_exceeded
+                    ? `Capacity deficit of ${simResult.population - simResult.effective_capacity} residents`
+                    : "No structural bottlenecks exceeding threshold",
+                  "Cadastral revenue clearance pending field survey"
+                ]).map((b, idx) => (
+                  <li key={idx}>{b}</li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           {briefError && (
@@ -441,7 +510,7 @@ export function WhatIfSimulator({
                   : "border-transparent text-[#565F58] hover:text-[#1C2420]"
               }`}
             >
-              <IndianRupee size={14} /> Statutory Costing (SDRF / NDRF & PMAY-G)
+              <IndianRupee size={14} /> Indicative Resettlement Financial Outlay Estimate
             </button>
             <button
               onClick={() => setActiveTab("phases")}
@@ -531,20 +600,20 @@ export function WhatIfSimulator({
             </div>
           )}
 
-          {/* TAB 2: Statutory SDRF / NDRF & PMAY-G Costing */}
+          {/* TAB 2: Indicative Resettlement Financial Outlay Estimate */}
           {activeTab === "financial" && financialOutlay && (
             <div className="border rounded-sm p-5 bg-white space-y-5" style={{ borderColor: C.line }}>
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <h3 className="f-serif text-base font-bold text-[#1C2420]">
-                    Statutory Resettlement Financial Outlay & Budget Sanction
+                    Indicative Resettlement Financial Outlay Estimate
                   </h3>
                   <p className="text-xs text-[#565F58] mt-0.5">
-                    Estimated under Ministry of Rural Development PMAY-G guidelines (₹1.30L/dwelling unit) and NDMA SDRF/NDRF infrastructure norms.
+                    Estimated under prototype financial models based on reference unit norms. Funding-source eligibility and applicable scheme norms require verification by the competent authority.
                   </p>
                 </div>
                 <span className="text-[11px] font-mono px-2.5 py-1 rounded-xs bg-[#F7F5F1] border border-[#D9D4C7] text-[#22364A] font-semibold">
-                  Norm: 75% Central NDRF / 25% State SDRF
+                  Reference Unit Norms: Illustrative Split
                 </span>
               </div>
 
@@ -741,7 +810,7 @@ export function WhatIfSimulator({
         onClose={() => setBriefOpen(false)}
       />
 
-      {/* SDMA In-Situ Adaptation Strategies Modal */}
+      {/* Candidate In-Situ Adaptation Measures Modal */}
       {selectedHab && (
         <AdaptationStrategyModal
           isOpen={strategyModalOpen}

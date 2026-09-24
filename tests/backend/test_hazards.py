@@ -72,7 +72,7 @@ def test_list_hazard_layers():
     agencies = [l["agency"] for l in layers]
     assert any("Geological Survey of India" in a for a in agencies)
     assert any("India Meteorological Department" in a for a in agencies)
-    print(f"PASS: test_list_hazard_layers ({len(layers)} official GIS feeds)")
+    print(f"PASS: test_list_hazard_layers ({len(layers)} reference GIS feeds)")
 
 if __name__ == "__main__":
     test_get_hazard_red_zones_geojson()

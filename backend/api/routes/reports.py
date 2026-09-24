@@ -9,11 +9,11 @@ import logging
 logger = logging.getLogger("suraksha.reports")
 router = APIRouter(prefix="/reports", tags=["Reports & AI Decision Support"])
 
-@router.post("/generate-brief", response_model=ReportBriefResponse, summary="Generate SDMA executive relocation brief")
+@router.post("/generate-brief", response_model=ReportBriefResponse, summary="Generate executive relocation decision-support brief")
 async def generate_executive_brief(payload: ReportBriefRequest):
     """
-    Generate an authoritative relocation decision brief for SDMAs and District Collectors
-    powered by the AI / LLM Explainer service with transparent policy directives.
+    Generate an executive relocation decision-support brief for SDMAs and District Collectors
+    powered by the AI / LLM Explainer service with structured policy recommendations.
     """
     logger.info(f"Generating SDMA executive brief: Habitation={payload.habitation_id}, Site={payload.site_id}")
     hab = await repo.get_habitation_by_id(payload.habitation_id)

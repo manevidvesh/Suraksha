@@ -8,12 +8,14 @@
 
 **SURAKSHA** is a multi-hazard spatial decision support platform designed for State and District Disaster Management Authorities (SDMA / DDMA). It replaces reactive post-disaster evacuation with proactive, data-driven resettlement planning across high-vulnerability corridors (such as the Western Ghats Zone 7 pilot region).
 
-By fusing satellite remote sensing, PostGIS spatial analysis, machine learning risk modeling, and infrastructure carrying capacity optimization, SURAKSHA:
-1. **Delineates Multi-Hazard Red Zones** from slope steepness, flood inundation models, and historical frequency.
-2. **Prioritizes Endangered Habitations** into actionable relocation time windows (*Immediate*, *Short-term*, *Medium-term*) using composite risk scoring.
+> **Core Principle**: *"AI explains. GIS measures. The decision engine calculates. Humans decide."*
+
+By fusing satellite remote sensing, PostGIS spatial analysis, deterministic MCDA risk modeling, infrastructure carrying capacity optimization, and an AI explanation layer, SURAKSHA:
+1. **Identifies Candidate High-Risk Zones** from slope steepness, flood inundation models, and historical frequency (decision-support screening).
+2. **Prioritizes Endangered Habitations** into actionable relocation time windows (*Immediate*, *Short-term*, *Medium-term*) using transparent Multi-Criteria Decision Analysis (MCDA).
 3. **Solves Infrastructure Carrying Capacity** under Liebig's Law of the Minimum — identifying candidate resettlement sites whose capacity is governed by the tightest infrastructure bottleneck (drinking water, sanitation, schools, primary healthcare).
 4. **Simulates Relocation Outcomes** with geodesic travel friction analysis and before-vs-after risk radar assessments.
-5. **Generates AI Executive Briefs** formatted for administrative sign-off and SDMA policy directives.
+5. **Generates AI Executive Briefs** providing plain-language decision explanations strictly bound to structured backend evidence for DDMA review.
 
 ---
 
@@ -80,7 +82,7 @@ SURAKSHA/
 │
 ├── docs/                             # Engineering documentation
 │   ├── architecture.md               # End-to-end system architecture
-│   ├── data-sources.md               # Authoritative data lineage & confidence scoring
+│   ├── data-sources.md               # Documented data lineage & confidence scoring
 │   ├── api.md                        # Complete OpenAPI / REST specification
 │   └── model-documentation.md        # Mathematical formulation & ML evaluation metrics
 │
@@ -131,7 +133,7 @@ docker-compose up --build
 
 ## 🧪 Testing
 
-Run the automated test suite covering backend routes, machine learning inference, and GIS spatial joins:
+Run the automated test suite covering backend routes, prototype ML models, and GIS spatial joins:
 
 ```bash
 python -m pytest tests/ -v
@@ -145,19 +147,19 @@ python -m pytest tests/ -v
 |---|---|---|
 | `GET` | `/api/v1/health` | Health check and PostGIS status |
 | `GET` | `/api/v1/hazards/summary` | Multi-hazard statistical metrics |
-| `GET` | `/api/v1/hazards/red-zones` | GeoJSON polygon layer of designated Red Zones |
+| `GET` | `/api/v1/hazards/red-zones` | GeoJSON polygon layer of candidate Red Zones (decision-support outputs) |
 | `GET` | `/api/v1/habitations` | Monitored settlements with risk scores and tiers |
 | `POST` | `/api/v1/habitations` | Register and score a new settlement |
 | `POST` | `/api/v1/risk/calculate` | Recalculate composite scores across custom weights |
 | `GET` | `/api/v1/relocation/sites` | Candidate sites filtered by effective carrying capacity |
 | `POST` | `/api/v1/simulation/relocate` | What-if simulation between habitation and candidate site |
-| `POST` | `/api/v1/reports/executive-brief` | Generate AI executive brief for SDMA sign-off |
+| `POST` | `/api/v1/reports/executive-brief` | Generate AI executive brief for competent authority review |
 | `POST` | `/api/v1/upload` | Ingest CSV, GeoJSON, or zipped Shapefiles |
 
 ---
 
 ## 📜 License & Institutional Attribution
-Built on authoritative datasets from:
+Built on documented reference criteria and baseline datasets from:
 - **GSI** (Geological Survey of India) — Landslide susceptibility maps
 - **IMD** (India Meteorological Department) — High-intensity precipitation radar
 - **MOSDAC / ISRO** — Flood inundation monitoring

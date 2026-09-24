@@ -136,10 +136,16 @@ export function filterSitesByCorridor(sites: CandidateSite[], corridorId: string
       return text.includes("gopeshwar") || text.includes("chamoli") || text.includes("uttarakhand");
     }
     if (corridorId === "eastern_plains") {
-      return text.includes("bankura") || text.includes("bengal");
+      return text.includes("bankura") || text.includes("bengal") || text.includes("s3");
     }
     if (corridorId === "northeast") {
-      return text.includes("jorhat") || text.includes("assam");
+      return (
+        text.includes("jorhat") ||
+        text.includes("assam") ||
+        text.includes("majuli") ||
+        text.includes("brahmaputra") ||
+        text.includes("s6")
+      );
     }
     return true;
   });
@@ -217,6 +223,11 @@ export function filterRedZonesByCorridor(
     const text = `${p.id || ""} ${p.zone_code || ""} ${p.name || ""} ${p.description || ""} ${p.habitation_id || ""}`.toLowerCase();
     if (corridorId === "western_ghats") {
       return (
+        p.habitation_id === "H1" ||
+        p.habitation_id === "H2" ||
+        p.habitation_id === "H4" ||
+        p.habitation_id === "H14" ||
+        p.habitation_id === "H12" ||
         text.includes("way") ||
         text.includes("ern") ||
         text.includes("mun") ||
@@ -237,6 +248,9 @@ export function filterRedZonesByCorridor(
     }
     if (corridorId === "himalayas") {
       return (
+        p.habitation_id === "H9" ||
+        p.habitation_id === "H10" ||
+        p.habitation_id === "H16" ||
         text.includes("jos") ||
         text.includes("ked") ||
         text.includes("uk") ||
@@ -250,6 +264,9 @@ export function filterRedZonesByCorridor(
     }
     if (corridorId === "eastern_plains") {
       return (
+        p.habitation_id === "H3" ||
+        p.habitation_id === "H5" ||
+        p.habitation_id === "H7" ||
         text.includes("tst") ||
         text.includes("sun") ||
         text.includes("wb") ||
@@ -261,6 +278,8 @@ export function filterRedZonesByCorridor(
     }
     if (corridorId === "northeast") {
       return (
+        p.habitation_id === "H11" ||
+        p.id === "RZ-AS-01" ||
         text.includes("maj") ||
         text.includes("as") ||
         text.includes("majuli") ||

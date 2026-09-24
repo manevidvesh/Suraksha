@@ -48,6 +48,19 @@ export default function RelocationSitesPage() {
             }
           />
 
+          {/* Candidate Screening & Field Verification Notice Banner */}
+          <div className="mb-4 p-2.5 rounded-sm bg-[#FFF9EE] border border-[#C0872B]/40 flex items-center justify-between gap-2 text-xs text-[#8C5D17]">
+            <div className="flex items-center gap-2">
+              <Info size={14} className="text-[#C0872B] shrink-0" />
+              <span>
+                <strong>Candidate Screening Notice:</strong> Sites listed are model-assessed alternatives. Comprehensive ground-truth geotechnical investigation by the competent geotechnical authority or qualified geotechnical professionals, hydrological assessment, and revenue title clearance by competent authorities are required prior to any resettlement action.
+              </span>
+            </div>
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-xs bg-white border border-[#C0872B]/40 font-semibold shrink-0">
+              FIELD VERIFICATION REQUIRED
+            </span>
+          </div>
+
           {/* Educational Callout Banner */}
           <div
             className="border rounded-sm p-4 mb-6 bg-white flex items-start gap-3"

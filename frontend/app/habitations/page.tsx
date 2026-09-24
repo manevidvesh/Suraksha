@@ -13,6 +13,10 @@ import {
   LifeBuoy,
   ClipboardCheck,
   Printer,
+  Calculator,
+  History,
+  ShieldCheck,
+  FileCheck,
 } from "lucide-react";
 import { useRiskData } from "@/hooks/useRiskData";
 import { Habitation } from "@/types";
@@ -30,6 +34,14 @@ import {
   filterHabitationsByCorridor,
   CORRIDORS,
   AdaptationStrategyModal,
+  McdaExplainerModal,
+  DataConfidencePanel,
+  McdaScenarioPanel,
+  EvidenceGapPanel,
+  HistoricalEvidenceModal,
+  AssessmentProvenanceModal,
+  HumanFieldReviewModal,
+  PopulationVintageBadge,
 } from "@/components/Common";
 import { getAdaptationStrategyForEntity } from "@/lib/adaptationStrategies";
 import { getHabitationReadiness } from "@/lib/ddmaReadinessData";
@@ -37,7 +49,6 @@ import {
   LifelineReadinessModal,
   OfflineActionCardModal,
 } from "@/components/DDMA";
-import { GAZETTED_PRESETS } from "@/lib/gazettedPresets";
 
 export default function HabitationsPage() {
   const {
@@ -53,9 +64,14 @@ export default function HabitationsPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mcdaModalOpen, setMcdaModalOpen] = useState(false);
   const [strategyModalOpen, setStrategyModalOpen] = useState(false);
   const [readinessModalOpen, setReadinessModalOpen] = useState(false);
   const [actionCardModalOpen, setActionCardModalOpen] = useState(false);
+  const [historicalModalOpen, setHistoricalModalOpen] = useState(false);
+  const [provenanceModalOpen, setProvenanceModalOpen] = useState(false);
+  const [fieldReviewModalOpen, setFieldReviewModalOpen] = useState(false);
+  const [fieldReviewStatus, setFieldReviewStatus] = useState<string | null>(null);
   const [breakdown, setBreakdown] = useState<any>(null);
   const [loadingBreakdown, setLoadingBreakdown] = useState(false);
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
@@ -160,160 +176,23 @@ export default function HabitationsPage() {
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-[290px_1fr] gap-6">
-            {/* Gazetted Framework Evaluation Panel */}
-            <div
-              className="border rounded-sm p-4 h-fit bg-white space-y-4"
-              style={{ borderColor: C.line }}
-            >
-              <div>
-                <div className="flex items-center justify-between">
-                  <p className="f-sans text-xs font-bold uppercase tracking-wider text-[#1C2420]">
-                    Statutory Framework
-                  </p>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-xs bg-[#E8F0EC] text-[#2A6B52] font-semibold border border-[#2A6B52]/30">
-                    NDMA Standard
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#565F58] mt-1 leading-tight">
-                  Risk weights must comply with official gazetted disaster methodology guidelines.
-                </p>
-              </div>
-
-              {/* Preset Selector */}
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-semibold text-[#1C2420]">
-                  Approved National Protocol
-                </label>
-                <select
-                  value={activePresetId}
-                  onChange={(e) => {
-                    const pid = e.target.value;
-                    setActivePresetId(pid);
-                    const p = GAZETTED_PRESETS.find((x) => x.id === pid);
-                    if (p) setWeights(p.weights);
-                  }}
-                  className="w-full border rounded-xs px-2.5 py-1.5 bg-[#F7F5F1] text-xs text-[#1C2420] focus:outline-none focus:ring-1 focus:ring-[#22364A] cursor-pointer"
-                  style={{ borderColor: C.line }}
-                >
-                  {GAZETTED_PRESETS.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.shortName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Active Protocol Details Card */}
-              {(() => {
-                const currentPreset = GAZETTED_PRESETS.find((p) => p.id === activePresetId) || GAZETTED_PRESETS[0];
-                return (
-                  <div className="p-3 rounded-xs bg-[#F7F5F1] border border-[#D9D4C7] space-y-2 text-xs">
-                    <p className="font-semibold text-[#1C2420] text-[11px]">
-                      {currentPreset.name}
-                    </p>
-                    <p className="text-[10px] text-[#565F58] leading-tight">
-                      <strong className="text-[#1C2420]">Authority:</strong> {currentPreset.authority}
-                    </p>
-                    <p className="text-[10px] text-[#3E5E82] font-mono leading-tight">
-                      {currentPreset.statutoryBasis}
-                    </p>
-
-                    <div className="pt-2 border-t border-[#D9D4C7] space-y-1.5">
-                      <p className="text-[10px] font-semibold uppercase text-[#565F58]">
-                        Mandated Weights Ratio:
-                      </p>
-                      <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
-                        <div className="flex justify-between">
-                          <span className="text-[#565F58]">Hazard:</span>
-                          <span className="font-mono font-semibold text-[#1C2420]">{weights.hazard}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-[#565F58]">Exposure:</span>
-                          <span className="font-mono font-semibold text-[#1C2420]">{weights.exposure}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-[#565F58]">Vulnerability:</span>
-                          <span className="font-mono font-semibold text-[#1C2420]">{weights.vulnerability}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-[#565F58]">History:</span>
-                          <span className="font-mono font-semibold text-[#1C2420]">{weights.history}%</span>
-                        </div>
-                        <div className="flex justify-between col-span-2">
-                          <span className="text-[#565F58]">Access Deficit:</span>
-                          <span className="font-mono font-semibold text-[#1C2420]">{weights.access}%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Statutory Cabinet Override (Audit Logged) */}
-              <div className="pt-2 border-t" style={{ borderColor: C.line }}>
-                <button
-                  type="button"
-                  onClick={() => setCabinetOverrideOpen(!cabinetOverrideOpen)}
-                  className="w-full flex items-center justify-between text-left text-[11px] font-semibold text-[#22364A] hover:text-[#B5462F] transition-colors py-1 cursor-pointer"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Sliders size={13} /> Emergency Cabinet Override
-                  </span>
-                  <span className="text-[10px] text-[#565F58]">
-                    {cabinetOverrideOpen ? "▲ Close" : "▼ Calibrate"}
-                  </span>
-                </button>
-
-                {cabinetOverrideOpen && (
-                  <div className="mt-3 space-y-3 pt-2 border-t border-dashed border-[#D9D4C7]">
-                    <div className="p-2 rounded-xs bg-[#FFF9EE] border border-[#C0872B]/40 text-[10px] text-[#8C5D17] leading-tight">
-                      ⚠️ <strong>Audit Warning:</strong> Overrides require recorded justification under Section 34(m) of Disaster Management Act 2005.
-                    </div>
-
-                    <div className="space-y-2.5">
-                      <Slider
-                        label="Hazard Intensity"
-                        value={weights.hazard}
-                        onChange={(v) => setWeights({ ...weights, hazard: v })}
-                      />
-                      <Slider
-                        label="Population Exposure"
-                        value={weights.exposure}
-                        onChange={(v) => setWeights({ ...weights, exposure: v })}
-                      />
-                      <Slider
-                        label="Social Vulnerability"
-                        value={weights.vulnerability}
-                        onChange={(v) => setWeights({ ...weights, vulnerability: v })}
-                      />
-                      <Slider
-                        label="Historical Frequency"
-                        value={weights.history}
-                        onChange={(v) => setWeights({ ...weights, history: v })}
-                      />
-                      <Slider
-                        label="Accessibility Deficit"
-                        value={weights.access}
-                        onChange={(v) => setWeights({ ...weights, access: v })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-semibold text-[#1C2420] mb-1">
-                        Executive File / Minute No. *
-                      </label>
-                      <input
-                        type="text"
-                        value={cabinetOverrideReason}
-                        onChange={(e) => setCabinetOverrideReason(e.target.value)}
-                        placeholder="e.g., DDMA/WND/MIN-44/2026"
-                        className="w-full border rounded-xs px-2 py-1 bg-[#F7F5F1] text-[11px] focus:outline-none"
-                        style={{ borderColor: C.line }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
+            {/* MCDA Multi-Criteria Weight Sensitivity & Planning Scenario Panel */}
+            <div className="h-fit">
+              <McdaScenarioPanel
+                weights={weights}
+                onWeightsChange={setWeights}
+                isCalculating={isCalculating}
+                currentScore={sel?.score}
+                onReset={() =>
+                  setWeights({
+                    hazard: 30,
+                    exposure: 25,
+                    vulnerability: 20,
+                    history: 15,
+                    access: 10,
+                  })
+                }
+              />
             </div>
 
             {/* Habitations List and Detail View */}
@@ -363,31 +242,67 @@ export default function HabitationsPage() {
               {/* Selected Habitation Risk Factor Breakdown Card */}
               {sel && (
                 <div
-                  className="border rounded-sm p-5 bg-white"
+                  className="border rounded-sm p-5 bg-white space-y-4"
                   style={{ borderColor: C.line }}
                 >
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="f-serif text-lg font-bold text-[#1C2420]">
                         Why {sel.name} scored {sel.score}/100
                       </h3>
                       <TierBadge tier={sel.tier} />
+                      <button
+                        onClick={() => setMcdaModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-[#22364A]/10 hover:bg-[#22364A]/20 text-[#22364A] text-xs font-semibold border border-[#22364A]/30 transition-colors cursor-pointer"
+                        title="Inspect exact MCDA mathematical formulation and weighted factor points"
+                      >
+                        <Calculator size={12} /> How is this score calculated?
+                      </button>
                       {(sel.id === "H14" || sel.name.toLowerCase().includes("kuttanad")) && (
                         <span className="text-[10px] px-2 py-0.5 rounded-xs bg-[#FFF3D6] text-[#C0872B] font-semibold border border-[#C0872B]/40">
                           In-Situ Priority (No Relocation Site)
                         </span>
                       )}
                     </div>
-                    {loadingBreakdown ? (
-                      <Loader2 size={14} className="animate-spin text-[#565F58]" />
-                    ) : (
-                      <Info size={15} style={{ color: C.inkSoft }} />
-                    )}
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[11px] text-[#565F58] bg-[#F7F5F1] px-2 py-0.5 rounded-xs border border-[#D9D4C7]">
+                        {breakdown?.assessment_id || `SRK-2026-${sel.id}-v1`}
+                      </span>
+                      {loadingBreakdown ? (
+                        <Loader2 size={14} className="animate-spin text-[#565F58]" />
+                      ) : (
+                        <Info size={15} style={{ color: C.inkSoft }} />
+                      )}
+                    </div>
                   </div>
 
-                  <p className="text-xs text-[#565F58] mb-4">
-                    {sel.region} · {sel.pop.toLocaleString()} exposed residents · {sel.events} recorded past disasters
-                  </p>
+                  {/* Demographic vintage and historical evidence strip */}
+                  <div className="flex items-center gap-2.5 flex-wrap text-xs text-[#565F58] pt-1">
+                    <span>
+                      <strong className="text-[#1C2420]">Region:</strong> {sel.region}
+                    </span>
+                    <span>·</span>
+                    <PopulationVintageBadge count={sel.pop} />
+                    <span>·</span>
+                    <button
+                      type="button"
+                      onClick={() => setHistoricalModalOpen(true)}
+                      className="inline-flex items-center gap-1 text-[#22364A] hover:underline cursor-pointer font-medium"
+                      title="Inspect 2018–2024 observation window event log"
+                    >
+                      <History size={12} className="text-[#565F58]" />
+                      <span><strong>{sel.events}</strong> recorded past events (2018–2024)</span>
+                    </button>
+                    <span>·</span>
+                    <span className="text-[11px] px-1.5 py-0.5 rounded-xs bg-[#FFF9EE] text-[#8C5D17] border border-[#C0872B]/30 font-medium">
+                      {breakdown?.evidence_status || "LIMITED EVIDENCE"}
+                    </span>
+                    {fieldReviewStatus && (
+                      <span className="text-[11px] px-1.5 py-0.5 rounded-xs bg-[#E8F0EC] text-[#2A6B52] border border-[#2A6B52]/30 font-semibold">
+                        Officer Review: {fieldReviewStatus}
+                      </span>
+                    )}
+                  </div>
 
                   <div className="h-52 mb-3">
                     <VulnerabilityBarChart factors={factorList} height={200} />
@@ -398,7 +313,14 @@ export default function HabitationsPage() {
                       `${sel.name} is prioritized as a ${sel.tier} resettlement urgency based on elevated hazard exposure and accessibility deficits.`}
                   </p>
 
-                  <div className="mt-4 flex items-center justify-between gap-2.5 flex-wrap">
+                  {/* Evidence Gaps & Field Validation Disclosure */}
+                  <EvidenceGapPanel
+                    entityName={sel.name}
+                    status={breakdown?.evidence_status || "LIMITED EVIDENCE"}
+                  />
+
+                  {/* Operational Action Row */}
+                  <div className="pt-2 flex items-center justify-between gap-2.5 flex-wrap border-t border-[#EAE7DF]">
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => setStrategyModalOpen(true)}
@@ -409,11 +331,35 @@ export default function HabitationsPage() {
                       </button>
 
                       <button
+                        onClick={() => setHistoricalModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#D9D4C7] text-xs font-semibold rounded-sm transition-colors cursor-pointer"
+                        title="Inspect recorded disaster events window"
+                      >
+                        <History size={13} /> Historical Evidence
+                      </button>
+
+                      <button
+                        onClick={() => setProvenanceModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#D9D4C7] text-xs font-semibold rounded-sm transition-colors cursor-pointer"
+                        title="Trace 8-stage data lineage and processing timestamps"
+                      >
+                        <FileCheck size={13} /> Provenance Lineage
+                      </button>
+
+                      <button
+                        onClick={() => setFieldReviewModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#22364A]/10 hover:bg-[#22364A]/20 text-[#22364A] border border-[#22364A]/30 text-xs font-semibold rounded-sm transition-colors cursor-pointer"
+                        title="Record DDMA field verification note or challenge"
+                      >
+                        <ShieldCheck size={13} /> Officer Review
+                      </button>
+
+                      <button
                         onClick={() => setReadinessModalOpen(true)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#22364A] text-xs font-semibold rounded-sm transition-colors cursor-pointer"
                         title="Audit and replenish DDMA lifeline equipment & stock"
                       >
-                        <ClipboardCheck size={13} /> 📋 DDMA Lifeline Checklist
+                        <ClipboardCheck size={13} /> Lifeline Checklist
                       </button>
 
                       <button
@@ -421,7 +367,7 @@ export default function HabitationsPage() {
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#B5462F] hover:bg-[#9E3B26] text-white text-xs font-semibold rounded-sm transition-colors cursor-pointer shadow-xs"
                         title="Export printable A4 offline emergency evacuation card"
                       >
-                        <Printer size={13} /> 🖨️ Offline Action Card
+                        <Printer size={13} /> Offline Card
                       </button>
                     </div>
 
@@ -434,6 +380,9 @@ export default function HabitationsPage() {
                   </div>
                 </div>
               )}
+
+              {/* Data Confidence & Evidentiary Lineage Panel */}
+              <DataConfidencePanel />
             </div>
           </div>
         </main>
@@ -446,7 +395,47 @@ export default function HabitationsPage() {
         onAdd={addHabitation}
       />
 
-      {/* SDMA In-Situ Adaptation & Non-Relocation Strategies Modal */}
+      {/* MCDA Formulation & Score Calculation Modal */}
+      {sel && (
+        <McdaExplainerModal
+          isOpen={mcdaModalOpen}
+          onClose={() => setMcdaModalOpen(false)}
+          habitation={sel}
+          weights={weights}
+        />
+      )}
+
+      {/* Historical Evidence Modal (2018-2024 Window) */}
+      {sel && (
+        <HistoricalEvidenceModal
+          isOpen={historicalModalOpen}
+          onClose={() => setHistoricalModalOpen(false)}
+          habitation={sel}
+        />
+      )}
+
+      {/* Assessment Provenance Lineage Modal */}
+      {sel && (
+        <AssessmentProvenanceModal
+          isOpen={provenanceModalOpen}
+          onClose={() => setProvenanceModalOpen(false)}
+          habitation={sel}
+          breakdown={breakdown}
+          weights={weights}
+        />
+      )}
+
+      {/* DDMA Officer Field Review & Challenge Modal */}
+      {sel && (
+        <HumanFieldReviewModal
+          isOpen={fieldReviewModalOpen}
+          onClose={() => setFieldReviewModalOpen(false)}
+          habitation={sel}
+          onReviewSaved={(rev) => setFieldReviewStatus(rev.status)}
+        />
+      )}
+
+      {/* Candidate In-Situ Adaptation Measures Modal */}
       {sel && (
         <AdaptationStrategyModal
           isOpen={strategyModalOpen}

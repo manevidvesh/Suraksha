@@ -105,7 +105,7 @@ export function OfflineActionCardModal({
           {/* Official Document Header */}
           <div className="border-b-2 border-black pb-4 mb-4 text-center relative">
             <div className="flex items-center justify-between border-b border-gray-300 pb-2 mb-2 text-[10px] uppercase font-bold tracking-wider text-gray-700">
-              <span>National Disaster Management Authority (NDMA)</span>
+              <span>Prototype Decision-Support Framework</span>
               <span>State Disaster Management Authority ({profile.state})</span>
               <span>District Disaster Management Authority ({profile.district})</span>
             </div>
@@ -115,7 +115,7 @@ export function OfflineActionCardModal({
                 SURAKSHA EMERGENCY EVACUATION & ACTION CARD
               </h1>
               <p className="text-xs font-mono font-semibold uppercase text-gray-800 mt-0.5">
-                STATUTORY DISASTER OPERATIONAL DIRECTIVE · FORM DDMA-AC-01
+                EMERGENCY OPERATIONAL READINESS TEMPLATE · FORM DDMA-AC-01 (PROTOTYPE)
               </p>
             </div>
 
@@ -333,7 +333,7 @@ export function OfflineActionCardModal({
             </div>
           </div>
 
-          {/* Statutory Sign-off Footer */}
+          {/* Template Sign-off Footer */}
           <div className="border-t-2 border-black pt-4 grid grid-cols-3 gap-4 text-center text-xs">
             <div>
               <div className="h-10 border-b border-dashed border-gray-400 mb-1" />
@@ -353,8 +353,8 @@ export function OfflineActionCardModal({
                   {new Date().toLocaleDateString("en-IN", { dateStyle: "long" })}
                 </span>
               </div>
-              <p className="font-bold text-[10px] uppercase text-black">Official Issuance Date</p>
-              <p className="text-[9px] text-gray-500">SURAKSHA Verification ID: SK-2026-DDMA</p>
+              <p className="font-bold text-[10px] uppercase text-black">Draft Template Date</p>
+              <p className="text-[9px] text-gray-500">SURAKSHA Reference ID: SK-2026-DDMA</p>
             </div>
           </div>
         </div>

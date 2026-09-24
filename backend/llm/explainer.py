@@ -4,6 +4,40 @@ from datetime import datetime, timezone
 from backend.schemas.simulation import ReportBriefResponse
 from backend.llm.prompts import get_executive_brief_prompt
 
+def validate_numerical_claims(text: str, allowed_facts: Dict[str, Any]) -> tuple[bool, list[str]]:
+    """
+    Validates numbers in generated explanation against structured input facts.
+    Checks whether numerical claims in the generated explanation are consistent with structured assessment facts available to the system.
+    It does not certify the overall factual accuracy of the generated narrative.
+    Returns (is_verified, unverified_claims).
+    """
+    import re
+    text_clean = text.replace(',', '')
+    numbers_in_text = re.findall(r'\b\d+(?:\.\d+)?\b', text_clean)
+    allowed_values = set()
+    for v in allowed_facts.values():
+        if isinstance(v, (int, float)):
+            allowed_values.add(str(int(v)))
+            allowed_values.add(str(v))
+        elif isinstance(v, dict):
+            for sub_v in v.values():
+                if isinstance(sub_v, (int, float)):
+                    allowed_values.add(str(int(sub_v)))
+                    allowed_values.add(str(sub_v))
+
+    # Known observation years, administrative timeline days, statutory act years
+    benign_numbers = {
+        "2005", "2011", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026",
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "15", "30", "45", "60", "90", "100"
+    }
+
+    unverified = []
+    for num in numbers_in_text:
+        if num not in allowed_values and num not in benign_numbers:
+            unverified.append(f"Unverified number '{num}' in narrative requires evidence reconciliation")
+
+    return len(unverified) == 0, unverified
+
 async def generate_sdma_executive_brief(
     hab: Dict[str, Any],
     site: Optional[Dict[str, Any]] = None,
@@ -11,7 +45,7 @@ async def generate_sdma_executive_brief(
     tier: str = "Immediate",
 ) -> ReportBriefResponse:
     """
-    Generate an authoritative decision brief for State Disaster Management Authorities (SDMAs)
+    Generate an executive decision-support brief for State Disaster Management Authorities (SDMAs)
     under the SURAKSHA framework.
     Supports Gemini API if configured, with an expert rule-based reasoning engine as fallback.
     """
@@ -20,6 +54,18 @@ async def generate_sdma_executive_brief(
     hazard = hab.get("hazard", "Landslide")
     events = hab.get("events", 0)
     site_name = site["name"] if site else "Under Evaluation"
+    assessment_id = f"SRK-2026-{hab.get('id', 'HAB')}"
+
+    allowed_facts = {
+        "population": pop,
+        "risk_score": risk_score,
+        "hazard_intensity": f.get("hazard", 75),
+        "events": events,
+        "factors": f,
+    }
+    if site:
+        allowed_facts["capacity"] = site.get("eff", {}).get("value", 500)
+        allowed_facts["transit_distance"] = site.get("distanceKm", 15)
 
     # Check for Gemini API Key
     gemini_key = os.getenv("GEMINI_API_KEY")
@@ -27,6 +73,9 @@ async def generate_sdma_executive_brief(
         try:
             from google import genai
             client = genai.Client(api_key=gemini_key)
+            cap_info = site.get("eff", {}) if site else {}
+            bottleneck = cap_info.get("bottleneck") if site else None
+            capacity_val = cap_info.get("value") if site else None
             prompt = get_executive_brief_prompt(
                 hab_name=hab["name"],
                 region=hab["region"],
@@ -37,14 +86,18 @@ async def generate_sdma_executive_brief(
                 factors=f,
                 events=events,
                 site_name=site_name,
+                bottleneck=bottleneck,
+                capacity_val=capacity_val,
             )
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
                 contents=prompt,
             )
             if response and response.text:
+                exec_text = response.text[:350] + "..."
+                is_verified, unverified = validate_numerical_claims(exec_text, allowed_facts)
                 return ReportBriefResponse(
-                    title=f"SURAKSHA SDMA Executive Relocation Brief: {hab['name']}",
+                    title=f"EXECUTIVE DECISION-SUPPORT BRIEF: Relocation Planning Assessment for {hab['name']}",
                     generated_at=datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC"),
                     habitation_name=hab["name"],
                     region=hab["region"],
@@ -52,23 +105,30 @@ async def generate_sdma_executive_brief(
                     priority_tier=tier,
                     primary_hazard=hazard,
                     population=pop,
-                    executive_summary=response.text[:300] + "...",
+                    executive_summary=exec_text,
                     risk_driver_analysis=(
-                        f"Dynamic AI analysis confirms critical risk levels driven by elevated {hazard} exposure "
-                        f"(intensity {f.get('hazard', 75)}/100) and historical disaster vulnerability."
+                        f"MCDA evidence analysis confirms critical risk levels driven by elevated {hazard} exposure "
+                        f"(intensity {f.get('hazard', 75)}/100) and historical disaster recurrence frequency."
                     ),
                     relocation_site_assessment=(
-                        f"Allocated to {site_name}. Absorption feasibility subject to infrastructure bottleneck verification."
+                        f"Allocated to candidate site '{site_name}'. Absorption feasibility strictly constrained by {bottleneck or 'infrastructure'} bottleneck."
                         if site else "No resettlement site finalized yet; immediate candidate evaluation advised."
                     ),
                     policy_recommendations=[
-                        f"Enforce immediate construction moratorium in {hab['name']}.",
-                        f"Expedite land clearance at {site_name}." if site else "Designate high-priority resettlement corridor.",
+                        f"Issue candidate High-Risk Zone advisory halting further unreinforced construction in {hab['name']}.",
+                        f"Expedite field engineering and title clearance at {site_name}." if site else "Designate high-priority resettlement corridor.",
                         "Activate emergency evacuation contingency protocols.",
-                        "Initiate gazette notification for SURAKSHA Hazard Zone demarcation.",
+                        "Human / competent-authority review required prior to administrative or legal execution.",
                     ],
-                    memorandum_number=f"F.No. SDMA/DM-ACT/2026/RELOC-{hab.get('id', 'HAB')}",
-                    statutory_authority="Disaster Management Act, 2005 (Sections 30 & 34)",
+                    memorandum_number=f"SRK-2026-RELOC-{hab.get('id', 'HAB')}",
+                    statutory_authority="Disaster Management Planning Framework · Decision Support Output",
+                    source_assessment_id=assessment_id,
+                    source_evidence_version="2026.09-demo",
+                    explanation_layer="SURAKSHA AI Explainer",
+                    human_review_status="PENDING DDMA REVIEW",
+                    is_verified_against_evidence=is_verified,
+                    unverified_claims=unverified,
+                    evidence_grounding_summary=allowed_facts,
                 )
         except Exception:
             pass  # Fallback to deterministic expert engine
@@ -76,8 +136,8 @@ async def generate_sdma_executive_brief(
     # Deterministic expert rule-based generation
     exec_summary = (
         f"{hab['name']} in {hab['region']} faces critical multi-hazard vulnerability ({tier.lower()} tier, "
-        f"composite risk score {risk_score}/100). With {pop} residents situated in high-susceptibility terrain "
-        f"and {events} recorded disaster events, proactive relocation is urgently required to prevent catastrophic loss."
+        f"composite MCDA risk score {risk_score}/100). With {pop} residents situated in high-susceptibility terrain "
+        f"and {events} recorded disaster events in the 2018–2024 demonstration observation period, proactive relocation planning is recommended."
     )
 
     drivers = []
@@ -92,12 +152,12 @@ async def generate_sdma_executive_brief(
 
     driver_analysis = (
         f"Primary risk drivers identified: {', '.join(drivers)}. "
-        f"Historical records indicate {events} major hazard events, underscoring systemic recurrence rather than isolated incidents."
+        f"Historical records indicate {events} major hazard events in the 2018–2024 observation period, underscoring recurrence risks."
     )
 
     if site:
-        cap_val = site.get("cap", {}).get("land", 500)
-        bottleneck = "water supply" if site.get("cap", {}).get("water", 500) < cap_val else "land availability"
+        cap_val = site.get("eff", {}).get("value", site.get("cap", {}).get("land", 500))
+        bottleneck = site.get("eff", {}).get("bottleneck", "water")
         site_assessment = (
             f"Candidate site '{site['name']}' ({site.get('distanceKm', 15)} km transit distance) provides "
             f"secure geological terrain. Site can absorb up to {cap_val} residents. Primary infrastructure bottleneck is {bottleneck}."
@@ -106,12 +166,13 @@ async def generate_sdma_executive_brief(
         site_assessment = "Candidate site selection is pending; spatial matching algorithm recommends screening sites within a 30 km radius."
 
     recommendations = [
-        f"Issue immediate SURAKSHA High-Risk Zone notification prohibiting further residential construction in {hab['name']}.",
-        f"Sanction phased relocation budget under SDRF/NDRF provisions for {pop} residents.",
+        f"Issue candidate High-Risk Zone advisory halting further unreinforced construction in {hab['name']}.",
+        f"Sanction phased relocation budget under SDRF/NDRF provisions for {pop} residents subject to DDMA verification.",
         f"Engage community elders and local panchayat in {hab['region']} for resettlement consent and site validation.",
     ]
     if site:
         recommendations.append(f"Upgrade {bottleneck} capacity at {site['name']} prior to final residential handover.")
+    recommendations.append("Human / competent-authority review required prior to administrative or legal execution.")
 
     import math
     from backend.schemas.simulation import FinancialOutlayBreakdown, DepartmentActionTask
@@ -170,8 +231,10 @@ async def generate_sdma_executive_brief(
         ),
     ]
 
+    is_verified, unverified = validate_numerical_claims(exec_summary + " " + driver_analysis, allowed_facts)
+
     return ReportBriefResponse(
-        title=f"OFFICE MEMORANDUM: Statutory Relocation Order for {hab['name']}",
+        title=f"EXECUTIVE DECISION-SUPPORT BRIEF: Relocation Planning Assessment for {hab['name']}",
         generated_at=datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC"),
         habitation_name=hab["name"],
         region=hab["region"],
@@ -183,8 +246,15 @@ async def generate_sdma_executive_brief(
         risk_driver_analysis=driver_analysis,
         relocation_site_assessment=site_assessment,
         policy_recommendations=recommendations,
-        memorandum_number=f"F.No. SDMA/DM-ACT/2026/RELOC-{hab.get('id', 'HAB')}",
-        statutory_authority="Disaster Management Act, 2005 (Sections 30 & 34)",
+        memorandum_number=f"SRK-2026-RELOC-{hab.get('id', 'HAB')}",
+        statutory_authority="Disaster Management Planning Framework · Decision-Support Output (Not a Statutory Order)",
         financial_outlay=fin_outlay,
         department_action_matrix=dept_matrix,
+        source_assessment_id=assessment_id,
+        source_evidence_version="2026.09-demo",
+        explanation_layer="SURAKSHA AI Explainer",
+        human_review_status="PENDING DDMA REVIEW",
+        is_verified_against_evidence=is_verified,
+        unverified_claims=unverified,
+        evidence_grounding_summary=allowed_facts,
     )
