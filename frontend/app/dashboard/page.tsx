@@ -1,26 +1,23 @@
 'use client';
 
-import React, { useState, useMemo, useRef, useEffect, Suspense } from "react";
+import React, { useState, useMemo, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   MapIcon,
   ChevronRight,
   ArrowRight,
-  Upload as UploadIcon,
   CheckCircle2,
   XCircle,
-  Loader2,
-  RefreshCcw,
   Plus,
   Database,
   ExternalLink,
   LifeBuoy,
   ClipboardCheck,
+  MapPin,
 } from "lucide-react";
 import { useRiskData } from "@/hooks/useRiskData";
-import { Habitation, UploadResult } from "@/types";
-import { api } from "@/lib/api";
+import { Habitation } from "@/types";
 import { C } from "@/components/Common/constants";
 import { TierBadge, ConfidenceBadge } from "@/components/Common/Badges";
 import { SectionHead } from "@/components/Common/SectionHead";
@@ -63,7 +60,7 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mapMode, setMapMode] = useState<"maplibre" | "schematic">("maplibre");
-  const [activeTab, setActiveTab] = useState<"overview" | "history" | "sources" | "upload">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "history" | "sources">("overview");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
   const [strategyModalOpen, setStrategyModalOpen] = useState(false);
@@ -101,16 +98,9 @@ function DashboardContent() {
   useEffect(() => {
     const tab = searchParams.get("tab");
     if (tab === "sources") setActiveTab("sources");
-    else if (tab === "upload" || tab === "data") setActiveTab("upload");
     else if (tab === "history") setActiveTab("history");
     else if (tab === "overview") setActiveTab("overview");
   }, [searchParams]);
-
-  // Upload states
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "dragging" | "loading" | "success" | "error">("idle");
-  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
-  const [uploadError, setUploadError] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const counts = useMemo(() => {
     const c = { Immediate: 0, "Short-term": 0, "Medium-term": 0 };
@@ -130,36 +120,6 @@ function DashboardContent() {
     displayedHabitations[0] ||
     habitations.find((h) => h.id === selectedHabitationId) ||
     habitations[0];
-
-  const handleFileUpload = async (file: File) => {
-    setUploadStatus("loading");
-    setUploadError("");
-    try {
-      const res = await api.uploadFile(file);
-      setUploadResult(res);
-      setUploadStatus(res.status === "success" ? "success" : "error");
-      if (res.status === "error") setUploadError(res.message);
-    } catch (err: any) {
-      setUploadStatus("error");
-      setUploadError(err.message || "Failed to upload spatial dataset.");
-    }
-  };
-
-  const handleSimulateUpload = async () => {
-    setUploadStatus("loading");
-    setUploadError("");
-    try {
-      const dummyCsv =
-        "name,region,hazard,pop,latitude,longitude\nAttamala Settlement,Wayanad,Landslide,320,11.5241,76.1482\nChooralmala Hamlet,Wayanad,Debris Flow,410,11.5392,76.1620\n";
-      const file = new File([dummyCsv], "simulated_wayanad_survey.csv", { type: "text/csv" });
-      const res = await api.uploadFile(file);
-      setUploadResult(res);
-      setUploadStatus("success");
-    } catch (err: any) {
-      setUploadStatus("error");
-      setUploadError(err.message);
-    }
-  };
 
   return (
     <div className="f-sans flex min-h-screen" style={{ backgroundColor: C.paper }}>
@@ -373,11 +333,11 @@ function DashboardContent() {
                       Inspect Risk Factors <ChevronRight size={13} />
                     </Link>
                     <Link
-                      href={`/readiness`}
-                      className="w-full inline-flex items-center justify-center gap-1.5 f-sans text-xs py-2 rounded-sm border border-[#22364A] hover:bg-[#FAF9F5] text-[#22364A] font-semibold cursor-pointer transition-colors"
-                      title="DDMA Lifeline Inventory & Offline Action Cards"
+                      href={`/relocation?habitation=${selectedHabitation.id}`}
+                      className="w-full inline-flex items-center justify-center gap-1.5 f-sans text-xs py-2 rounded-sm bg-[#3D6B5C] hover:bg-[#32584B] text-white font-semibold cursor-pointer transition-colors shadow-xs"
+                      title="Evaluate candidate relocation sites and Liebig carrying capacity"
                     >
-                      <ClipboardCheck size={13} /> DDMA Readiness & Action Cards
+                      <MapPin size={13} /> Evaluate Relocation Sites <ArrowRight size={13} />
                     </Link>
                     <Link
                       href={`/simulation`}
@@ -401,9 +361,8 @@ function DashboardContent() {
           <div className="border-b mb-6 flex gap-6 text-sm font-medium" style={{ borderColor: C.line }}>
             {[
               { id: "overview", label: "Settlements Priority" },
-              { id: "history", label: "Disaster Events" },
+              { id: "history", label: "Disaster Events (Factor F)" },
               { id: "sources", label: "Data Sources & Lineage" },
-              { id: "upload", label: "Spatial Ingestion" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -460,13 +419,13 @@ function DashboardContent() {
           {activeTab === "history" && (
             <div className="border rounded-sm p-5 bg-white" style={{ borderColor: C.line }}>
               <div className="flex justify-between items-center mb-4">
-                <p className="text-xs font-semibold text-[#1C2420]">Historical Disaster Incidents</p>
-                <Link
-                  href="/history"
-                  className="text-xs text-[#22364A] font-medium hover:underline inline-flex items-center gap-1"
-                >
-                  Open Dedicated History Page <ExternalLink size={12} />
-                </Link>
+                <div>
+                  <p className="text-xs font-semibold text-[#1C2420]">Historical Disaster Incidents</p>
+                  <p className="text-[11px] text-[#565F58]">MCDA Disaster History Factor (F) Evidence · 15% Weight</p>
+                </div>
+                <span className="text-[11px] font-mono text-[#565F58] bg-[#F7F5F1] px-2 py-0.5 rounded-xs border" style={{ borderColor: C.line }}>
+                  {displayedHistory.length} incident record{displayedHistory.length !== 1 ? "s" : ""}
+                </span>
               </div>
               {displayedHistory.length === 0 ? (
                 <div className="py-8 text-center text-xs text-[#565F58]">
@@ -530,115 +489,6 @@ function DashboardContent() {
                   </div>
                 </div>
               ))}
-            </div>
-          )}
-
-          {/* Tab 4: Spatial Data Ingestion */}
-          {activeTab === "upload" && (
-            <div className="bg-white border rounded-sm p-6" style={{ borderColor: C.line }}>
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="f-serif text-base font-semibold text-[#1C2420]">
-                    Ingest Spatial Datasets
-                  </h3>
-                  <p className="text-xs text-[#565F58]">
-                    Live PostGIS ingestion with EPSG:4326 validation and automated attribute mapping
-                  </p>
-                </div>
-                <Link
-                  href="/data"
-                  className="text-xs text-[#22364A] font-medium hover:underline inline-flex items-center gap-1"
-                >
-                  Open Dedicated Ingestion Portal <ExternalLink size={12} />
-                </Link>
-              </div>
-
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept=".csv,.geojson,.json,.shp,.zip"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
-                }}
-              />
-              <div
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setUploadStatus("dragging");
-                }}
-                onDragLeave={() => setUploadStatus("idle")}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  if (e.dataTransfer.files?.[0]) handleFileUpload(e.dataTransfer.files[0]);
-                }}
-                className="border-2 border-dashed rounded-sm p-8 flex flex-col items-center text-center transition-colors"
-                style={{
-                  borderColor: uploadStatus === "dragging" ? C.slate : C.line,
-                  backgroundColor: uploadStatus === "dragging" ? C.paperDim : C.paper,
-                }}
-              >
-                {uploadStatus === "idle" || uploadStatus === "dragging" ? (
-                  <>
-                    <UploadIcon size={26} strokeWidth={1.5} style={{ color: C.inkSoft }} />
-                    <p className="f-sans text-sm mt-3 font-medium text-[#1C2420]">
-                      Drag and drop your survey file here
-                    </p>
-                    <p className="f-sans text-xs mt-1 text-[#565F58]">
-                      Supports .csv, .geojson, .shp (zipped)
-                    </p>
-                    <div className="flex gap-2 mt-4 flex-wrap justify-center">
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-4 py-2 rounded-sm text-white text-xs font-medium bg-[#22364A] hover:bg-[#3E5E82] cursor-pointer transition-colors"
-                      >
-                        Select File to Upload
-                      </button>
-                      <button
-                        onClick={handleSimulateUpload}
-                        className="px-4 py-2 rounded-sm border text-xs font-medium hover:bg-white text-[#22364A] cursor-pointer transition-colors"
-                        style={{ borderColor: C.line }}
-                      >
-                        Simulate CSV Upload (Quick Test)
-                      </button>
-                    </div>
-                  </>
-                ) : uploadStatus === "loading" ? (
-                  <>
-                    <Loader2 size={24} className="animate-spin text-[#22364A]" />
-                    <p className="text-sm mt-3 font-medium text-[#1C2420]">
-                      Validating geometries against PostGIS schema…
-                    </p>
-                  </>
-                ) : uploadStatus === "success" ? (
-                  <>
-                    <CheckCircle2 size={26} style={{ color: C.pine }} />
-                    <p className="text-sm mt-3 font-medium text-[#1C2420]">
-                      {uploadResult?.filename} ingested successfully
-                    </p>
-                    <p className="text-xs text-[#565F58] mt-1">{uploadResult?.message}</p>
-                    <button
-                      onClick={() => setUploadStatus("idle")}
-                      className="text-xs mt-4 inline-flex items-center gap-1.5 text-[#22364A] cursor-pointer hover:underline"
-                    >
-                      <RefreshCcw size={12} /> Upload another file
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <XCircle size={26} style={{ color: C.immediate }} />
-                    <p className="text-sm mt-3 font-medium text-[#1C2420]">Upload validation failed</p>
-                    <p className="text-xs text-[#565F58] mt-1 max-w-sm">{uploadError}</p>
-                    <button
-                      onClick={() => setUploadStatus("idle")}
-                      className="text-xs mt-4 px-3 py-1.5 border rounded-sm hover:bg-white text-[#22364A] cursor-pointer"
-                      style={{ borderColor: C.line }}
-                    >
-                      Try again
-                    </button>
-                  </>
-                )}
-              </div>
             </div>
           )}
 

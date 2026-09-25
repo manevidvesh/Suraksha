@@ -25,19 +25,15 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { id: "dashboard", label: "Dashboard", href: "/dashboard", icon: Home },
+  { id: "dashboard", label: "Overview", href: "/dashboard", icon: Home },
   { id: "risk-map", label: "Multi-Hazard Map", href: "/risk-map", icon: Compass },
-  { id: "habitations", label: "Risk Scoring", href: "/habitations", icon: AlertTriangle },
-  { id: "relocation", label: "Relocation Sites", href: "/relocation", icon: MapPin },
-  { id: "simulation", label: "What-If Simulator", href: "/simulation", icon: Sliders },
+  { id: "habitations", label: "Habitation Risk", href: "/habitations", icon: AlertTriangle },
+  { id: "relocation", label: "Relocation Intelligence", href: "/relocation", icon: MapPin },
+  { id: "simulation", label: "What-If Simulation", href: "/simulation", icon: Sliders },
+  { id: "sources", label: "Evidence & Sources", href: "/sources", icon: Database },
 ];
 
-export const SECONDARY_NAV: NavItem[] = [
-  { id: "readiness", label: "DDMA Readiness & Cards", href: "/readiness", icon: ClipboardCheck },
-  { id: "sources", label: "Data Sources", href: "/sources", icon: Database },
-  { id: "data", label: "Data Ingestion", href: "/data", icon: UploadIcon },
-  { id: "history", label: "Disaster History", href: "/history", icon: Clock },
-];
+export const SECONDARY_NAV: NavItem[] = [];
 
 export function Sidebar({
   view,
@@ -57,7 +53,7 @@ export function Sidebar({
       return view === item.id;
     }
     if (pathname === item.href) return true;
-    if (item.id === "data" && (pathname === "/data" || pathname === "/upload")) return true;
+    if (item.id === "dashboard" && pathname === "/") return true;
     return false;
   };
 
@@ -80,7 +76,7 @@ export function Sidebar({
             </div>
             <div>
               <p className="text-[9px] uppercase tracking-[0.16em] font-bold text-[#9BA8AE]">
-                Government of India
+                SURAKSHA PROTOTYPE · SIH DEMO
               </p>
               <p className="f-serif text-lg font-bold tracking-tight text-[#F7F5F1] group-hover:text-white transition-colors leading-none mt-0.5">
                 SURAKSHA
@@ -143,56 +139,6 @@ export function Sidebar({
         })}
       </nav>
 
-      <div className="px-3 pt-4 pb-1">
-        <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-[#9BA8AE]/70 f-sans">
-          Data & Operations
-        </p>
-      </div>
-
-      <div className="py-1 space-y-0.5">
-        {SECONDARY_NAV.map((n) => {
-          const active = isCurrentActive(n);
-          const Icon = n.icon;
-
-          if (setView) {
-            return (
-              <button
-                key={n.id}
-                aria-current={active ? "page" : undefined}
-                onClick={() => handleClick(n)}
-                className="w-full flex items-center gap-3 px-5 py-2 f-sans text-xs text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset cursor-pointer transition-colors"
-                style={{
-                  color: active ? C.paper : "#9BA8AE",
-                  backgroundColor: active ? "rgba(255,255,255,0.08)" : "transparent",
-                  borderLeft: `2px solid ${active ? C.paper : "transparent"}`,
-                }}
-              >
-                <Icon size={14} strokeWidth={1.75} />
-                {n.label}
-              </button>
-            );
-          }
-
-          return (
-            <Link
-              key={n.id}
-              href={n.href}
-              onClick={() => setMobileOpen && setMobileOpen(false)}
-              aria-current={active ? "page" : undefined}
-              className="w-full flex items-center gap-3 px-5 py-2 f-sans text-xs text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset cursor-pointer transition-colors"
-              style={{
-                color: active ? C.paper : "#9BA8AE",
-                backgroundColor: active ? "rgba(255,255,255,0.08)" : "transparent",
-                borderLeft: `2px solid ${active ? C.paper : "transparent"}`,
-              }}
-            >
-              <Icon size={14} strokeWidth={1.75} />
-              {n.label}
-            </Link>
-          );
-        })}
-      </div>
-
       <div className="mt-auto border-t border-[#152331]">
         <div className="px-4 py-2 bg-[#0c141d] border-b border-[#152331]">
           <div
@@ -218,7 +164,7 @@ export function Sidebar({
             District Collector & DDMA Chairperson
           </p>
           <p className="mt-0.5 text-[10px] text-[#9BA8AE]/80">
-            Disaster Management Act 2005 · All-India
+            Disaster Relocation Decision Support · Representative Corridors
           </p>
         </div>
       </div>

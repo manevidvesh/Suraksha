@@ -35,7 +35,7 @@ export function TopBar({
             {title || "SURAKSHA DSS"}
           </p>
           <p className="text-[9px] uppercase tracking-wider text-[#565F58] leading-none">
-            Govt of India · SDMA / DDMA
+            SURAKSHA · DISASTER MANAGEMENT DECISION-SUPPORT PROTOTYPE
           </p>
         </div>
       </div>

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 class SiteCapacity(BaseModel):
     land: int = Field(..., description="Max additional residents supportable by developable land")
@@ -33,4 +33,65 @@ class CandidateSiteOut(BaseModel):
     land_administrative_screening: Optional[Dict[str, str]] = Field(default_factory=dict, description="Honest unverified land status")
     livelihood_continuity: Optional[Dict[str, str]] = Field(default_factory=dict, description="Unassessed livelihood continuity structure")
 
+class FourResponsePathways(BaseModel):
+    in_situ_mitigation: Dict[str, Any] = Field(default_factory=dict)
+    prepare_and_evacuate: Dict[str, Any] = Field(default_factory=dict)
+    temporary_shelter: Dict[str, Any] = Field(default_factory=dict)
+    permanent_relocation: Dict[str, Any] = Field(default_factory=dict)
+
+class HabitationSiteCandidateMatch(BaseModel):
+    site_id: str
+    site_name: str
+    region: Optional[str] = None
+    distance_km: Optional[float] = None
+    effective_capacity: int
+    allocated_capacity: int = 0
+    remaining_capacity: int
+    population_demand: int
+    capacity_gap: int = 0
+    bottleneck: str
+    screening_status: str
+    is_eligible: bool
+    rank: Optional[int] = None
+    match_score: Optional[float] = None
+    exclusion_reasons: List[str] = Field(default_factory=list)
+    screening_matrix: Dict[str, str] = Field(default_factory=dict)
+    key_constraints: List[str] = Field(default_factory=list)
+    why_this: List[str] = Field(default_factory=list)
+    why_not: List[str] = Field(default_factory=list)
+    evidence_status: str = "EXTERNAL VALIDATION REQUIRED"
+    field_review_override: Optional[str] = None
+
+class HabitationMatchingResult(BaseModel):
+    habitation_id: str
+    habitation_name: str
+    region: Optional[str] = None
+    population: int
+    risk_score: int
+    priority_tier: str
+    primary_hazard: Optional[str] = None
+    status: str
+    message: str
+    eligible_sites: List[HabitationSiteCandidateMatch] = Field(default_factory=list)
+    excluded_sites: List[HabitationSiteCandidateMatch] = Field(default_factory=list)
+    all_evaluated_candidates: List[HabitationSiteCandidateMatch] = Field(default_factory=list)
+    unknown_evidence: List[str] = Field(default_factory=list)
+    capacity_gaps: List[Dict[str, Any]] = Field(default_factory=list)
+    required_validation: List[str] = Field(default_factory=list)
+    candidate_measures: List[str] = Field(default_factory=list)
+    additional_site_identification_required: bool = False
+    four_pathways: Optional[FourResponsePathways] = None
+
+class SiteCentricMatchingResult(BaseModel):
+    site_id: str
+    site_name: str
+    region: Optional[str] = None
+    effective_capacity: int
+    allocated_capacity: int = 0
+    remaining_capacity: int
+    bottleneck: str
+    eligible_habitations: List[Dict[str, Any]] = Field(default_factory=list)
+    ineligible_habitations: List[Dict[str, Any]] = Field(default_factory=list)
+
 from backend.schemas.simulation import MetricComparison, SimulationRequest, SimulationResponse
+

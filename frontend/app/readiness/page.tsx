@@ -12,6 +12,7 @@ import {
   Filter,
   CheckCircle2,
   ExternalLink,
+  Info,
 } from "lucide-react";
 import { useRiskData } from "@/hooks/useRiskData";
 import { C } from "@/components/Common/constants";
@@ -98,6 +99,14 @@ export default function DdmaReadinessPage() {
             title="DDMA Lifeline Readiness & Offline Action Cards"
             sub="District Disaster Management Authority operations suite: audit emergency relief equipment, track lifeline supply deficits across high-risk settlements, and export 1-click printable A4 disaster action cards for field wardens."
           />
+
+          {/* Internal Reference Scope Banner */}
+          <div className="mb-6 p-4 rounded-sm bg-[#FFFDF7] border border-[#C0872B]/50 flex items-start gap-3">
+            <Info size={18} className="text-[#C0872B] shrink-0 mt-0.5" />
+            <div className="text-xs text-[#565F58] leading-relaxed">
+              <strong className="text-[#1C2420]">Administrative Reference Module:</strong> This internal prototype view demonstrates how settlement-level lifeline parameters and infrastructure deficits inform candidate-site screening. Operational emergency dispatch, supply replenishment, and shelter administration are outside SURAKSHA&apos;s core decision-support boundary.
+            </div>
+          </div>
 
           {/* DDMA KPI Overview Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">

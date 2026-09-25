@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Database, CheckCircle2, Clock, AlertTriangle, RefreshCw, ArrowRight, Shield, Info, Layers, Cpu, Compass } from "lucide-react";
+import { Database, CheckCircle2, Clock, AlertTriangle, RefreshCw, Shield, Info, Layers, Cpu, Compass } from "lucide-react";
 import { useRiskData } from "@/hooks/useRiskData";
 import { C } from "@/components/Common/constants";
 import { SectionHead } from "@/components/Common/SectionHead";
@@ -176,23 +176,15 @@ export default function SourcesPage() {
             title="Configured Data Sources Catalog & Provenance"
             sub="Every risk score, candidate red zone boundary, and site capacity metric traces back to documented reference standards, derived geospatial layers, or curated demonstration datasets. Stale inputs, demonstration baselines, and prototype layers are transparently disclosed."
             action={
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleRefresh}
-                  disabled={isRefreshing}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border rounded-sm hover:bg-white text-[#22364A] transition-colors cursor-pointer"
-                  style={{ borderColor: C.line }}
-                >
-                  <RefreshCw size={13} className={isRefreshing ? "animate-spin" : ""} />
-                  {isRefreshing ? "Checking Feeds…" : "Check Health"}
-                </button>
-                <Link
-                  href="/data"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-sm text-white bg-[#22364A] hover:bg-[#3E5E82] transition-colors"
-                >
-                  Upload New Data <ArrowRight size={13} />
-                </Link>
-              </div>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border rounded-sm hover:bg-white text-[#22364A] transition-colors cursor-pointer"
+                style={{ borderColor: C.line }}
+              >
+                <RefreshCw size={13} className={isRefreshing ? "animate-spin" : ""} />
+                {isRefreshing ? "Re-verifying Catalog…" : "Verify Catalog"}
+              </button>
             }
           />
 
@@ -256,28 +248,28 @@ export default function SourcesPage() {
             </div>
           </div>
 
-          {/* Feed Health Summary Banner */}
+          {/* Catalog Status Summary Banner */}
           <div
             className="border rounded-sm p-4 mb-6 bg-white flex items-center justify-between gap-4 flex-wrap"
             style={{ borderColor: C.line }}
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xs bg-[#3D6B5C]/15 text-[#3D6B5C]">
-                <CheckCircle2 size={18} />
+              <div className="p-2 rounded-xs bg-[#22364A]/10 text-[#22364A]">
+                <Database size={18} />
               </div>
               <div>
                 <p className="text-xs font-semibold text-[#1C2420]">
-                  10 Ingestion & Evaluation Pipelines Operational · 1 Decennial Baseline Flagged
+                  Configured Static &amp; Demonstration Catalog · 10 Datasets &amp; Reference Specifications
                 </p>
                 <p className="text-[11px] text-[#565F58]">
-                  PostGIS geometries projected to EPSG:4326 · Status verified {lastRefreshed}
+                  Demonstration dataset and documented reference criteria · No active external network telemetry feeds
                 </p>
               </div>
             </div>
 
-            <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#3D6B5C] bg-[#3D6B5C]/10 px-2.5 py-1 rounded-xs">
-              <span className="w-2 h-2 rounded-full bg-[#3D6B5C] animate-pulse" />
-              Pipelines Healthy
+            <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#22364A] bg-[#22364A]/10 px-2.5 py-1 rounded-xs">
+              <span className="w-2 h-2 rounded-full bg-[#3D6B5C]" />
+              Configured Static &amp; Demonstration Catalog
             </span>
           </div>
 
@@ -342,7 +334,7 @@ export default function SourcesPage() {
                 </h3>
               </div>
               <p className="text-xs text-[#565F58] leading-relaxed">
-                The implemented software behavior has been verified through 55 automated backend tests and 14 frontend route checks against the current prototype&apos;s defined technical and mathematical specifications. SURAKSHA verifies computational consistency, not real-world ground truth; field, legal, and administrative validation remain the responsibility of the competent authorities.
+                The implemented software behavior has been verified through 67 automated backend tests and 14 frontend route checks against the current prototype&apos;s defined technical and mathematical specifications. SURAKSHA verifies computational consistency, not real-world ground truth; field, legal, and administrative validation remain the responsibility of the competent authorities.
               </p>
               <div className="p-2.5 rounded-xs bg-[#FFF9EE] border border-[#C0872B]/40 text-[11px] text-[#8C5D17] leading-relaxed">
                 ⚠️ <strong>Operational Honesty:</strong> Software test passes do not equate to real-world geotechnical or hydrological safety validation. Before any physical relocation decision is implemented, appropriate ground-truth, technical, legal, environmental, socioeconomic, and administrative validation would be required according to the hazard, site, jurisdiction, applicable law, and competent authorities (e.g., ground-truth geotechnical investigation by the competent geotechnical authority or qualified geotechnical professionals where required, hydrological/hydraulic assessment where required, cadastral and land-title verification, infrastructure capacity verification, environmental assessment, socioeconomic/livelihood assessment, applicable community consultation, and statutory approvals).

@@ -22,7 +22,7 @@ export const REFERENCE_SCENARIO_PRESETS: ReferenceScenarioPreset[] = [
     name: "Western Ghats Landslide Reference Model (Illustrative)",
     shortName: "Landslide Zonation Reference",
     authority: "Modeled after NDMA & Geological Survey of India Guidelines",
-    statutoryBasis: "Reference: National Landslide Risk Management Strategy §4.2",
+    statutoryBasis: "Reference: National Landslide Risk Management Strategy Guidelines (Illustrative Demonstration Preset)",
     description: "Prioritizes slope gradient (>38°) and historical mass wasting for high-precipitation escarpments.",
     applicableHazards: ["Landslide", "Debris flow", "Slope subsidence"],
     weights: {
@@ -38,7 +38,7 @@ export const REFERENCE_SCENARIO_PRESETS: ReferenceScenarioPreset[] = [
     name: "High-Discharge Riverine Flood Reference Model (Illustrative)",
     shortName: "Riverine Flood Reference",
     authority: "Modeled after Central Water Commission Frameworks",
-    statutoryBasis: "Reference: CWC River Inundation & Population Exposure Guidelines (2023)",
+    statutoryBasis: "Reference: CWC River Inundation & Population Exposure Modeling Framework (Illustrative Demonstration Preset)",
     description: "Heavily weights population density and embankment breach vulnerability along major river basins.",
     applicableHazards: ["Flood", "Riverine flood", "Flash flood"],
     weights: {
@@ -54,7 +54,7 @@ export const REFERENCE_SCENARIO_PRESETS: ReferenceScenarioPreset[] = [
     name: "Coastal Vulnerability Reference Model (Illustrative)",
     shortName: "Coastal Inundation Reference",
     authority: "Modeled after Coastal Regulation Zone Notification & CVI Studies",
-    statutoryBasis: "Reference: Coastal Regulation Zone & CVI Assessment Methodologies",
+    statutoryBasis: "Reference: Coastal Regulation Zone & CVI Assessment Modeling Guidelines (Illustrative Demonstration Preset)",
     description: "Evaluates chronic shoreline retreat, tidal surge exposure, and recurrent saline breach history.",
     applicableHazards: ["Coastal erosion", "Cyclone", "Tidal inundation"],
     weights: {
@@ -70,7 +70,7 @@ export const REFERENCE_SCENARIO_PRESETS: ReferenceScenarioPreset[] = [
     name: "Himalayan Glacial & Cloudburst Reference Model (Illustrative)",
     shortName: "Himalayan GLOF Reference",
     authority: "Modeled after Himalayan Disaster Management Studies & WIHG Protocols",
-    statutoryBasis: "Reference: Glacial Lake Outburst Flood Standard Operating Guidance",
+    statutoryBasis: "Reference: Glacial Lake Outburst Flood Modeling Studies (Illustrative Demonstration Preset)",
     description: "Focuses on extreme elevation gradient, rapid discharge velocity, and valley bottleneck isolation.",
     applicableHazards: ["Flash flood & cloudburst", "GLOF", "Land subsidence"],
     weights: {

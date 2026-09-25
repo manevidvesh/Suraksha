@@ -139,6 +139,11 @@ export default function DataPage() {
             }
           />
 
+          {/* Prototype Ingestion Utility Banner */}
+          <div className="mb-6 p-3 bg-[#FAF9F5] border border-[#D9D4C7] rounded-sm text-xs text-[#565F58]">
+            <strong className="text-[#1C2420]">Prototype Demonstration Utility:</strong> Provides sample CSV/GeoJSON upload verification for pilot data ingestion. Production data lineage and catalog provenance are curated in the <Link href="/sources" className="text-[#22364A] underline font-semibold">Evidence &amp; Sources Catalog</Link>.
+          </div>
+
           {/* Upload Drop Zone */}
           <div className="mb-8">
             <input

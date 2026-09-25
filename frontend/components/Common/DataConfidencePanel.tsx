@@ -114,7 +114,7 @@ export function DataConfidencePanel() {
         {/* Mini stats */}
         <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-dashed border-[#D9D4C7] text-xs">
           <div>
-            <span className="text-[10px] text-[#565F58] block uppercase font-mono">Hazard Models:</span>
+            <span className="text-[10px] text-[#565F58] block uppercase font-mono">Hazard Indicators:</span>
             <strong className="text-[#2A6B52]">GSI Reference / PostGIS (High)</strong>
           </div>
           <div>

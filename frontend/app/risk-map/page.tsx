@@ -16,6 +16,7 @@ import {
   BellRing,
   Loader2,
   Info,
+  MapPin,
 } from "lucide-react";
 import { useRiskData } from "@/hooks/useRiskData";
 import { C } from "@/components/Common/constants";
@@ -118,7 +119,7 @@ export default function RiskMapPage() {
         type: "cloudburst",
         targetName: selectedHabitation.name,
         message: `SIMULATED IMD RADAR TRIGGER: Extreme Precipitation (>68.5 mm/hr) over ${selectedHabitation.name}`,
-        details: `Candidate dynamic risk zone expanded by 5.5 km buffer in simulation. For DDMA contingency review under Section 34(b) of Disaster Management Act (Demonstration Run).`,
+        details: `Candidate dynamic risk zone expanded by 5.5 km buffer in simulation. Simulated stress-test scenario for district contingency review (Demonstration Run).`,
       });
     } finally {
       setIsSimulating(false);
@@ -232,7 +233,7 @@ export default function RiskMapPage() {
                     IMD & CWC-Inspired Dynamic Event Simulation
                   </h3>
                   <p className="text-[11px] text-[#565F58]">
-                    Simulated radar & hydrological discharge feed for dynamic candidate risk perimeter adjustment under Section 34(b) DM Act (Demonstration Environment).
+                    Simulated radar & hydrological discharge inputs for dynamic candidate-risk perimeter stress testing in the demonstration environment.
                   </p>
                 </div>
               </div>
@@ -406,10 +407,17 @@ export default function RiskMapPage() {
                 </Link>
 
                 <Link
+                  href={`/relocation?habitation=${selectedHabitation.id}`}
+                  className="px-3.5 py-1.5 text-xs font-medium rounded-sm text-white bg-[#3D6B5C] hover:bg-[#32584B] transition-colors inline-flex items-center gap-1 shadow-xs"
+                >
+                  <MapPin size={13} /> Relocation Sites <ArrowRight size={13} />
+                </Link>
+
+                <Link
                   href="/simulation"
                   className="px-3.5 py-1.5 text-xs font-medium rounded-sm text-white bg-[#22364A] hover:bg-[#3E5E82] transition-colors inline-flex items-center gap-1"
                 >
-                  <Sliders size={13} /> Simulate Relocation
+                  <Sliders size={13} /> Stress Test
                 </Link>
               </div>
             </div>

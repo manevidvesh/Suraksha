@@ -469,7 +469,7 @@ export default function MapLibreView({
         });
       }
 
-      // Add Candidate Site Markers (Safe Relocation Points)
+      // Add Candidate Site Markers (Candidate Relocation Sites)
       sites.forEach((site) => {
         if (typeof site.latitude !== 'number' || typeof site.longitude !== 'number' || isNaN(site.latitude) || isNaN(site.longitude)) return;
 
@@ -506,7 +506,7 @@ export default function MapLibreView({
         const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
           <div style="font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; padding: 4px;">
             <div style="font-weight: 700; color: #3D6B5C; font-size: 13px;">🛡️ ${site.name}</div>
-            <div style="color: #565F58; margin-top: 2px;">Safe Resettlement Site (${site.region || 'Pilot Zone'})</div>
+            <div style="color: #565F58; margin-top: 2px;">Candidate Resettlement Site (${site.region || 'Pilot Zone'})</div>
             <div style="margin-top: 4px; font-size: 11px; font-weight: 600; color: #1C2420;">
               Effective Capacity: <span style="color: #3D6B5C; font-weight: 700;">${effValue}</span>
             </div>

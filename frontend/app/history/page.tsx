@@ -63,6 +63,16 @@ export default function HistoryPage() {
             }
           />
 
+          {/* Evidentiary Factor Note */}
+          <div className="mb-6 p-3 bg-white border rounded-sm flex items-center justify-between text-xs text-[#565F58]" style={{ borderColor: C.line }}>
+            <span>
+              <strong className="text-[#1C2420]">Decision Engine Role:</strong> Feeds the <strong>Historical Frequency Factor (F, 15% weight)</strong> in deterministic settlement risk scoring.
+            </span>
+            <Link href="/habitations" className="text-[#22364A] hover:underline font-semibold flex items-center gap-1">
+              View Scoring <ArrowRight size={12} />
+            </Link>
+          </div>
+
           {/* Regional Planning Corridor Selector */}
           <div className="mb-5 bg-white border p-3.5 rounded-sm" style={{ borderColor: C.line }}>
             <CorridorSelector

@@ -265,3 +265,114 @@ export interface UploadResult {
   message: string;
 }
 
+export interface FourResponsePathways {
+  in_situ_mitigation: {
+    pathway: string;
+    applicability: string;
+    guidance: string;
+    heading: string;
+    measures: string[];
+    disclaimer: string;
+  };
+  prepare_and_evacuate: {
+    pathway: string;
+    applicability: string;
+    guidance: string;
+    operational_flow: string;
+    monitoring_requirement: string;
+    demonstration_note: string;
+  };
+  temporary_shelter: {
+    pathway: string;
+    applicability: string;
+    guidance: string;
+    shelter_capacity: string;
+    operational_cycle: string;
+  };
+  permanent_relocation: {
+    pathway: string;
+    applicability: string;
+    guidance: string;
+    prerequisites: string[];
+    eligible_alternatives_count: number;
+  };
+}
+
+export interface HabitationSiteCandidateMatch {
+  site_id: string;
+  site_name: string;
+  region?: string;
+  distance_km?: number;
+  effective_capacity: number;
+  allocated_capacity: number;
+  remaining_capacity: number;
+  population_demand: number;
+  capacity_gap: number;
+  bottleneck: string;
+  screening_status: string;
+  is_eligible: boolean;
+  rank?: number;
+  match_score?: number;
+  exclusion_reasons: string[];
+  screening_matrix: Record<string, string>;
+  key_constraints: string[];
+  why_this: string[];
+  why_not: string[];
+  evidence_status: string;
+  field_review_override?: string;
+}
+
+export interface HabitationMatchingResult {
+  habitation_id: string;
+  habitation_name: string;
+  region?: string;
+  population: number;
+  risk_score: number;
+  priority_tier: string;
+  primary_hazard?: string;
+  status: "ELIGIBLE_OPTIONS_AVAILABLE" | "NO_CANDIDATES" | "NO_ELIGIBLE_CANDIDATES" | "INSUFFICIENT_EVIDENCE" | "INSUFFICIENT_CAPACITY" | "NO_SUITABLE_SITE_IDENTIFIED" | string;
+  message: string;
+  eligible_sites: HabitationSiteCandidateMatch[];
+  excluded_sites: HabitationSiteCandidateMatch[];
+  all_evaluated_candidates: HabitationSiteCandidateMatch[];
+  unknown_evidence: string[];
+  capacity_gaps: {
+    site_id: string;
+    site_name: string;
+    remaining_capacity: number;
+    demand: number;
+    shortfall: number;
+    bottleneck: string;
+  }[];
+  required_validation: string[];
+  candidate_measures: string[];
+  additional_site_identification_required: boolean;
+  four_pathways?: FourResponsePathways;
+}
+
+export interface SiteCentricMatchingResult {
+  site_id: string;
+  site_name: string;
+  region?: string;
+  effective_capacity: number;
+  allocated_capacity: number;
+  remaining_capacity: number;
+  bottleneck: string;
+  eligible_habitations: {
+    habitation_id: string;
+    habitation_name: string;
+    region?: string;
+    population: number;
+    distance_km?: number;
+    priority_tier: string;
+    risk_score: number;
+    capacity_consumed_pct: number;
+  }[];
+  ineligible_habitations: {
+    habitation_id: string;
+    habitation_name: string;
+    population: number;
+    reasons: string[];
+  }[];
+}
+

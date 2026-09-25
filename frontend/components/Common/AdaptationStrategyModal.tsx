@@ -7,9 +7,7 @@ import {
   Layers,
   Clock,
   Building2,
-  Coins,
   CheckCircle2,
-  TrendingDown,
   Users,
   Compass,
   FileDown,
@@ -41,18 +39,13 @@ export function AdaptationStrategyModal({
   const currentPillar = strategy.pillars.find((p) => p.pillarNumber === activePillar) || strategy.pillars[0];
 
   const handleCopySummary = () => {
-    const text = `SURAKSHA DISASTER MANAGEMENT DIRECTIVE: IN-SITU ADAPTATION STRATEGY
+    const text = `SURAKSHA CANDIDATE IN-SITU ADAPTATION MEASURES (TECHNICAL REVIEW)
+Settlement: ${habitationName || strategy.zoneName}
 Zone: ${strategy.zoneName} (${strategy.region})
 Hazard: ${strategy.hazardType}
-Why Non-Relocation: ${strategy.whyNoRelocation}
+Why Evaluated: ${strategy.whyNoRelocation}
 
-ESTIMATED COST BENEFIT:
-- In-Situ Protection Cost: ${strategy.costBenefitVsRelocation.estimatedInSituCost}
-- Relocation Cost: ${strategy.costBenefitVsRelocation.estimatedRelocationCost}
-- Budget Savings: ${strategy.costBenefitVsRelocation.costSavingsPercent}%
-- Social Acceptance: ${strategy.costBenefitVsRelocation.socialAcceptanceScore}/100
-
-PILLARS OF INTERVENTION:
+PILLARS OF CANDIDATE INTERVENTION:
 ${strategy.pillars
   .map(
     (p) => `
@@ -60,7 +53,7 @@ PILLAR ${p.pillarNumber}: ${p.title} (${p.category})
 ` +
       p.interventions
         .map(
-          (i) => `  * ${i.name} [${i.engineeringType} | ${i.timeline} | ${i.estimatedCost}]\n    Agency: ${i.implementingAgency}\n    Detail: ${i.description}`
+          (i) => `  * ${i.name} [${i.engineeringType} | ${i.timeline}]\n    Agency: ${i.implementingAgency}\n    Detail: ${i.description}`
         )
         .join("\n")
   )
@@ -123,36 +116,20 @@ PILLAR ${p.pillarNumber}: ${p.title} (${p.category})
             </div>
           </div>
 
-          {/* Cost-Benefit & Feasibility Comparison Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px border bg-[#D9D4C7] rounded-sm overflow-hidden">
-            <div className="bg-white p-3">
-              <p className="text-[11px] text-[#565F58]">In-Situ Adaptation</p>
-              <p className="f-mono text-sm font-bold text-[#1C2420] mt-0.5">
-                {strategy.costBenefitVsRelocation.estimatedInSituCost}
-              </p>
-              <span className="text-[10px] text-[#3D6B5C] font-medium">Cost-Effective</span>
+          {/* Decision Pathway Guidance Banner */}
+          <div className="p-3.5 bg-[#FAF9F5] border border-[#D9D4C7] rounded-sm space-y-1.5">
+            <div className="flex items-center justify-between text-xs flex-wrap gap-2">
+              <span className="font-semibold text-[#1C2420] flex items-center gap-1.5">
+                <LifeBuoy size={14} className="text-[#C0872B]" />
+                Response Pathway: Candidate In-Situ Risk Mitigation
+              </span>
+              <span className="font-mono text-[10px] uppercase font-bold text-[#C0872B] bg-[#FFF9EE] px-2 py-0.5 rounded-xs border border-[#C0872B]/30">
+                Technical Authority Review Required
+              </span>
             </div>
-            <div className="bg-white p-3">
-              <p className="text-[11px] text-[#565F58]">Full Relocation Cost</p>
-              <p className="f-mono text-sm font-bold text-[#565F58] line-through mt-0.5">
-                {strategy.costBenefitVsRelocation.estimatedRelocationCost}
-              </p>
-              <span className="text-[10px] text-[#B5462F]">Prohibitive</span>
-            </div>
-            <div className="bg-white p-3">
-              <p className="text-[11px] text-[#565F58]">Exchequer Savings</p>
-              <p className="f-mono text-base font-bold text-[#3D6B5C] flex items-center gap-1 mt-0.5">
-                <TrendingDown size={14} /> {strategy.costBenefitVsRelocation.costSavingsPercent}%
-              </p>
-              <span className="text-[10px] text-[#565F58]">Fiscal Conservation</span>
-            </div>
-            <div className="bg-white p-3">
-              <p className="text-[11px] text-[#565F58]">Community Acceptance</p>
-              <p className="f-mono text-base font-bold text-[#22364A] flex items-center gap-1 mt-0.5">
-                <Users size={14} /> {strategy.costBenefitVsRelocation.socialAcceptanceScore}%
-              </p>
-              <span className="text-[10px] text-[#3D6B5C]">Overwhelming Support</span>
-            </div>
+            <p className="text-[11px] text-[#565F58] leading-relaxed">
+              When planned relocation is constrained by lack of eligible candidate sites or carrying capacity deficits, candidate in-situ structural and nature-based measures are surfaced as fallback options. Specific structural design, geotechnical feasibility, and implementation approval remain the statutory responsibility of the competent technical departments.
+            </p>
           </div>
 
           {/* Strategic Pillars Selection Tabs */}
@@ -231,9 +208,6 @@ PILLAR ${p.pillarNumber}: ${p.title} (${p.category})
                       </span>
                       <span className="px-2 py-0.5 rounded-xs font-medium bg-[#FFF9EE] text-[#C0872B] border border-[#C0872B]/30 flex items-center gap-1">
                         <Clock size={10} /> {item.timeline}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-xs font-semibold bg-[#EAF3EE] text-[#3D6B5C] border border-[#3D6B5C]/30 flex items-center gap-1">
-                        <Coins size={10} /> {item.estimatedCost}
                       </span>
                     </div>
                   </div>

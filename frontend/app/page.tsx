@@ -19,7 +19,7 @@ export default function LandingPage() {
       <div className="bg-[#0E1721] px-6 sm:px-12 py-1.5 border-b border-white/5 text-[11px] text-[#7C8A90] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#2A6B52]" />
-          <span>Government of India · National Disaster Risk & Settlement Allocation Engine</span>
+          <span>SURAKSHA PROTOTYPE · Disaster Risk & Relocation Decision-Support Engine</span>
         </div>
         <div className="hidden sm:flex items-center gap-4 text-[10px]">
           <span>5 Regional Planning Corridors</span>
@@ -39,7 +39,7 @@ export default function LandingPage() {
                 SURAKSHA
               </span>
               <span className="px-2 py-0.5 text-[10px] uppercase font-bold rounded-xs bg-white/10 text-[#C7D0D4] tracking-wider border border-white/10">
-                National Command
+                SURAKSHA Decision Support
               </span>
             </div>
           </div>
@@ -51,7 +51,7 @@ export default function LandingPage() {
             href="/dashboard"
             className="text-[#C7D0D4] hover:text-white transition-colors"
           >
-            Dashboard
+            Overview
           </Link>
           <Link
             href="/risk-map"
@@ -63,19 +63,25 @@ export default function LandingPage() {
             href="/habitations"
             className="text-[#C7D0D4] hover:text-white transition-colors hidden md:inline-block"
           >
-            Risk Scoring
+            Habitation Risk
           </Link>
           <Link
             href="/relocation"
             className="text-[#C7D0D4] hover:text-white transition-colors hidden sm:inline-block"
           >
-            Relocation Sites
+            Relocation Intelligence
           </Link>
           <Link
-            href="/readiness"
+            href="/simulation"
             className="text-[#C7D0D4] hover:text-white transition-colors hidden lg:inline-block"
           >
-            DDMA Readiness
+            What-If Simulation
+          </Link>
+          <Link
+            href="/sources"
+            className="text-[#C7D0D4] hover:text-white transition-colors hidden xl:inline-block"
+          >
+            Evidence &amp; Sources
           </Link>
         </nav>
       </header>
@@ -96,7 +102,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="f-sans text-base sm:text-lg text-[#C7D0D4] leading-relaxed max-w-2xl font-light">
-              <strong className="text-white font-semibold">SURAKSHA</strong> leverages slope elevation gradients, flood inundation models, and carrying capacity constraints to rank vulnerable settlements and assign them to viable candidate relocation sites before disaster strikes.
+              <strong className="text-white font-semibold">SURAKSHA</strong> leverages terrain slope gradients, flood hazard indicators, and carrying capacity constraints to rank vulnerable settlements and evaluate viable candidate relocation sites before disaster strikes.
             </p>
 
             {/* Quick Metrics */}
@@ -157,7 +163,7 @@ export default function LandingPage() {
                   <span className="text-[#9BA8AE]">2 KM Scale</span>
                 </div>
                 <p className="text-[10px] text-[#9BA8AE] leading-tight font-sans">
-                  PostGIS buffer across altitude contours to safe candidate site.
+                  PostGIS buffer across altitude contours to candidate relocation site.
                 </p>
               </div>
             </div>

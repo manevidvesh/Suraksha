@@ -7,6 +7,8 @@ import {
   SimulationResult,
   ExecutiveBrief,
   UploadResult,
+  HabitationMatchingResult,
+  SiteCentricMatchingResult,
 } from "../types";
 import {
   FALLBACK_HABITATIONS,
@@ -162,7 +164,7 @@ export const api = {
           name: payload.zone_name,
           hazard_type: payload.hazard_type,
           severity: payload.severity,
-          description: `Dynamic Early Warning scenario simulation: ${payload.radius_km} km radius buffer around coordinates (${payload.latitude.toFixed(3)}, ${payload.longitude.toFixed(3)}). For contingency assessment under Section 34(b) DM Act (Demonstration Run).`,
+          description: `Dynamic Early Warning scenario simulation: ${payload.radius_km} km radius buffer around coordinates (${payload.latitude.toFixed(3)}, ${payload.longitude.toFixed(3)}). Dynamic candidate-risk perimeter stress testing in the demonstration environment.`,
           source_agency: "SURAKSHA Dynamic Hazard Engine (Simulation)",
           radius_km: payload.radius_km,
         },
@@ -277,6 +279,243 @@ export const api = {
       return await request<CandidateSite[]>(`/api/relocation/sites${qs}`);
     } catch {
       return FALLBACK_SITES.filter((s) => s.eff.value >= minCapacity);
+    }
+  },
+
+  async getHabitationCandidateMatches(
+    habitationId: string,
+    params?: {
+      maxDistanceKm?: number;
+      allocations?: Record<string, number>;
+      fieldOverrides?: Record<string, string>;
+    }
+  ): Promise<HabitationMatchingResult> {
+    const maxDist = params?.maxDistanceKm || 160;
+    try {
+      if (params?.allocations || params?.fieldOverrides) {
+        return await request<HabitationMatchingResult>(`/api/relocation/match/${habitationId}?max_distance_km=${maxDist}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            allocations: params.allocations || {},
+            field_overrides: params.fieldOverrides || {},
+          }),
+        });
+      }
+      return await request<HabitationMatchingResult>(`/api/relocation/match/${habitationId}?max_distance_km=${maxDist}`);
+    } catch (err) {
+      console.warn("Using fallback candidate matching for", habitationId, err);
+      const hab = FALLBACK_HABITATIONS.find((h) => h.id === habitationId) || FALLBACK_HABITATIONS[0];
+      const allocations = params?.allocations || {};
+      const overrides = params?.fieldOverrides || {};
+
+      const evaluated: any[] = [];
+      const eligible: any[] = [];
+      const excluded: any[] = [];
+      const capacityGaps: any[] = [];
+
+      for (const site of FALLBACK_SITES) {
+        const effCap = site.eff.value;
+        const allocated = allocations[site.id] || 0;
+        const remaining = Math.max(0, effCap - allocated);
+        const gap = Math.max(0, hab.pop - remaining);
+
+        // Distance estimate
+        let dist = 25;
+        if (hab.latitude && hab.longitude && site.latitude && site.longitude) {
+          const dLat = (site.latitude - hab.latitude) * (Math.PI / 180);
+          const dLon = (site.longitude - hab.longitude) * (Math.PI / 180);
+          const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(hab.latitude * (Math.PI / 180)) *
+              Math.cos(site.latitude * (Math.PI / 180)) *
+              Math.sin(dLon / 2) *
+              Math.sin(dLon / 2);
+          dist = Math.round(6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        } else if (site.distanceKm) {
+          dist = site.distanceKm;
+        }
+
+        const rejectionReasons: string[] = [];
+        if (overrides[site.id] === "unsuitable") {
+          rejectionReasons.push("Excluded: Competent authority field review marked site unsuitable.");
+        }
+        if (dist > maxDist) {
+          rejectionReasons.push(`Transit distance (${dist} km) exceeds operational regional corridor limit (${maxDist} km).`);
+        }
+        if (hab.pop > remaining) {
+          rejectionReasons.push(`Insufficient effective capacity: remaining ${remaining} cannot absorb ${hab.pop} residents (shortfall of ${gap} residents constrained by ${site.eff.bottleneck}).`);
+          capacityGaps.push({
+            site_id: site.id,
+            site_name: site.name,
+            remaining_capacity: remaining,
+            demand: hab.pop,
+            shortfall: gap,
+            bottleneck: site.eff.bottleneck,
+          });
+        }
+
+        const isEligible = rejectionReasons.length === 0;
+        const matchScore = isEligible ? Math.round(Math.max(0, 100 - dist * 0.5) + Math.min(50, (remaining - hab.pop) * 0.1)) : undefined;
+
+        const candidateMatch = {
+          site_id: site.id,
+          site_name: site.name,
+          region: site.region,
+          distance_km: dist,
+          effective_capacity: effCap,
+          allocated_capacity: allocated,
+          remaining_capacity: remaining,
+          population_demand: hab.pop,
+          capacity_gap: gap,
+          bottleneck: site.eff.bottleneck,
+          screening_status: isEligible ? "Passed baseline screening" : "Excluded from eligible matching",
+          is_eligible: isEligible,
+          rank: undefined,
+          match_score: matchScore,
+          exclusion_reasons: rejectionReasons,
+          screening_matrix: site.screening_matrix || {},
+          key_constraints: gap > 0 ? [`Capacity deficit: ${gap} persons`] : [site.eff.bottleneck],
+          why_this: [`Liebig effective capacity supports ${effCap} persons`, `Transit distance: ${dist} km`],
+          why_not: rejectionReasons.length > 0 ? rejectionReasons : [`Expansion constrained by ${site.eff.bottleneck}`],
+          evidence_status: "EXTERNAL VALIDATION REQUIRED",
+          field_review_override: overrides[site.id],
+        };
+
+        evaluated.push(candidateMatch);
+        if (isEligible) eligible.push(candidateMatch);
+        else excluded.push(candidateMatch);
+      }
+
+      eligible.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+      eligible.forEach((item, idx) => {
+        item.rank = idx + 1;
+      });
+
+      let status = "ELIGIBLE_OPTIONS_AVAILABLE";
+      let message = `${eligible.length} candidate site${eligible.length > 1 ? "s" : ""} available for comparison.`;
+      if (eligible.length === 0) {
+        const hasCapDeficit = capacityGaps.length > 0;
+        status = hasCapDeficit ? "INSUFFICIENT_CAPACITY" : "NO_SUITABLE_SITE_IDENTIFIED";
+        message = "No candidate relocation site currently satisfies the prototype's baseline screening requirements for this habitation.";
+      }
+
+      return {
+        habitation_id: hab.id,
+        habitation_name: hab.name,
+        region: hab.region,
+        population: hab.pop,
+        risk_score: hab.score,
+        priority_tier: hab.tier,
+        primary_hazard: hab.hazard,
+        status,
+        message,
+        eligible_sites: eligible,
+        excluded_sites: excluded,
+        all_evaluated_candidates: evaluated,
+        unknown_evidence: [
+          "Cadastral revenue boundary and land tenure deeds are UNKNOWN (ground survey required).",
+          "Legal encumbrances and title dispute status are UNKNOWN.",
+          "Local socio-economic livelihood continuity has NOT BEEN ASSESSED.",
+        ],
+        capacity_gaps: capacityGaps,
+        required_validation: [
+          "Geotechnical bore-hole and slope stability validation by competent authority.",
+          "Hydrological peak runoff analysis for 100-year return period.",
+          "Revenue department Patta title clearance under Land Acquisition Act.",
+        ],
+        candidate_measures: [
+          "Surface runoff interception trenches and masonry contour drains",
+          "Reinforced retaining crib-walls with weep holes along critical slope toe",
+          "Slope bio-engineering with deep-root vetiver grass and systematic terracing",
+        ],
+        additional_site_identification_required: eligible.length === 0,
+        four_pathways: {
+          in_situ_mitigation: {
+            pathway: "In-Situ Mitigation & Adaptation",
+            applicability: eligible.length === 0 ? "RECOMMENDED FOR ACTIVE EVALUATION" : "ALTERNATIVE TO RELOCATION",
+            guidance: "Relocation may not be necessary if risk can be reduced through targeted mitigation.",
+            heading: "Candidate Measures for Consideration by the Competent Authority",
+            measures: [
+              "Surface runoff interception trenches and masonry contour drains",
+              "Reinforced retaining crib-walls with weep holes along critical slope toe",
+              "Slope bio-engineering with deep-root vetiver grass and systematic terracing",
+            ],
+            disclaimer: "Candidate measures are technical options for consideration by competent authorities, not official prescriptions.",
+          },
+          prepare_and_evacuate: {
+            pathway: "Prepare & Evacuate",
+            applicability: "ACTIVE OPERATIONAL READINESS",
+            guidance: "Prepare and evacuate pathway. Requires authoritative observation/forecast inputs and competent-authority trigger decisions.",
+            operational_flow: "MONITOR → ALERT → THRESHOLD / AUTHORITY TRIGGER → EVACUATE",
+            monitoring_requirement: "Requires certified meteorological / hydrological telemetry and formal SDMA/DDMA emergency trigger.",
+            demonstration_note: "IMD & CWC shock scenarios in this system are demonstration stress tests, not calibrated physical predictions.",
+          },
+          temporary_shelter: {
+            pathway: "Temporary Relocation / Shelter",
+            applicability: "HIGH / IMMEDIATE RISK CONTINGENCY",
+            guidance: "Temporary shelter considered during alert escalation pending geotechnical and hydrological reassessment.",
+            shelter_capacity: "Temporary shelter capacity: data unavailable (requires local revenue circle audit)",
+            operational_cycle: "Immediate Risk → Temporary Transit Shelter → Geotechnical Reassessment → Return or Resettlement Consideration",
+          },
+          permanent_relocation: {
+            pathway: "Permanent Relocation",
+            applicability: eligible.length > 0 ? "ELIGIBLE CANDIDATE SITES IDENTIFIED" : "NO ELIGIBLE CANDIDATE SITES IDENTIFIED",
+            guidance: eligible.length > 0 ? "Candidate for further relocation assessment." : "Permanent relocation blocked: no viable candidate site currently identified. Additional site identification or in-situ mitigation required.",
+            prerequisites: [
+              "Sustained high-risk context where in-situ mitigation is technically or economically infeasible",
+              "Screened candidate site availability satisfying Liebig infrastructure carrying capacity",
+              "Ground-truth geotechnical and cadastral title clearance by competent revenue authority",
+              "Community consultation and competent authority administrative sanction",
+            ],
+            eligible_alternatives_count: eligible.length,
+          },
+        },
+      };
+    }
+  },
+
+  async getSiteCentricMatches(siteId: string, maxDistanceKm: number = 160): Promise<SiteCentricMatchingResult> {
+    try {
+      return await request<SiteCentricMatchingResult>(`/api/relocation/site-matches/${siteId}?max_distance_km=${maxDistanceKm}`);
+    } catch (err) {
+      const site = FALLBACK_SITES.find((s) => s.id === siteId) || FALLBACK_SITES[0];
+      const eligibleHabs: any[] = [];
+      const ineligibleHabs: any[] = [];
+
+      for (const h of FALLBACK_HABITATIONS) {
+        if (h.pop <= site.eff.value) {
+          eligibleHabs.push({
+            habitation_id: h.id,
+            habitation_name: h.name,
+            region: h.region,
+            population: h.pop,
+            distance_km: 25,
+            priority_tier: h.tier,
+            risk_score: h.score,
+            capacity_consumed_pct: Math.round((h.pop / site.eff.value) * 100),
+          });
+        } else {
+          ineligibleHabs.push({
+            habitation_id: h.id,
+            habitation_name: h.name,
+            population: h.pop,
+            reasons: [`Insufficient capacity: population ${h.pop} exceeds site limit ${site.eff.value}`],
+          });
+        }
+      }
+
+      return {
+        site_id: site.id,
+        site_name: site.name,
+        region: site.region,
+        effective_capacity: site.eff.value,
+        allocated_capacity: 0,
+        remaining_capacity: site.eff.value,
+        bottleneck: site.eff.bottleneck,
+        eligible_habitations: eligibleHabs,
+        ineligible_habitations: ineligibleHabs,
+      };
     }
   },
 
@@ -452,7 +691,7 @@ export const api = {
         priority_tier: hab.tier,
         primary_hazard: hab.hazard,
         population: hab.pop,
-        executive_summary: `${hab.name} in ${hab.region} is prioritized for ${hab.tier.toLowerCase()} relocation planning and decision-support evaluation under Section 30(2)(v) of the Disaster Management Act, 2005. Composite vulnerability is driven by recurring ${hab.hazard.toLowerCase()} hazards affecting ${hab.pop.toLocaleString()} residents (${households} households). Total estimated resettlement outlay is ₹${totalCrores.toFixed(2)} Cr under 75:25 NDRF-SDRF planning model.`,
+        executive_summary: `${hab.name} in ${hab.region} is prioritized for ${hab.tier.toLowerCase()} relocation planning and decision-support evaluation under disaster management planning frameworks. Composite vulnerability is driven by recurring ${hab.hazard.toLowerCase()} hazards affecting ${hab.pop.toLocaleString()} residents (${households} households). Total estimated resettlement outlay is ₹${totalCrores.toFixed(2)} Cr under 75:25 NDRF-SDRF planning model.`,
         risk_driver_analysis: `PostGIS spatial intersect indicates severe slope steepness (>28°) combined with saturated catchment precipitation. Historical records demonstrate ${hab.events} previous displacement events with high likelihood of slope mobilization during monsoon peaks.`,
         relocation_site_assessment: site
           ? `Designated candidate site ${site.name} exhibits an effective carrying capacity of ${site.eff.value} additional residents, governed by ${site.eff.bottleneck} threshold. Transit distance is ${site.distanceKm} km.`

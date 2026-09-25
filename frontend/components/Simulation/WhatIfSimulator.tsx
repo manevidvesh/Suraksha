@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   Compass,
   LifeBuoy,
-  IndianRupee,
   Activity,
   Calendar,
   ShieldCheck,
@@ -59,7 +58,7 @@ export function WhatIfSimulator({
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
-  const [activeTab, setActiveTab] = useState<"spatial" | "financial" | "phases">("spatial");
+  const [activeTab, setActiveTab] = useState<"spatial" | "phases">("spatial");
   const [strategyModalOpen, setStrategyModalOpen] = useState(false);
 
   // Filter habitations by active planning corridor
@@ -500,17 +499,7 @@ export function WhatIfSimulator({
                   : "border-transparent text-[#565F58] hover:text-[#1C2420]"
               }`}
             >
-              <Activity size={14} /> Spatial & Carrying Capacity
-            </button>
-            <button
-              onClick={() => setActiveTab("financial")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium border-b-2 cursor-pointer transition-colors whitespace-nowrap ${
-                activeTab === "financial"
-                  ? "border-[#22364A] text-[#22364A] font-semibold"
-                  : "border-transparent text-[#565F58] hover:text-[#1C2420]"
-              }`}
-            >
-              <IndianRupee size={14} /> Indicative Resettlement Financial Outlay Estimate
+              <Activity size={14} /> Spatial &amp; Carrying Capacity
             </button>
             <button
               onClick={() => setActiveTab("phases")}
@@ -520,7 +509,7 @@ export function WhatIfSimulator({
                   : "border-transparent text-[#565F58] hover:text-[#1C2420]"
               }`}
             >
-              <Calendar size={14} /> 3-Phase DDMA Operational Strategy
+              <Calendar size={14} /> 3-Phase Operational Planning Strategy
             </button>
           </div>
 
@@ -600,121 +589,7 @@ export function WhatIfSimulator({
             </div>
           )}
 
-          {/* TAB 2: Indicative Resettlement Financial Outlay Estimate */}
-          {activeTab === "financial" && financialOutlay && (
-            <div className="border rounded-sm p-5 bg-white space-y-5" style={{ borderColor: C.line }}>
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                  <h3 className="f-serif text-base font-bold text-[#1C2420]">
-                    Indicative Resettlement Financial Outlay Estimate
-                  </h3>
-                  <p className="text-xs text-[#565F58] mt-0.5">
-                    Estimated under prototype financial models based on reference unit norms. Funding-source eligibility and applicable scheme norms require verification by the competent authority.
-                  </p>
-                </div>
-                <span className="text-[11px] font-mono px-2.5 py-1 rounded-xs bg-[#F7F5F1] border border-[#D9D4C7] text-[#22364A] font-semibold">
-                  Reference Unit Norms: Illustrative Split
-                </span>
-              </div>
-
-              {/* KPI Summary Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3 bg-[#F7F5F1] rounded-sm border border-[#D9D4C7]">
-                  <p className="text-[11px] text-[#565F58]">Total Estimated Outlay</p>
-                  <p className="f-mono text-xl font-bold text-[#B5462F] mt-0.5">
-                    ₹{financialOutlay.total_crores.toFixed(2)} <span className="text-xs font-normal">Cr</span>
-                  </p>
-                  <p className="text-[10px] text-[#565F58] mt-0.5">All line items included</p>
-                </div>
-                <div className="p-3 bg-[#F7F5F1] rounded-sm border border-[#D9D4C7]">
-                  <p className="text-[11px] text-[#565F58]">Rehabilitation Units</p>
-                  <p className="f-mono text-xl font-bold text-[#1C2420] mt-0.5">
-                    {financialOutlay.households_count} <span className="text-xs font-normal">Families</span>
-                  </p>
-                  <p className="text-[10px] text-[#565F58] mt-0.5">{simResult.population} total residents</p>
-                </div>
-                <div className="p-3 bg-[#F7F5F1] rounded-sm border border-[#D9D4C7]">
-                  <p className="text-[11px] text-[#565F58]">Central NDRF Share (75%)</p>
-                  <p className="f-mono text-xl font-bold text-[#3D6B5C] mt-0.5">
-                    ₹{financialOutlay.ndrf_central_share_crores.toFixed(2)} <span className="text-xs font-normal">Cr</span>
-                  </p>
-                  <p className="text-[10px] text-[#565F58] mt-0.5">MHA Disaster Response Head</p>
-                </div>
-                <div className="p-3 bg-[#F7F5F1] rounded-sm border border-[#D9D4C7]">
-                  <p className="text-[11px] text-[#565F58]">State SDRF Share (25%)</p>
-                  <p className="f-mono text-xl font-bold text-[#22364A] mt-0.5">
-                    ₹{financialOutlay.sdrf_state_share_crores.toFixed(2)} <span className="text-xs font-normal">Cr</span>
-                  </p>
-                  <p className="text-[10px] text-[#565F58] mt-0.5">State Disaster Mitigation Fund</p>
-                </div>
-              </div>
-
-              {/* Detailed Breakdown Table */}
-              <div className="overflow-x-auto border rounded-sm" style={{ borderColor: C.line }}>
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-[#F7F5F1] border-b border-[#D9D4C7] text-[#565F58] font-semibold">
-                      <th className="p-3">Component / Budget Head</th>
-                      <th className="p-3">Governing Department / Scheme</th>
-                      <th className="p-3">Unit Benchmark</th>
-                      <th className="p-3 text-right">Cost (₹ Crores)</th>
-                      <th className="p-3 text-right">Central / State Split</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#EFECE4] text-[#1C2420]">
-                    <tr>
-                      <td className="p-3 font-medium">Pucca Disaster-Resistant Housing</td>
-                      <td className="p-3 text-[#565F58]">PMAY-Gramin / Rural Development</td>
-                      <td className="p-3 font-mono">₹1.30 Lakh / Household</td>
-                      <td className="p-3 text-right font-mono font-bold text-[#3D6B5C]">
-                        ₹{financialOutlay.pmay_housing_crores.toFixed(2)} Cr
-                      </td>
-                      <td className="p-3 text-right text-[#565F58]">60% / 40%</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 font-medium">Site Grading, Retaining Walls & Roads</td>
-                      <td className="p-3 text-[#565F58]">Public Works Department (PWD) / SDRF</td>
-                      <td className="p-3 font-mono">₹0.80 Lakh / Household</td>
-                      <td className="p-3 text-right font-mono font-bold text-[#3D6B5C]">
-                        ₹{financialOutlay.land_development_crores.toFixed(2)} Cr
-                      </td>
-                      <td className="p-3 text-right text-[#565F58]">75% / 25%</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 font-medium">Piped Water Intake & Rural Sanitation</td>
-                      <td className="p-3 text-[#565F58]">Jal Jeevan Mission (JJM) / PHED</td>
-                      <td className="p-3 font-mono">₹1.20 Lakh / Household</td>
-                      <td className="p-3 text-right font-mono font-bold text-[#3D6B5C]">
-                        ₹{financialOutlay.infrastructure_crores.toFixed(2)} Cr
-                      </td>
-                      <td className="p-3 text-right text-[#565F58]">50% / 50%</td>
-                    </tr>
-                    <tr className="bg-[#FAF9F5] font-bold">
-                      <td className="p-3" colSpan={3}>Consolidated Outlay Obligation</td>
-                      <td className="p-3 text-right font-mono text-[#B5462F] text-sm">
-                        ₹{financialOutlay.total_crores.toFixed(2)} Cr
-                      </td>
-                      <td className="p-3 text-right font-mono text-[#22364A]">75% Central : 25% State</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Fiscal Sharing Bar */}
-              <div>
-                <div className="flex justify-between text-[11px] text-[#565F58] mb-1 font-medium">
-                  <span>Central NDRF / Centrally Sponsored Head (75% · ₹{financialOutlay.ndrf_central_share_crores.toFixed(2)} Cr)</span>
-                  <span>State Matching SDRF Share (25% · ₹{financialOutlay.sdrf_state_share_crores.toFixed(2)} Cr)</span>
-                </div>
-                <div className="w-full h-3 rounded-full bg-[#EFECE4] flex overflow-hidden">
-                  <div className="h-full bg-[#3D6B5C] transition-all" style={{ width: "75%" }} />
-                  <div className="h-full bg-[#22364A] transition-all" style={{ width: "25%" }} />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: 3-Phase DDMA Operational Strategy */}
+          {/* TAB 2: 3-Phase Operational Planning Strategy */}
           {activeTab === "phases" && (
             <div className="border rounded-sm p-5 bg-white space-y-4" style={{ borderColor: C.line }}>
               <div>
@@ -722,7 +597,7 @@ export function WhatIfSimulator({
                   3-Phase District Relocation & Rehabilitation Operational Strategy
                 </h3>
                 <p className="text-xs text-[#565F58] mt-0.5">
-                  Standard Operating Procedure (SOP) under Sections 30 and 34 of the Disaster Management Act, 2005.
+                  Operational Planning Framework · District Emergency Contingency Strategy.
                 </p>
               </div>
 
@@ -741,7 +616,7 @@ export function WhatIfSimulator({
                   <ul className="text-xs text-[#565F58] space-y-1.5 list-disc pl-4 leading-relaxed">
                     <li>Immediate evacuation of vulnerable elderly, pregnant women, and children from {simResult.habitation_name} to designated pucca cyclone/flood shelters.</li>
                     <li>SDRF quick-response watercraft and mobile emergency communication dispatched.</li>
-                    <li>Police perimeter established under Section 34(b) DM Act prohibiting reentry into active Red Zone.</li>
+                    <li>Administrative boundary established prohibiting unauthorized entry into active hazard zone.</li>
                   </ul>
                   <div className="pt-2 border-t border-[#D9D4C7]/60 text-[11px] text-[#22364A] font-medium">
                     Nodal Lead: Tehsildar & Sub-Divisional Police Officer

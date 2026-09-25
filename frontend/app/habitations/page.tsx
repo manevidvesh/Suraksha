@@ -11,8 +11,6 @@ import {
   Plus,
   Sliders,
   LifeBuoy,
-  ClipboardCheck,
-  Printer,
   Calculator,
   History,
   ShieldCheck,
@@ -44,11 +42,6 @@ import {
   PopulationVintageBadge,
 } from "@/components/Common";
 import { getAdaptationStrategyForEntity } from "@/lib/adaptationStrategies";
-import { getHabitationReadiness } from "@/lib/ddmaReadinessData";
-import {
-  LifelineReadinessModal,
-  OfflineActionCardModal,
-} from "@/components/DDMA";
 
 export default function HabitationsPage() {
   const {
@@ -66,8 +59,6 @@ export default function HabitationsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mcdaModalOpen, setMcdaModalOpen] = useState(false);
   const [strategyModalOpen, setStrategyModalOpen] = useState(false);
-  const [readinessModalOpen, setReadinessModalOpen] = useState(false);
-  const [actionCardModalOpen, setActionCardModalOpen] = useState(false);
   const [historicalModalOpen, setHistoricalModalOpen] = useState(false);
   const [provenanceModalOpen, setProvenanceModalOpen] = useState(false);
   const [fieldReviewModalOpen, setFieldReviewModalOpen] = useState(false);
@@ -354,29 +345,23 @@ export default function HabitationsPage() {
                         <ShieldCheck size={13} /> Officer Review
                       </button>
 
-                      <button
-                        onClick={() => setReadinessModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#22364A] text-xs font-semibold rounded-sm transition-colors cursor-pointer"
-                        title="Audit and replenish DDMA lifeline equipment & stock"
-                      >
-                        <ClipboardCheck size={13} /> Lifeline Checklist
-                      </button>
-
-                      <button
-                        onClick={() => setActionCardModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#B5462F] hover:bg-[#9E3B26] text-white text-xs font-semibold rounded-sm transition-colors cursor-pointer shadow-xs"
-                        title="Export printable A4 offline emergency evacuation card"
-                      >
-                        <Printer size={13} /> Offline Card
-                      </button>
                     </div>
 
-                    <Link
-                      href="/simulation"
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#22364A] hover:bg-[#3E5E82] text-white text-xs font-medium rounded-sm transition-colors cursor-pointer"
-                    >
-                      Simulate Relocation <ArrowRight size={13} />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/relocation?habitation=${sel.id}`}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#3D6B5C] hover:bg-[#32584B] text-white text-xs font-semibold rounded-sm transition-colors cursor-pointer shadow-xs"
+                      >
+                        Evaluate Candidate Sites <ArrowRight size={13} />
+                      </Link>
+
+                      <Link
+                        href="/simulation"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#22364A]/30 text-xs font-medium rounded-sm transition-colors cursor-pointer"
+                      >
+                        Stress Test
+                      </Link>
+                    </div>
                   </div>
                 </div>
               )}
@@ -445,23 +430,6 @@ export default function HabitationsPage() {
         />
       )}
 
-      {/* DDMA Lifeline Inventory Modal */}
-      {sel && (
-        <LifelineReadinessModal
-          isOpen={readinessModalOpen}
-          onClose={() => setReadinessModalOpen(false)}
-          profile={getHabitationReadiness(sel.id)}
-        />
-      )}
-
-      {/* DDMA Printable Offline Action Card Modal */}
-      {sel && (
-        <OfflineActionCardModal
-          isOpen={actionCardModalOpen}
-          onClose={() => setActionCardModalOpen(false)}
-          profile={getHabitationReadiness(sel.id)}
-        />
-      )}
     </div>
   );
 }

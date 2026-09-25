@@ -159,8 +159,8 @@ async def generate_sdma_executive_brief(
         cap_val = site.get("eff", {}).get("value", site.get("cap", {}).get("land", 500))
         bottleneck = site.get("eff", {}).get("bottleneck", "water")
         site_assessment = (
-            f"Candidate site '{site['name']}' ({site.get('distanceKm', 15)} km transit distance) provides "
-            f"secure geological terrain. Site can absorb up to {cap_val} residents. Primary infrastructure bottleneck is {bottleneck}."
+            f"Candidate site '{site['name']}' ({site.get('distanceKm', 15)} km transit distance) has "
+            f"passed baseline GIS hazard screening in the demonstration model. Site can absorb up to {cap_val} residents under prototype capacity model. Primary infrastructure bottleneck is {bottleneck}."
         )
     else:
         site_assessment = "Candidate site selection is pending; spatial matching algorithm recommends screening sites within a 30 km radius."

@@ -269,7 +269,7 @@ export const ADAPTATION_STRATEGIES: Record<string, ZoneAdaptationStrategy> = {
         pillarNumber: 2,
         title: "Early Warning Telemetry & Ridge-Top Transition Centers",
         category: "Elevated Safe Havens & Transit",
-        summary: "Real-time rain telemetry and automated community evacuation to safe ridge zones.",
+        summary: "Automated rain telemetry and community evacuation to designated ridge zones.",
         interventions: [
           {
             name: "Tipping Bucket Telemetry & Soil Moisture Sensors",
@@ -528,7 +528,7 @@ export const ADAPTATION_STRATEGIES: Record<string, ZoneAdaptationStrategy> = {
         pillarNumber: 3,
         title: "Riparian Bio-Shielding & Wetland Flood Attenuation",
         category: "Nature-Based & Eco-Hydrology",
-        summary: "Bio-turfing with deep-root riparian grasses, eco-hydrological beel restoration, and real-time radar telemetry.",
+        summary: "Bio-turfing with deep-root riparian grasses, eco-hydrological beel restoration, and radar telemetry early warning integration.",
         interventions: [
           {
             name: "Nal & Khagori Grass Bio-Revetment Belts",
