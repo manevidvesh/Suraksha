@@ -38,6 +38,7 @@ yarn-error.log*
 *.swo
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Large GIS / Satellite rasters (keep sample geojson)
 *.tif

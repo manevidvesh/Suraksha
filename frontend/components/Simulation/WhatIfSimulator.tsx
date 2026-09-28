@@ -21,7 +21,7 @@ import { C } from "../Common/constants";
 import { EmptyState } from "../Common/EmptyState";
 import { RiskRadarChart } from "../Charts/RiskRadarChart";
 import { ExecutiveBriefModal } from "../AIExplanation/ExecutiveBriefModal";
-import { CorridorSelector, filterHabitationsByCorridor, AdaptationStrategyModal } from "../Common";
+import { CorridorSelector, filterHabitationsByCorridor, AdaptationStrategyModal, TierBadge } from "../Common";
 import { getAdaptationStrategyForEntity } from "@/lib/adaptationStrategies";
 
 export interface WhatIfSimulatorProps {
@@ -428,6 +428,114 @@ export function WhatIfSimulator({
             <span className="text-[10px] text-[#565F58] font-mono">
               {simResult.explanation_layer || "AI EXPLANATION LAYER — FOR HUMAN DECISION-MAKER REVIEW"}
             </span>
+          </div>
+
+          {/* BASELINE → INTERVENTION → SIMULATED OUTCOME VISUAL PIPELINE */}
+          <div className="border rounded-sm bg-white p-4 space-y-3" style={{ borderColor: C.line }}>
+            <div className="flex items-center justify-between pb-2 border-b text-xs" style={{ borderColor: C.line }}>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#22364A]" />
+                <h4 className="f-serif text-sm font-bold text-[#1C2420]">
+                  Relocation Impact Model: Baseline → Intervention → Outcome
+                </h4>
+              </div>
+              <span className="text-[10px] font-mono text-[#565F58] bg-[#FAF9F5] px-2 py-0.5 rounded-xs border border-[#D9D4C7]">
+                Demonstration Scenario Model
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
+              {/* Stage 1: Baseline */}
+              <div className="p-3.5 rounded-sm border border-[#B5462F]/30 bg-[#FFFDFD] flex flex-col justify-between space-y-2">
+                <div>
+                  <div className="flex items-center justify-between gap-1 mb-1.5">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-xs bg-[#B5462F] text-white">
+                      1. Baseline Hazard
+                    </span>
+                    <TierBadge tier={selectedHab?.tier || "Immediate"} />
+                  </div>
+                  <h5 className="font-bold text-sm text-[#1C2420]">{simResult.habitation_name}</h5>
+                  <p className="text-[11px] text-[#565F58] mt-0.5">{selectedHab?.region} · {selectedHab?.hazard}</p>
+                </div>
+
+                <div className="pt-2 border-t border-[#D9D4C7]/50 space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-[#565F58]">Composite Risk:</span>
+                    <span className="f-mono font-bold text-[#B5462F]">{selectedHab?.score || 80}/100</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#565F58]">Exposed Population:</span>
+                    <span className="f-mono font-bold text-[#1C2420]">{simResult.population.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stage 2: Intervention Vector */}
+              <div className="p-3.5 rounded-sm border border-[#22364A]/30 bg-[#F4F7FA] flex flex-col justify-between space-y-2">
+                <div>
+                  <div className="flex items-center justify-between gap-1 mb-1.5">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-xs bg-[#22364A] text-white">
+                      2. Relocation Vector
+                    </span>
+                    <span className="text-[10px] font-mono font-semibold text-[#22364A]">
+                      {simResult.travel_distance_km} km transit
+                    </span>
+                  </div>
+                  <h5 className="font-bold text-sm text-[#1C2420]">{simResult.site_name}</h5>
+                  <p className="text-[11px] text-[#565F58] mt-0.5">Candidate Resettlement Site</p>
+                </div>
+
+                <div className="pt-2 border-t border-[#D9D4C7]/50 space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-[#565F58]">Site Effective Cap:</span>
+                    <span className="f-mono font-bold text-[#2A6B52]">{simResult.effective_capacity.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#565F58]">Liebig Bottleneck:</span>
+                    <span className="font-semibold text-[#B5462F]">{simResult.bottleneck}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stage 3: Simulated Outcome */}
+              <div className="p-3.5 rounded-sm border border-[#2A6B52]/30 bg-[#F6FAF8] flex flex-col justify-between space-y-2">
+                <div>
+                  <div className="flex items-center justify-between gap-1 mb-1.5">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-xs bg-[#2A6B52] text-white">
+                      3. Simulated Result
+                    </span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-xs ${
+                      simResult.capacity_exceeded ? "bg-[#FFF9EE] text-[#C0872B]" : "bg-[#E8F0EC] text-[#2A6B52]"
+                    }`}>
+                      {simResult.capacity_exceeded ? "Capacity Deficit" : "Viable Match"}
+                    </span>
+                  </div>
+                  <h5 className="font-bold text-sm text-[#2A6B52]">
+                    −{simResult.hazard_reduction_pct}% Hazard Exposure
+                  </h5>
+                  <p className="text-[11px] text-[#565F58] mt-0.5">
+                    {simResult.capacity_exceeded
+                      ? `Exceeds capacity by ${simResult.population - simResult.effective_capacity} residents`
+                      : `Sufficient capacity (+${simResult.effective_capacity - simResult.population} headroom)`}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-[#D9D4C7]/50 space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-[#565F58]">Absorption Load:</span>
+                    <span className="f-mono font-bold text-[#1C2420]">
+                      {Math.round((simResult.population / (simResult.effective_capacity || 1)) * 100)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#565F58]">Decision Status:</span>
+                    <span className="font-semibold text-[#22364A] truncate">
+                      {simResult.decision_status?.replace(/_/g, " ") || "VIABLE CANDIDATE"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Viability Drivers, Bottlenecks & Decision Blockers Grid */}

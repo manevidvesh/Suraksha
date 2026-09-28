@@ -38,6 +38,7 @@ import {
   HowSurakshaDecides,
   DataConfidencePanel,
   PopulationVintageBadge,
+  RiskFactorBarBreakdown,
 } from "@/components/Common";
 import { getAdaptationStrategyForEntity } from "@/lib/adaptationStrategies";
 
@@ -183,6 +184,31 @@ function DashboardContent() {
             }
           />
 
+          {/* Decision Support Chain Banner */}
+          <div className="mb-4 px-3.5 py-2.5 rounded-sm bg-[#FAF9F5] border border-[#D9D4C7] flex items-center justify-between gap-2 overflow-x-auto text-[11px] font-mono text-[#565F58] shadow-2xs">
+            <span className="font-bold text-[#1C2420] uppercase text-[10px] shrink-0">
+              DECISION CHAIN:
+            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="px-2 py-0.5 rounded-xs bg-[#B5462F]/15 text-[#B5462F] font-semibold">1. HAZARD</span>
+              <span>→</span>
+              <span className="px-2 py-0.5 rounded-xs bg-[#22364A]/15 text-[#22364A] font-semibold">2. HABITATION</span>
+              <span>→</span>
+              <span className="px-2 py-0.5 rounded-xs bg-[#B5462F]/15 text-[#B5462F] font-semibold">3. MCDA RISK</span>
+              <span>→</span>
+              <span className="px-2 py-0.5 rounded-xs bg-[#3D6B5C]/15 text-[#3D6B5C] font-semibold">4. SITES</span>
+              <span>→</span>
+              <span className="px-2 py-0.5 rounded-xs bg-[#C0872B]/15 text-[#C0872B] font-semibold">5. CAPACITY</span>
+              <span>→</span>
+              <span className="px-2 py-0.5 rounded-xs bg-[#22364A]/15 text-[#22364A] font-semibold">6. MATCHING</span>
+              <span>→</span>
+              <span className="px-2 py-0.5 rounded-xs bg-[#1C2420] text-white font-semibold">7. HUMAN REVIEW</span>
+            </div>
+            <span className="text-[10px] text-[#22364A] font-sans font-medium shrink-0">
+              Deterministic DSS
+            </span>
+          </div>
+
           {/* Regional Planning Corridor Selector */}
           <div className="mb-6 bg-white border p-3.5 rounded-sm" style={{ borderColor: C.line }}>
             <CorridorSelector
@@ -287,11 +313,7 @@ function DashboardContent() {
                     )}
                   </div>
 
-                  <dl className="mt-4 space-y-2 f-sans text-sm">
-                    <div className="flex justify-between border-b pb-1" style={{ borderColor: C.line }}>
-                      <dt style={{ color: C.inkSoft }}>Composite Risk</dt>
-                      <dd className="f-mono font-semibold">{selectedHabitation.score} / 100</dd>
-                    </div>
+                  <dl className="mt-3 space-y-1.5 f-sans text-xs">
                     <div className="flex justify-between border-b pb-1 items-center" style={{ borderColor: C.line }}>
                       <dt style={{ color: C.inkSoft }}>Demographics</dt>
                       <dd>
@@ -300,19 +322,43 @@ function DashboardContent() {
                     </div>
                     <div className="flex justify-between border-b pb-1" style={{ borderColor: C.line }}>
                       <dt style={{ color: C.inkSoft }}>Primary Hazard</dt>
-                      <dd>{selectedHabitation.hazard}</dd>
+                      <dd className="font-medium text-[#1C2420]">{selectedHabitation.hazard}</dd>
                     </div>
                     <div className="flex justify-between border-b pb-1" style={{ borderColor: C.line }}>
-                      <dt style={{ color: C.inkSoft }}>Recorded Events</dt>
-                      <dd className="f-mono">{selectedHabitation.events}</dd>
+                      <dt style={{ color: C.inkSoft }}>Recorded Incidents</dt>
+                      <dd className="f-mono">{selectedHabitation.events} past events</dd>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between border-b pb-1" style={{ borderColor: C.line }}>
                       <dt style={{ color: C.inkSoft }}>Coordinates</dt>
-                      <dd className="f-mono text-xs">
+                      <dd className="f-mono text-[11px]">
                         {selectedHabitation.latitude.toFixed(4)}, {selectedHabitation.longitude.toFixed(4)}
                       </dd>
                     </div>
                   </dl>
+
+                  {/* Visual 5-Factor MCDA Risk Breakdown */}
+                  <div className="mt-3 pt-2 border-t" style={{ borderColor: C.line }}>
+                    <RiskFactorBarBreakdown
+                      factors={selectedHabitation.f}
+                      compositeScore={selectedHabitation.score}
+                      compact
+                    />
+                  </div>
+
+                  {/* Contextual Resettlement Candidate Status */}
+                  <div className="mt-3 p-2.5 rounded-xs bg-[#FAF9F5] border border-[#D9D4C7] text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-semibold text-[#1C2420]">Candidate Destination:</span>
+                      <span className="font-mono font-bold text-[#3D6B5C]">
+                        {displayedSites[0] ? displayedSites[0].name : "None in corridor"}
+                      </span>
+                    </div>
+                    {displayedSites[0] && (
+                      <p className="text-[10px] text-[#565F58]">
+                        Effective Capacity: {displayedSites[0].eff?.value || 300} · Limiting Bottleneck: {displayedSites[0].eff?.bottleneck || "Water"}
+                      </p>
+                    )}
+                  </div>
 
                   <div className="mt-5 space-y-2">
                     <button

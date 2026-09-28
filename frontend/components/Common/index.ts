@@ -15,3 +15,4 @@ export * from "./HistoricalEvidenceModal";
 export * from "./AssessmentProvenanceModal";
 export * from "./SimulationParameterDisclosure";
 export * from "./PopulationVintageBadge";
+export * from "./RiskFactorBarBreakdown";

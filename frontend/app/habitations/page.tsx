@@ -40,6 +40,7 @@ import {
   AssessmentProvenanceModal,
   HumanFieldReviewModal,
   PopulationVintageBadge,
+  RiskFactorBarBreakdown,
 } from "@/components/Common";
 import { getAdaptationStrategyForEntity } from "@/lib/adaptationStrategies";
 
@@ -295,9 +296,13 @@ export default function HabitationsPage() {
                     )}
                   </div>
 
-                  <div className="h-52 mb-3">
-                    <VulnerabilityBarChart factors={factorList} height={200} />
-                  </div>
+                  {/* Visual 5-Factor MCDA Factor Breakdown with Weights and Formula */}
+                  <RiskFactorBarBreakdown
+                    factors={sel.f}
+                    weights={weights}
+                    compositeScore={sel.score}
+                    showFormula
+                  />
 
                   <p className="f-sans text-xs text-[#565F58] leading-relaxed bg-[#F7F5F1] p-3 rounded-xs border border-[#D9D4C7]">
                     {breakdown?.explanation ||

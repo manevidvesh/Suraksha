@@ -34,6 +34,7 @@ import { Sidebar } from "@/components/Navigation/Sidebar";
 import { TopBar } from "@/components/Navigation/TopBar";
 import { SiteList } from "@/components/SiteRanking";
 import { CapacityBreakdown } from "@/components/Capacity/CapacityBreakdown";
+import { CorridorAllocationFlow } from "@/components/Relocation/CorridorAllocationFlow";
 import { CorridorSelector, filterHabitationsByCorridor, filterSitesByCorridor } from "@/components/Common";
 import {
   HabitationMatchingResult,
@@ -421,6 +422,16 @@ function RelocationContent() {
                   </div>
                 )}
               </div>
+
+              {/* Visual Many-to-Many Relocation Allocation Network */}
+              <CorridorAllocationFlow
+                habitations={corridorHabitations}
+                sites={displayedSites}
+                selectedHabitationId={activeHabitation?.id || ""}
+                onSelectHabitation={setSelectedHabitationId}
+                selectedSiteId={selectedSiteId}
+                onSelectSite={setSelectedSiteId}
+              />
 
               {/* Step 2: Matching Result Status Header */}
               {matchingResult && (
