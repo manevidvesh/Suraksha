@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { Database, CheckCircle2, Clock, AlertTriangle, RefreshCw, Shield, Info, Layers, Cpu, Compass } from "lucide-react";
+import { Database, Clock, AlertTriangle, RefreshCw, Shield, Layers, Cpu } from "lucide-react";
 import { useRiskData } from "@/hooks/useRiskData";
 import { C } from "@/components/Common/constants";
 import { SectionHead } from "@/components/Common/SectionHead";
@@ -147,18 +147,21 @@ const EXTENDED_SOURCES: EnhancedSource[] = [
 ];
 
 export default function SourcesPage() {
-  const { sources, loading } = useRiskData();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [filterType, setFilterType] = useState<string>("ALL");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastRefreshed, setLastRefreshed] = useState("Just now");
 
   const handleRefresh = () => {
     setIsRefreshing(true);
     setTimeout(() => {
       setIsRefreshing(false);
-      setLastRefreshed("Just now");
-    }, 600);
+    }, 500);
   };
+
+  const filteredSources = useMemo(() => {
+    if (filterType === "ALL") return EXTENDED_SOURCES;
+    return EXTENDED_SOURCES.filter((s) => s.provenanceType === filterType);
+  }, [filterType]);
 
   return (
     <div className="f-sans flex min-h-screen" style={{ backgroundColor: C.paper }}>
@@ -166,15 +169,15 @@ export default function SourcesPage() {
 
       <div className="flex-1 min-w-0">
         <TopBar
-          title="SURAKSHA Data Sources & Provenance"
+          title="Evidence & Sources Catalog"
           mobileOpen={mobileOpen}
           setMobileOpen={setMobileOpen}
         />
 
-        <main className="px-5 sm:px-8 py-7 max-w-6xl">
+        <main className="px-5 sm:px-8 py-6 max-w-6xl space-y-5">
           <SectionHead
-            title="Configured Data Sources Catalog & Provenance"
-            sub="Every risk score, candidate red zone boundary, and site capacity metric traces back to documented reference standards, derived geospatial layers, or curated demonstration datasets. Stale inputs, demonstration baselines, and prototype layers are transparently disclosed."
+            title="Evidence & Sources Catalog"
+            sub="Lineage, confidence, and validation requirements for all datasets and reference standards."
             action={
               <button
                 onClick={handleRefresh}
@@ -183,110 +186,48 @@ export default function SourcesPage() {
                 style={{ borderColor: C.line }}
               >
                 <RefreshCw size={13} className={isRefreshing ? "animate-spin" : ""} />
-                {isRefreshing ? "Re-verifying Catalog…" : "Verify Catalog"}
+                {isRefreshing ? "Verifying Catalog…" : "Verify Catalog"}
               </button>
             }
           />
 
-          {/* Data Honesty & Provenance Disclosure Box */}
-          <div
-            className="border rounded-sm p-4 sm:p-5 mb-6 bg-white space-y-3"
-            style={{ borderColor: C.line }}
-          >
-            <div className="flex items-center gap-2.5 text-[#22364A]">
-              <Shield size={18} className="text-[#3D6B5C]" />
-              <h2 className="f-serif text-base font-bold text-[#1C2420]">
-                Data Honesty & Provenance Statement
-              </h2>
-            </div>
-            <p className="text-xs text-[#565F58] leading-relaxed">
-              SURAKSHA operates with complete technical transparency. The application combines{" "}
-              <strong className="text-[#1C2420]">source-derived spatial layers</strong> from reference criteria,{" "}
-              <strong className="text-[#1C2420]">PostGIS-processed GIS models</strong>,{" "}
-              <strong className="text-[#1C2420]">deterministic decision engine calculations</strong>, and{" "}
-              <strong className="text-[#1C2420]">prototype demonstration datasets</strong>. 
-              We never fabricate live external API connections: dynamic hazard expansions are explicitly marked as 
-              interactive simulations.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2 border-t border-dashed border-[#D9D4C7] text-xs">
-              <div className="p-2.5 rounded-xs bg-[#FAF9F5] border border-[#D9D4C7] space-y-1">
-                <span className="font-mono font-bold text-[10px] text-[#2A6B52] block uppercase">
-                  A. RUNTIME DATASET
-                </span>
-                <p className="text-[11px] text-[#565F58]">
-                  Actually consumed by the application: pilot settlements and candidate relocation site geometries evaluated by the engine.
-                </p>
-              </div>
-
-              <div className="p-2.5 rounded-xs bg-[#FAF9F5] border border-[#D9D4C7] space-y-1">
-                <span className="font-mono font-bold text-[10px] text-[#C0872B] block uppercase">
-                  B. DEMONSTRATION DATASET
-                </span>
-                <p className="text-[11px] text-[#565F58]">
-                  Prototype/sample data used in demonstration: Census 2011 decennial baseline and scenario-driven shock parameters.
-                </p>
-              </div>
-
-              <div className="p-2.5 rounded-xs bg-[#FAF9F5] border border-[#D9D4C7] space-y-1">
-                <span className="font-mono font-bold text-[10px] text-[#1E5878] block uppercase">
-                  C. DOCUMENTED REFERENCE
-                </span>
-                <p className="text-[11px] text-[#565F58]">
-                  Used for methodological reference only: GSI slope criteria, IMD rainfall thresholds, CWC flood stage, and SOI datum.
-                </p>
-              </div>
-
-              <div className="p-2.5 rounded-xs bg-[#FAF9F5] border border-[#D9D4C7] space-y-1">
-                <span className="font-mono font-bold text-[10px] text-[#B5462F] block uppercase">
-                  D. EXTERNAL VALIDATION
-                </span>
-                <p className="text-[11px] text-[#565F58]">
-                  Not available or not verifiable inside prototype: cadastral land ownership, legal title encumbrance, and geotechnical boreholes.
-                </p>
-              </div>
-            </div>
+          {/* Interactive Provenance Type Filter */}
+          <div className="flex border-b border-[#D9D4C7] gap-2 overflow-x-auto text-xs font-medium">
+            {[
+              { id: "ALL", label: `All Sources (${EXTENDED_SOURCES.length})` },
+              { id: "RUNTIME DATASET", label: "Runtime Datasets (1)" },
+              { id: "DEMONSTRATION DATASET", label: "Demonstration Data (2)" },
+              { id: "DOCUMENTED REFERENCE", label: "Reference Standards (6)" },
+              { id: "EXTERNAL VALIDATION REQUIRED", label: "External Validation Required (1)" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setFilterType(tab.id)}
+                className={`pb-2.5 transition-colors cursor-pointer whitespace-nowrap ${
+                  filterType === tab.id
+                    ? "border-b-2 font-bold text-[#1C2420] border-[#22364A]"
+                    : "text-[#565F58] hover:text-[#1C2420] border-transparent"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
-          {/* Catalog Status Summary Banner */}
+          {/* Sources Catalog Items */}
           <div
-            className="border rounded-sm p-4 mb-6 bg-white flex items-center justify-between gap-4 flex-wrap"
+            className="border rounded-sm divide-y bg-white shadow-2xs"
             style={{ borderColor: C.line }}
           >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xs bg-[#22364A]/10 text-[#22364A]">
-                <Database size={18} />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-[#1C2420]">
-                  Configured Static &amp; Demonstration Catalog · 10 Datasets &amp; Reference Specifications
-                </p>
-                <p className="text-[11px] text-[#565F58]">
-                  Demonstration dataset and documented reference criteria · No active external network telemetry feeds
-                </p>
-              </div>
-            </div>
-
-            <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#22364A] bg-[#22364A]/10 px-2.5 py-1 rounded-xs">
-              <span className="w-2 h-2 rounded-full bg-[#3D6B5C]" />
-              Configured Static &amp; Demonstration Catalog
-            </span>
-          </div>
-
-          {/* Sources Catalog */}
-          <div
-            className="border rounded-sm divide-y bg-white"
-            style={{ borderColor: C.line }}
-          >
-            {EXTENDED_SOURCES.map((src) => (
+            {filteredSources.map((src) => (
               <div
                 key={src.id}
-                className="p-5 flex items-start justify-between gap-4 flex-wrap hover:bg-[#F7F5F1] transition-colors"
+                className="p-4 sm:p-5 flex items-start justify-between gap-4 flex-wrap hover:bg-[#FAF9F5] transition-colors"
               >
                 <div className="space-y-1.5 max-w-xl">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Database size={15} className="text-[#3E5E82] shrink-0" />
-                    <h3 className="f-serif text-base font-semibold text-[#1C2420]">
+                    <h3 className="f-serif text-sm sm:text-base font-bold text-[#1C2420]">
                       {src.name}
                     </h3>
                     <ProvenanceBadge type={src.provenanceType} />
@@ -303,7 +244,7 @@ export default function SourcesPage() {
 
                   <div className="flex items-center gap-3 text-[11px] text-[#565F58] pt-1 flex-wrap">
                     <span className="flex items-center gap-1">
-                      <Clock size={12} /> Cycle / Timestamp: {src.updated}
+                      <Clock size={11} /> Timestamp: {src.updated}
                     </span>
                     <span>•</span>
                     <span className="font-mono">
@@ -315,7 +256,7 @@ export default function SourcesPage() {
                 <div className="flex flex-col items-end gap-1.5 shrink-0">
                   <ConfidenceBadge level={src.confidence} stale={src.stale} />
                   {src.stale && (
-                    <span className="inline-flex items-center gap-1 text-[10px] text-[#C0872B] font-medium">
+                    <span className="inline-flex items-center gap-1 text-[10px] text-[#C0872B] font-semibold">
                       <AlertTriangle size={11} /> Requires field calibration
                     </span>
                   )}
@@ -324,53 +265,45 @@ export default function SourcesPage() {
             ))}
           </div>
 
-          {/* Software Verification != Real-World Validation Callout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            <div className="border rounded-sm p-4 bg-white space-y-2" style={{ borderColor: C.line }}>
+          {/* Core Methodological & Governance Boundary Disclosures */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border rounded-sm p-4 bg-white space-y-2 shadow-2xs" style={{ borderColor: C.line }}>
               <div className="flex items-center gap-2 text-[#22364A]">
                 <Cpu size={16} className="text-[#3E5E82]" />
                 <h3 className="f-serif text-sm font-bold text-[#1C2420]">
-                  Software Verification ≠ Real-World Validation
+                  Software Verification ≠ Real-World Safety Validation
                 </h3>
               </div>
               <p className="text-xs text-[#565F58] leading-relaxed">
-                The implemented software behavior has been verified through 67 automated backend tests and 14 frontend route checks against the current prototype&apos;s defined technical and mathematical specifications. SURAKSHA verifies computational consistency, not real-world ground truth; field, legal, and administrative validation remain the responsibility of the competent authorities.
+                SURAKSHA verifies mathematical consistency and computational rules against defined technical models. It does not replace real-world geotechnical or hydrological safety verification.
               </p>
               <div className="p-2.5 rounded-xs bg-[#FFF9EE] border border-[#C0872B]/40 text-[11px] text-[#8C5D17] leading-relaxed">
-                ⚠️ <strong>Operational Honesty:</strong> Software test passes do not equate to real-world geotechnical or hydrological safety validation. Before any physical relocation decision is implemented, appropriate ground-truth, technical, legal, environmental, socioeconomic, and administrative validation would be required according to the hazard, site, jurisdiction, applicable law, and competent authorities (e.g., ground-truth geotechnical investigation by the competent geotechnical authority or qualified geotechnical professionals where required, hydrological/hydraulic assessment where required, cadastral and land-title verification, infrastructure capacity verification, environmental assessment, socioeconomic/livelihood assessment, applicable community consultation, and statutory approvals).
+                ⚠️ <strong>Statutory Notice:</strong> Prior to any physical relocation sanction, on-site geotechnical boreholes, hydraulic flood modeling, cadastral land-title verification, and competent authority approval remain legally mandatory.
               </div>
             </div>
 
-            <div className="border rounded-sm p-4 bg-white space-y-2" style={{ borderColor: C.line }}>
+            <div className="border rounded-sm p-4 bg-white space-y-2 shadow-2xs" style={{ borderColor: C.line }}>
               <div className="flex items-center gap-2 text-[#22364A]">
                 <Layers size={16} className="text-[#3D6B5C]" />
                 <h3 className="f-serif text-sm font-bold text-[#1C2420]">
-                  Production Engine vs. Exploratory ML Models
+                  Deterministic Engine vs. Exploratory ML Models
                 </h3>
               </div>
               <p className="text-xs text-[#565F58] leading-relaxed">
-                SURAKSHA prioritizes explainability and auditability. The primary decision engine is built on deterministic Multi-Criteria Decision Analysis (MCDA) and PostGIS spatial intersections.
+                SURAKSHA enforces auditability and transparency. The primary decision engine relies on deterministic Multi-Criteria Decision Analysis (MCDA) and PostGIS spatial queries.
               </p>
-              <div className="p-2.5 rounded-xs bg-[#FAF9F5] border border-[#D9D4C7] text-[11px] text-[#565F58] leading-tight space-y-1">
+              <div className="p-2.5 rounded-xs bg-[#FAF9F5] border border-[#D9D4C7] text-[11px] text-[#565F58] leading-relaxed space-y-1">
                 <p>
-                  • <strong>Production Path:</strong> MCDA scoring + Liebig bottleneck screening + factual rule-based reasoning.
+                  • <strong>Production Path:</strong> Auditable MCDA scoring + Liebig bottleneck carrying capacity calculations.
                 </p>
                 <p>
-                  • <strong>Exploratory ML:</strong> Offline Random Forest/XGBoost models in the repository are research benchmarks for susceptibility mapping, not black-box automated deciders.
+                  • <strong>Exploratory ML:</strong> Offline Random Forest/XGBoost models in the repository are research benchmarks, not automated deciders.
                 </p>
                 <p>
-                  • <strong>AI Explanation Layer:</strong> LLMs synthesize structured findings into administrative briefs with numerical consistency enforcement.
+                  • <strong>AI Explanation Layer:</strong> Summarizes structured metrics with strict numerical consistency checks.
                 </p>
               </div>
             </div>
-          </div>
-
-          {/* Institutional Note */}
-          <div className="mt-6 border-t pt-5 text-xs text-[#565F58] flex flex-wrap justify-between items-center gap-2" style={{ borderColor: C.line }}>
-            <span>Formulated following open geospatial disaster risk assessment principles and evidence-based decision support.</span>
-            <Link href="/dashboard" className="text-[#22364A] hover:underline font-medium">
-              Return to Dashboard
-            </Link>
           </div>
         </main>
       </div>

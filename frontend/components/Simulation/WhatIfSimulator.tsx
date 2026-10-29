@@ -9,11 +9,11 @@ import {
   CheckCircle2,
   FileText,
   AlertTriangle,
-  Compass,
   LifeBuoy,
   Activity,
   Calendar,
-  ShieldCheck,
+  IndianRupee,
+  ShieldAlert,
 } from "lucide-react";
 import { Habitation, CandidateSite, SimulationResult, ExecutiveBrief, FinancialOutlayBreakdown } from "@/types";
 import { api } from "@/lib/api";
@@ -58,7 +58,7 @@ export function WhatIfSimulator({
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
-  const [activeTab, setActiveTab] = useState<"spatial" | "phases">("spatial");
+  const [activeTab, setActiveTab] = useState<"blockers" | "finance" | "phases">("blockers");
   const [strategyModalOpen, setStrategyModalOpen] = useState(false);
 
   // Filter habitations by active planning corridor
@@ -163,7 +163,6 @@ export function WhatIfSimulator({
 
     try {
       const result = await api.simulateRelocation(habId, siteId);
-      // Overwrite geodesic distance with real Haversine if available
       if (transitDist > 0) {
         result.travel_distance_km = transitDist;
       }
@@ -210,9 +209,9 @@ export function WhatIfSimulator({
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       {/* Regional Planning Corridor Selector */}
-      <div className="mb-4 bg-white border p-3.5 rounded-sm" style={{ borderColor: C.line }}>
+      <div className="bg-white border p-3 rounded-sm" style={{ borderColor: C.line }}>
         <CorridorSelector
           selectedCorridor={selectedCorridor}
           onSelectCorridor={handleSelectCorridor}
@@ -221,7 +220,7 @@ export function WhatIfSimulator({
 
       {/* Parameter Selection Grid */}
       <div
-        className="border rounded-sm p-4 mb-5 grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end bg-white"
+        className="border rounded-sm p-4 grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end bg-white shadow-2xs"
         style={{ borderColor: C.line }}
       >
         <div>
@@ -234,13 +233,13 @@ export function WhatIfSimulator({
               setHabId(e.target.value);
               setStatus("idle");
             }}
-            className="w-full border rounded-sm px-3 py-2 f-sans text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#22364A]"
+            className="w-full border rounded-xs px-3 py-2 f-sans text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#22364A] cursor-pointer"
             style={{ borderColor: C.line }}
           >
             <option value="">Select a habitation…</option>
             {corridorHabitations.map((h: Habitation) => (
               <option key={h.id} value={h.id}>
-                {h.name} ({h.region}) · Pop: {h.pop.toLocaleString()} · {h.hazard}
+                {h.name} ({h.region}) · Pop: {h.pop.toLocaleString()} · {h.hazard} [{h.tier}]
               </option>
             ))}
           </select>
@@ -256,12 +255,12 @@ export function WhatIfSimulator({
               setSiteId(e.target.value);
               setStatus("idle");
             }}
-            className="w-full border rounded-sm px-3 py-2 f-sans text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#22364A]"
+            className="w-full border rounded-xs px-3 py-2 f-sans text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#22364A] cursor-pointer"
             style={{ borderColor: C.line }}
           >
             <option value="">Select a site…</option>
             {localSites.length > 0 && (
-              <optgroup label="Recommended Regional Corridor Sites (< 200 km)">
+              <optgroup label="Regional Corridor Sites (< 200 km)">
                 {localSites.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name} ({s.region}) — {s.dist} km transit · Cap: {s.eff.value}
@@ -270,10 +269,10 @@ export function WhatIfSimulator({
               </optgroup>
             )}
             {distantSites.length > 0 && (
-              <optgroup label="⚠️ Other Disaster Corridors (Demo Sandbox Only)">
+              <optgroup label="⚠️ Other Corridors (Demo Sandbox Only)">
                 {distantSites.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name} ({s.region}) — {s.dist} km (Infeasible Inter-State)
+                    {s.name} ({s.region}) — {s.dist} km (Inter-State)
                   </option>
                 ))}
               </optgroup>
@@ -284,7 +283,7 @@ export function WhatIfSimulator({
         <button
           onClick={runSimulation}
           disabled={status === "loading"}
-          className="f-sans text-xs font-semibold px-4 py-2.5 rounded-sm text-white inline-flex items-center justify-center gap-1.5 focus:outline-none focus-visible:ring-2 cursor-pointer transition-colors"
+          className="f-sans text-xs font-semibold px-5 py-2.5 rounded-sm text-white inline-flex items-center justify-center gap-1.5 focus:outline-none focus-visible:ring-2 cursor-pointer transition-colors shadow-2xs"
           style={{ backgroundColor: C.slate }}
         >
           {status === "loading" ? (
@@ -297,54 +296,44 @@ export function WhatIfSimulator({
         </button>
       </div>
 
-      {/* Candidate In-Situ Measures for Zero/No-Relocation-Site Habitats (e.g. Kuttanad) */}
+      {/* Special Zone Alert for Zero-Relocation Habitats (e.g. Kuttanad) */}
       {selectedHab &&
         (selectedHab.id === "H14" ||
           selectedHab.name.toLowerCase().includes("kuttanad")) && (
-          <div className="border border-[#C0872B] bg-[#FFFDF7] p-4 rounded-sm mb-5 text-xs text-[#1C2420] flex items-start justify-between gap-3 flex-wrap shadow-2xs">
-            <div className="flex items-start gap-2.5 max-w-2xl">
-              <LifeBuoy size={20} className="text-[#C0872B] shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold text-[#B5462F]">
-                  Special Zone Assessment: {selectedHab.name} has no designated upland relocation site.
-                </span>
-                <p className="text-[11px] text-[#565F58] mt-1 leading-relaxed">
-                  Kuttanad is India's sub-sea-level agrarian heritage polder. Total population relocation is rejected by local farming communities and unviable under state land constraints. <strong>Candidate In-Situ Adaptation Measures</strong> (amphibious dwellings, reinforced polder ring dykes, canal de-silting, and high-ground rescue flood shelters) are evaluated for technical authority review rather than forced resettlement.
-                </p>
-              </div>
+          <div className="border border-[#C0872B] bg-[#FFFDF7] p-3 rounded-sm text-xs text-[#1C2420] flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <LifeBuoy size={16} className="text-[#C0872B] shrink-0" />
+              <span>
+                <strong>Special Zone Notice:</strong> {selectedHab.name} is India&apos;s sub-sea-level agrarian polder. In-situ adaptation (polder ring dykes, flood shelters) is evaluated rather than forced upland relocation.
+              </span>
             </div>
             <button
               onClick={() => setStrategyModalOpen(true)}
-              className="px-3.5 py-1.5 text-xs font-semibold rounded-sm text-[#22364A] bg-[#FFF3D6] border border-[#C0872B] hover:bg-[#FFE8B3] transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0"
+              className="px-2.5 py-1 text-xs font-semibold rounded-xs text-[#22364A] bg-[#FFF3D6] border border-[#C0872B] hover:bg-[#FFE8B3] transition-colors inline-flex items-center gap-1 cursor-pointer shrink-0"
             >
-              <LifeBuoy size={13} className="text-[#C0872B]" /> Inspect Candidate In-Situ Measures
+              <LifeBuoy size={12} className="text-[#C0872B]" /> In-Situ Strategies
             </button>
           </div>
         )}
 
       {/* Cross-State Geographic Infeasibility Notice */}
       {selectedSite && isCrossState && (
-        <div className="border border-[#C0872B] bg-[#FFF9EE] p-3.5 rounded-sm mb-5 text-xs text-[#1C2420] flex items-start gap-2.5">
-          <AlertTriangle size={18} className="text-[#C0872B] shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            <span className="font-semibold text-[#B5462F]">
-              Geographical Infeasibility Warning: {selectedHab?.name} ({selectedHab?.region}) is ~{transitDist.toLocaleString()} km away from {selectedSite?.name} ({selectedSite?.region}).
-            </span>
-            <p className="text-[11px] text-[#565F58] mt-1">
-              In actual disaster administration, planned habitation relocation is strictly restricted to local panchayats or within-state contiguous revenue districts (typically &lt; 30–50 km). The inclusion of cross-state sites (e.g. Kannur vs Bankura) in the database is solely to demonstrate how the multi-hazard mathematical algorithm scales across diverse national hazard typologies.
-            </p>
-          </div>
+        <div className="border border-[#C0872B] bg-[#FFF9EE] p-3 rounded-sm text-xs text-[#1C2420] flex items-center gap-2">
+          <AlertTriangle size={16} className="text-[#C0872B] shrink-0" />
+          <span>
+            <strong>Geographical Infeasibility Notice:</strong> {selectedHab?.name} is ~{transitDist.toLocaleString()} km from {selectedSite?.name}. In actual disaster administration, planned relocation is restricted to local panchayats (&lt; 30–50 km).
+          </span>
         </div>
       )}
 
       {status === "error" && (
         <div
-          className="border rounded-sm p-4 flex items-start gap-3 mb-5"
+          className="border rounded-sm p-4 flex items-start gap-3"
           style={{ borderColor: C.immediate, backgroundColor: `${C.immediate}0D` }}
         >
-          <FileWarning size={18} style={{ color: C.immediate }} className="mt-0.5" />
+          <FileWarning size={18} style={{ color: C.immediate }} className="mt-0.5 shrink-0" />
           <div>
-            <p className="f-sans text-sm font-medium" style={{ color: C.immediate }}>
+            <p className="f-sans text-sm font-semibold" style={{ color: C.immediate }}>
               Simulation parameters incomplete
             </p>
             <p className="f-sans text-xs mt-0.5" style={{ color: C.inkSoft }}>
@@ -370,7 +359,8 @@ export function WhatIfSimulator({
       )}
 
       {status === "done" && simResult && (
-        <div className="space-y-5">
+        <div className="space-y-4">
+          {/* Top Result Banner */}
           <div
             className="border rounded-sm p-3.5 flex items-center justify-between gap-3 flex-wrap"
             style={{
@@ -386,7 +376,7 @@ export function WhatIfSimulator({
               )}
               <div>
                 <p className="f-sans text-sm font-semibold" style={{ color: C.ink }}>
-                  Relocation Model: {simResult.habitation_name} → {simResult.site_name}
+                  Pairing: {simResult.habitation_name} → {simResult.site_name}
                 </p>
                 <p className="text-xs" style={{ color: C.inkSoft }}>
                   {simResult.summary_message}
@@ -397,8 +387,8 @@ export function WhatIfSimulator({
             <button
               onClick={generateBrief}
               disabled={briefLoading}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#22364A] text-white text-xs font-medium rounded-xs hover:bg-[#3E5E82] cursor-pointer transition-colors"
-              title="Synthesizes structured relocation findings into an AI explanation brief for DDMA review"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#22364A] text-white text-xs font-semibold rounded-xs hover:bg-[#3E5E82] cursor-pointer transition-colors shadow-xs"
+              title="Synthesize structured relocation findings into an AI explanation brief for DDMA review"
             >
               {briefLoading ? (
                 <Loader2 size={13} className="animate-spin" />
@@ -409,372 +399,243 @@ export function WhatIfSimulator({
             </button>
           </div>
 
-          {/* Decision Support Status & Audit Metadata */}
-          <div className="flex items-center justify-between gap-2 flex-wrap text-xs px-1">
-            <div className="flex items-center gap-2">
-              <span
-                className={`px-2 py-0.5 rounded-xs font-semibold text-[11px] border ${
-                  simResult.decision_status?.includes("NO SUITABLE")
-                    ? "bg-[#FFF3D6] text-[#C0872B] border-[#C0872B]/40"
-                    : "bg-[#E8F0EC] text-[#2A6B52] border-[#2A6B52]/40"
+          {/* Primary Simulation Metrics & Radar Chart */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
+            {/* Left: Risk Radar Chart */}
+            <div
+              className="border rounded-sm p-4 bg-white"
+              style={{ borderColor: C.line }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="f-sans text-xs font-bold uppercase tracking-wider text-[#1C2420]">
+                  Before vs. After Hazard Exposure Profile
+                </p>
+                <span className="text-[10px] font-mono text-[#565F58] bg-[#FAF9F5] px-2 py-0.5 rounded-xs border border-[#D9D4C7]">
+                  Multidimensional Radar
+                </span>
+              </div>
+              <RiskRadarChart data={simResult.radar_data} height={260} />
+            </div>
+
+            {/* Right: Key Displacement & Capacity Metrics */}
+            <div
+              className="border rounded-sm p-4 space-y-3 bg-white flex flex-col justify-between"
+              style={{ borderColor: C.line }}
+            >
+              <div>
+                <p className="f-sans text-xs text-[#565F58]">
+                  Hazard Exposure Reduction
+                </p>
+                <p className="f-mono text-3xl font-bold" style={{ color: C.pine }}>
+                  −{simResult.hazard_reduction_pct}%
+                </p>
+                <p className="text-[11px] text-[#565F58] mt-0.5">
+                  Post-relocation multi-hazard exposure drop
+                </p>
+              </div>
+
+              <div className="pt-2 border-t" style={{ borderColor: C.line }}>
+                <p className="f-sans text-xs text-[#565F58]">
+                  Site Capacity Absorption
+                </p>
+                <p className="f-mono text-xl font-bold text-[#1C2420]">
+                  {simResult.population}{" "}
+                  <span className="text-xs font-normal text-[#565F58]">
+                    / {simResult.effective_capacity} cap
+                  </span>
+                </p>
+                <div className="h-2 rounded-full mt-1.5" style={{ backgroundColor: C.paperDim }}>
+                  <div
+                    className="h-2 rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        (simResult.population / (simResult.effective_capacity || 1)) * 100
+                      )}%`,
+                      backgroundColor: simResult.capacity_exceeded ? C.immediate : C.pine,
+                    }}
+                  />
+                </div>
+                <p className="text-[10px] text-[#565F58] mt-1">
+                  Governed by Liebig Bottleneck: <strong className="text-[#B5462F]">{simResult.bottleneck}</strong>
+                </p>
+              </div>
+
+              <div className="pt-2 border-t" style={{ borderColor: C.line }}>
+                <div className="flex justify-between items-baseline">
+                  <span className="f-sans text-xs text-[#565F58]">Transit Distance:</span>
+                  <span className="f-mono font-bold text-sm text-[#1C2420]">{simResult.travel_distance_km} km</span>
+                </div>
+                <div className="flex justify-between items-baseline mt-1">
+                  <span className="f-sans text-xs text-[#565F58]">Decision Status:</span>
+                  <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-xs ${
+                    simResult.capacity_exceeded ? "bg-[#FFF9EE] text-[#C0872B]" : "bg-[#E8F0EC] text-[#2A6B52]"
+                  }`}>
+                    {simResult.capacity_exceeded ? "Capacity Deficit" : "Viable Match"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed Perspectives Tabs */}
+          <div className="border rounded-sm bg-white overflow-hidden" style={{ borderColor: C.line }}>
+            <div className="flex border-b bg-[#FAF9F5] px-4 gap-4 text-xs font-medium" style={{ borderColor: C.line }}>
+              <button
+                onClick={() => setActiveTab("blockers")}
+                className={`py-2.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "blockers"
+                    ? "border-[#22364A] text-[#1C2420] font-bold"
+                    : "border-transparent text-[#565F58] hover:text-[#1C2420]"
                 }`}
               >
-                {simResult.decision_status || (simResult.capacity_exceeded ? "CAPACITY DEFICIT DETECTED" : "VIABLE CANDIDATE MATCH")}
-              </span>
-              <span className="font-mono text-[10px] text-[#565F58] bg-[#FAF9F5] px-2 py-0.5 rounded-xs border border-[#D9D4C7]">
-                Ref: {simResult.source_assessment_id || "SRK-2026-SIM-v1"}
-              </span>
-            </div>
-            <span className="text-[10px] text-[#565F58] font-mono">
-              {simResult.explanation_layer || "AI EXPLANATION LAYER — FOR HUMAN DECISION-MAKER REVIEW"}
-            </span>
-          </div>
-
-          {/* BASELINE → INTERVENTION → SIMULATED OUTCOME VISUAL PIPELINE */}
-          <div className="border rounded-sm bg-white p-4 space-y-3" style={{ borderColor: C.line }}>
-            <div className="flex items-center justify-between pb-2 border-b text-xs" style={{ borderColor: C.line }}>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#22364A]" />
-                <h4 className="f-serif text-sm font-bold text-[#1C2420]">
-                  Relocation Impact Model: Baseline → Intervention → Outcome
-                </h4>
-              </div>
-              <span className="text-[10px] font-mono text-[#565F58] bg-[#FAF9F5] px-2 py-0.5 rounded-xs border border-[#D9D4C7]">
-                Demonstration Scenario Model
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
-              {/* Stage 1: Baseline */}
-              <div className="p-3.5 rounded-sm border border-[#B5462F]/30 bg-[#FFFDFD] flex flex-col justify-between space-y-2">
-                <div>
-                  <div className="flex items-center justify-between gap-1 mb-1.5">
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-xs bg-[#B5462F] text-white">
-                      1. Baseline Hazard
-                    </span>
-                    <TierBadge tier={selectedHab?.tier || "Immediate"} />
-                  </div>
-                  <h5 className="font-bold text-sm text-[#1C2420]">{simResult.habitation_name}</h5>
-                  <p className="text-[11px] text-[#565F58] mt-0.5">{selectedHab?.region} · {selectedHab?.hazard}</p>
-                </div>
-
-                <div className="pt-2 border-t border-[#D9D4C7]/50 space-y-1 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-[#565F58]">Composite Risk:</span>
-                    <span className="f-mono font-bold text-[#B5462F]">{selectedHab?.score || 80}/100</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#565F58]">Exposed Population:</span>
-                    <span className="f-mono font-bold text-[#1C2420]">{simResult.population.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stage 2: Intervention Vector */}
-              <div className="p-3.5 rounded-sm border border-[#22364A]/30 bg-[#F4F7FA] flex flex-col justify-between space-y-2">
-                <div>
-                  <div className="flex items-center justify-between gap-1 mb-1.5">
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-xs bg-[#22364A] text-white">
-                      2. Relocation Vector
-                    </span>
-                    <span className="text-[10px] font-mono font-semibold text-[#22364A]">
-                      {simResult.travel_distance_km} km transit
-                    </span>
-                  </div>
-                  <h5 className="font-bold text-sm text-[#1C2420]">{simResult.site_name}</h5>
-                  <p className="text-[11px] text-[#565F58] mt-0.5">Candidate Resettlement Site</p>
-                </div>
-
-                <div className="pt-2 border-t border-[#D9D4C7]/50 space-y-1 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-[#565F58]">Site Effective Cap:</span>
-                    <span className="f-mono font-bold text-[#2A6B52]">{simResult.effective_capacity.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#565F58]">Liebig Bottleneck:</span>
-                    <span className="font-semibold text-[#B5462F]">{simResult.bottleneck}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stage 3: Simulated Outcome */}
-              <div className="p-3.5 rounded-sm border border-[#2A6B52]/30 bg-[#F6FAF8] flex flex-col justify-between space-y-2">
-                <div>
-                  <div className="flex items-center justify-between gap-1 mb-1.5">
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-xs bg-[#2A6B52] text-white">
-                      3. Simulated Result
-                    </span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-xs ${
-                      simResult.capacity_exceeded ? "bg-[#FFF9EE] text-[#C0872B]" : "bg-[#E8F0EC] text-[#2A6B52]"
-                    }`}>
-                      {simResult.capacity_exceeded ? "Capacity Deficit" : "Viable Match"}
-                    </span>
-                  </div>
-                  <h5 className="font-bold text-sm text-[#2A6B52]">
-                    −{simResult.hazard_reduction_pct}% Hazard Exposure
-                  </h5>
-                  <p className="text-[11px] text-[#565F58] mt-0.5">
-                    {simResult.capacity_exceeded
-                      ? `Exceeds capacity by ${simResult.population - simResult.effective_capacity} residents`
-                      : `Sufficient capacity (+${simResult.effective_capacity - simResult.population} headroom)`}
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-[#D9D4C7]/50 space-y-1 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-[#565F58]">Absorption Load:</span>
-                    <span className="f-mono font-bold text-[#1C2420]">
-                      {Math.round((simResult.population / (simResult.effective_capacity || 1)) * 100)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#565F58]">Decision Status:</span>
-                    <span className="font-semibold text-[#22364A] truncate">
-                      {simResult.decision_status?.replace(/_/g, " ") || "VIABLE CANDIDATE"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Viability Drivers, Bottlenecks & Decision Blockers Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs bg-[#FAF9F5] p-3.5 rounded-sm border border-[#D9D4C7]">
-            <div className="space-y-1">
-              <p className="font-bold text-[#2A6B52] uppercase text-[10px] tracking-wider">
-                Why This Site (Viability Drivers)
-              </p>
-              <ul className="list-disc pl-4 space-y-0.5 text-[#1C2420] text-[11px]">
-                {(simResult.why_this_site || [
-                  `Reduces hazard exposure by ${simResult.hazard_reduction_pct}%`,
-                  `Effective capacity supports ${simResult.effective_capacity} persons`
-                ]).map((w, idx) => (
-                  <li key={idx}>{w}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-1">
-              <p className="font-bold text-[#C0872B] uppercase text-[10px] tracking-wider">
-                Constraints & Bottlenecks
-              </p>
-              <ul className="list-disc pl-4 space-y-0.5 text-[#1C2420] text-[11px]">
-                {(simResult.why_not_this_site || [
-                  `Primary capacity bottleneck: ${simResult.bottleneck}`,
-                  `Transit distance: ${simResult.travel_distance_km} km`
-                ]).map((w, idx) => (
-                  <li key={idx}>{w}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-1">
-              <p className="font-bold text-[#B5462F] uppercase text-[10px] tracking-wider">
-                Primary Decision Blockers
-              </p>
-              <ul className="list-disc pl-4 space-y-0.5 text-[#1C2420] text-[11px]">
-                {(simResult.primary_blockers && simResult.primary_blockers.length > 0 ? simResult.primary_blockers : [
-                  simResult.capacity_exceeded
-                    ? `Capacity deficit of ${simResult.population - simResult.effective_capacity} residents`
-                    : "No structural bottlenecks exceeding threshold",
-                  "Cadastral revenue clearance pending field survey"
-                ]).map((b, idx) => (
-                  <li key={idx}>{b}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {briefError && (
-            <div
-              className="border rounded-sm p-3 flex items-start gap-2"
-              style={{ borderColor: C.immediate, backgroundColor: `${C.immediate}0D` }}
-            >
-              <FileWarning size={16} style={{ color: C.immediate }} className="mt-0.5 shrink-0" />
-              <p className="f-sans text-xs" style={{ color: C.immediate }}>
-                {briefError}
-              </p>
-            </div>
-          )}
-
-          {/* Operational & Financial Mode Tabs */}
-          <div className="flex border-b border-[#D9D4C7] gap-2 pt-1 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab("spatial")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium border-b-2 cursor-pointer transition-colors whitespace-nowrap ${
-                activeTab === "spatial"
-                  ? "border-[#22364A] text-[#22364A] font-semibold"
-                  : "border-transparent text-[#565F58] hover:text-[#1C2420]"
-              }`}
-            >
-              <Activity size={14} /> Spatial &amp; Carrying Capacity
-            </button>
-            <button
-              onClick={() => setActiveTab("phases")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium border-b-2 cursor-pointer transition-colors whitespace-nowrap ${
-                activeTab === "phases"
-                  ? "border-[#22364A] text-[#22364A] font-semibold"
-                  : "border-transparent text-[#565F58] hover:text-[#1C2420]"
-              }`}
-            >
-              <Calendar size={14} /> 3-Phase Operational Planning Strategy
-            </button>
-          </div>
-
-          {/* TAB 1: Spatial Capacity & Risk Radar */}
-          {activeTab === "spatial" && (
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
-              <div
-                className="border rounded-sm p-4 bg-white"
-                style={{ borderColor: C.line }}
+                <Activity size={13} /> Viability Drivers &amp; Constraints
+              </button>
+              <button
+                onClick={() => setActiveTab("finance")}
+                className={`py-2.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "finance"
+                    ? "border-[#22364A] text-[#1C2420] font-bold"
+                    : "border-transparent text-[#565F58] hover:text-[#1C2420]"
+                }`}
               >
-                <p className="f-sans text-sm font-semibold mb-1 text-[#1C2420]">
-                  Before vs. After Hazard Profile
-                </p>
-                <p className="text-xs mb-3 text-[#565F58]">
-                  Multidimensional radar comparison showing drop in hazard exposure and accessibility deficit
-                </p>
-                <RiskRadarChart data={simResult.radar_data} height={280} />
-              </div>
-
-              <div
-                className="border rounded-sm p-4 space-y-4 bg-white"
-                style={{ borderColor: C.line }}
+                <IndianRupee size={13} /> Financial Outlay (PMAY-G / NDRF)
+              </button>
+              <button
+                onClick={() => setActiveTab("phases")}
+                className={`py-2.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "phases"
+                    ? "border-[#22364A] text-[#1C2420] font-bold"
+                    : "border-transparent text-[#565F58] hover:text-[#1C2420]"
+                }`}
               >
-                <div>
-                  <p className="f-sans text-xs text-[#565F58]">
-                    Resettlement Site Capacity Load
-                  </p>
-                  <p className="f-mono text-2xl font-bold text-[#1C2420]">
-                    {simResult.population}{" "}
-                    <span className="text-xs font-normal text-[#565F58]">
-                      / {simResult.effective_capacity} capacity
-                    </span>
-                  </p>
-                  <div className="h-2 rounded-full mt-2" style={{ backgroundColor: C.paperDim }}>
-                    <div
-                      className="h-2 rounded-full transition-all"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          (simResult.population / (simResult.effective_capacity || 1)) * 100
-                        )}%`,
-                        backgroundColor: simResult.capacity_exceeded ? C.immediate : C.pine,
-                      }}
-                    />
-                  </div>
-                  {simResult.capacity_exceeded && (
-                    <p className="f-sans text-xs mt-1.5 font-medium" style={{ color: C.immediate }}>
-                      Exceeds site bottleneck ({simResult.bottleneck}) — phased relocation or utility expansion required.
+                <Calendar size={13} /> 3-Phase District Contingency Strategy
+              </button>
+            </div>
+
+            <div className="p-4">
+              {/* TAB 1: Viability Drivers & Constraints */}
+              {activeTab === "blockers" && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 rounded-xs bg-[#F6FAF8] border border-[#2A6B52]/20 space-y-1.5">
+                    <p className="font-bold text-[#2A6B52] uppercase text-[10px] tracking-wider">
+                      Viability Drivers (Why This Site)
                     </p>
-                  )}
-                </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-[#1C2420] text-[11px]">
+                      {(simResult.why_this_site || [
+                        `Reduces hazard exposure by ${simResult.hazard_reduction_pct}%`,
+                        `Effective capacity supports ${simResult.effective_capacity} persons`,
+                      ]).map((w, idx) => (
+                        <li key={idx}>{w}</li>
+                      ))}
+                    </ul>
+                  </div>
 
-                <div className="pt-2 border-t" style={{ borderColor: C.line }}>
-                  <p className="f-sans text-xs text-[#565F58]">
-                    Actual Transit Distance
-                  </p>
-                  <p className="f-mono text-2xl font-bold text-[#1C2420]">
-                    {simResult.travel_distance_km}{" "}
-                    <span className="text-xs font-normal text-[#565F58]">km</span>
-                  </p>
-                  {simResult.travel_distance_km > 200 && (
-                    <span className="text-[10px] text-[#B5462F] font-semibold">
-                      (Out-of-Corridor / Inter-State Transit)
-                    </span>
-                  )}
-                </div>
+                  <div className="p-3 rounded-xs bg-[#FFFDF9] border border-[#C0872B]/30 space-y-1.5">
+                    <p className="font-bold text-[#C0872B] uppercase text-[10px] tracking-wider">
+                      Constraints &amp; Bottlenecks
+                    </p>
+                    <ul className="list-disc pl-4 space-y-0.5 text-[#1C2420] text-[11px]">
+                      {(simResult.why_not_this_site || [
+                        `Primary capacity bottleneck: ${simResult.bottleneck}`,
+                        `Transit distance: ${simResult.travel_distance_km} km`,
+                      ]).map((w, idx) => (
+                        <li key={idx}>{w}</li>
+                      ))}
+                    </ul>
+                  </div>
 
-                <div className="pt-2 border-t" style={{ borderColor: C.line }}>
-                  <p className="f-sans text-xs text-[#565F58]">
-                    Hazard Exposure Reduction
-                  </p>
-                  <p className="f-mono text-2xl font-bold" style={{ color: C.pine }}>
-                    −{simResult.hazard_reduction_pct}%
+                  <div className="p-3 rounded-xs bg-[#FFF8F6] border border-[#B5462F]/20 space-y-1.5">
+                    <p className="font-bold text-[#B5462F] uppercase text-[10px] tracking-wider">
+                      Primary Decision Blockers
+                    </p>
+                    <ul className="list-disc pl-4 space-y-0.5 text-[#1C2420] text-[11px]">
+                      {(simResult.primary_blockers && simResult.primary_blockers.length > 0 ? simResult.primary_blockers : [
+                        simResult.capacity_exceeded
+                          ? `Capacity deficit of ${simResult.population - simResult.effective_capacity} residents`
+                          : "No structural bottlenecks exceeding threshold",
+                        "Cadastral revenue clearance pending field survey",
+                      ]).map((b, idx) => (
+                        <li key={idx}>{b}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: Financial Outlay */}
+              {activeTab === "finance" && financialOutlay && (
+                <div className="space-y-3 text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="p-3 bg-[#FAF9F5] border rounded-xs" style={{ borderColor: C.line }}>
+                      <p className="text-[10px] text-[#565F58]">Estimated Households</p>
+                      <p className="f-mono text-lg font-bold text-[#1C2420]">{financialOutlay.households_count}</p>
+                    </div>
+                    <div className="p-3 bg-[#FAF9F5] border rounded-xs" style={{ borderColor: C.line }}>
+                      <p className="text-[10px] text-[#565F58]">Total Estimated Outlay</p>
+                      <p className="f-mono text-lg font-bold text-[#B5462F]">₹{financialOutlay.total_crores} Cr</p>
+                    </div>
+                    <div className="p-3 bg-[#FAF9F5] border rounded-xs" style={{ borderColor: C.line }}>
+                      <p className="text-[10px] text-[#565F58]">NDRF Central Share (75%)</p>
+                      <p className="f-mono text-lg font-bold text-[#2A6B52]">₹{financialOutlay.ndrf_central_share_crores} Cr</p>
+                    </div>
+                    <div className="p-3 bg-[#FAF9F5] border rounded-xs" style={{ borderColor: C.line }}>
+                      <p className="text-[10px] text-[#565F58]">SDRF State Share (25%)</p>
+                      <p className="f-mono text-lg font-bold text-[#22364A]">₹{financialOutlay.sdrf_state_share_crores} Cr</p>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-[#565F58]">
+                    Breakdown: PMAY-G Housing: ₹{financialOutlay.pmay_housing_crores} Cr · Land Acquisition &amp; Leveling: ₹{financialOutlay.land_development_crores} Cr · Basic Infrastructure: ₹{financialOutlay.infrastructure_crores} Cr.
                   </p>
                 </div>
-              </div>
+              )}
+
+              {/* TAB 3: 3-Phase Operational Strategy */}
+              {activeTab === "phases" && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 rounded-xs border border-[#B5462F]/30 bg-[#FFFDFD] space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-xs bg-[#B5462F] text-white">
+                        Phase 1: Zero-Hour
+                      </span>
+                      <span className="font-mono text-[10px] font-bold text-[#B5462F]">0 – 48 Hours</span>
+                    </div>
+                    <h5 className="font-bold text-xs text-[#1C2420]">Pre-emptive Evacuation</h5>
+                    <p className="text-[11px] text-[#565F58] leading-relaxed">
+                      Evacuate vulnerable populations from {simResult.habitation_name} to designated cyclone/flood shelters with SDRF emergency communication.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xs border border-[#C0872B]/30 bg-[#FFFEFA] space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-xs bg-[#C0872B] text-white">
+                        Phase 2: Stabilization
+                      </span>
+                      <span className="font-mono text-[10px] font-bold text-[#C0872B]">1 – 6 Months</span>
+                    </div>
+                    <h5 className="font-bold text-xs text-[#1C2420]">Site Engineering &amp; Utilities</h5>
+                    <p className="text-[11px] text-[#565F58] leading-relaxed">
+                      Commission tubewells and utilities at {simResult.site_name} to resolve site bottleneck ({simResult.bottleneck}) and erect transitional weather-proof shelters.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xs border border-[#3D6B5C]/30 bg-[#F8FAF9] space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-xs bg-[#3D6B5C] text-white">
+                        Phase 3: Resettlement
+                      </span>
+                      <span className="font-mono text-[10px] font-bold text-[#3D6B5C]">6 – 18 Months</span>
+                    </div>
+                    <h5 className="font-bold text-xs text-[#1C2420]">Permanent Housing &amp; Patta</h5>
+                    <p className="text-[11px] text-[#565F58] leading-relaxed">
+                      Issue registered land assignment deeds (Pattas), disburse PMAY-G direct benefit transfers, and transfer civic registrations.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-
-          {/* TAB 2: 3-Phase Operational Planning Strategy */}
-          {activeTab === "phases" && (
-            <div className="border rounded-sm p-5 bg-white space-y-4" style={{ borderColor: C.line }}>
-              <div>
-                <h3 className="f-serif text-base font-bold text-[#1C2420]">
-                  3-Phase District Relocation & Rehabilitation Operational Strategy
-                </h3>
-                <p className="text-xs text-[#565F58] mt-0.5">
-                  Operational Planning Framework · District Emergency Contingency Strategy.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Phase 1 */}
-                <div className="p-4 rounded-sm border border-[#B5462F]/30 bg-[#FFFDFD] space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-xs bg-[#B5462F] text-white">
-                      Phase 1: Zero-Hour
-                    </span>
-                    <span className="text-[11px] font-mono font-bold text-[#B5462F]">0 – 48 Hours</span>
-                  </div>
-                  <h4 className="f-serif text-sm font-bold text-[#1C2420]">
-                    Pre-emptive Evacuation to Relief Shelters
-                  </h4>
-                  <ul className="text-xs text-[#565F58] space-y-1.5 list-disc pl-4 leading-relaxed">
-                    <li>Immediate evacuation of vulnerable elderly, pregnant women, and children from {simResult.habitation_name} to designated pucca cyclone/flood shelters.</li>
-                    <li>SDRF quick-response watercraft and mobile emergency communication dispatched.</li>
-                    <li>Administrative boundary established prohibiting unauthorized entry into active hazard zone.</li>
-                  </ul>
-                  <div className="pt-2 border-t border-[#D9D4C7]/60 text-[11px] text-[#22364A] font-medium">
-                    Nodal Lead: Tehsildar & Sub-Divisional Police Officer
-                  </div>
-                </div>
-
-                {/* Phase 2 */}
-                <div className="p-4 rounded-sm border border-[#C0872B]/30 bg-[#FFFEFA] space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-xs bg-[#C0872B] text-white">
-                      Phase 2: Stabilization
-                    </span>
-                    <span className="text-[11px] font-mono font-bold text-[#C0872B]">1 – 6 Months</span>
-                  </div>
-                  <h4 className="f-serif text-sm font-bold text-[#1C2420]">
-                    Site Engineering & Utility Commissioning
-                  </h4>
-                  <ul className="text-xs text-[#565F58] space-y-1.5 list-disc pl-4 leading-relaxed">
-                    <li>PWD executes topographical site leveling, retaining walls, and {simResult.travel_distance_km} km access road link to {simResult.site_name}.</li>
-                    <li>PHED commissions deep-bore tubewell and overhead storage to overcome site bottleneck ({simResult.bottleneck}).</li>
-                    <li>Erection of transitional weather-proof CGI sheet transit shelters for displaced families.</li>
-                  </ul>
-                  <div className="pt-2 border-t border-[#D9D4C7]/60 text-[11px] text-[#22364A] font-medium">
-                    Nodal Lead: Executive Engineer (PWD & PHED)
-                  </div>
-                </div>
-
-                {/* Phase 3 */}
-                <div className="p-4 rounded-sm border border-[#3D6B5C]/30 bg-[#F8FAF9] space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-xs bg-[#3D6B5C] text-white">
-                      Phase 3: Resettlement
-                    </span>
-                    <span className="text-[11px] font-mono font-bold text-[#3D6B5C]">6 – 18 Months</span>
-                  </div>
-                  <h4 className="f-serif text-sm font-bold text-[#1C2420]">
-                    Patta Distribution & Pucca Handover
-                  </h4>
-                  <ul className="text-xs text-[#565F58] space-y-1.5 list-disc pl-4 leading-relaxed">
-                    <li>Issuance of registered Land Assignment Deeds (Pattas) of 3 cents freehold title per eligible household under State Revenue Code.</li>
-                    <li>Release of PMAY-G direct benefit transfer tranches for permanent disaster-resilient housing.</li>
-                    <li>Transfer of ration cards, Anganwadi enrollments, and rural livelihoods to destination panchayat.</li>
-                  </ul>
-                  <div className="pt-2 border-t border-[#D9D4C7]/60 text-[11px] text-[#22364A] font-medium">
-                    Nodal Lead: District Collector & DDMA Chairperson
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -782,7 +643,7 @@ export function WhatIfSimulator({
         <EmptyState
           icon={Sliders}
           title="No simulation run yet"
-          body="Choose a source habitation and candidate site above, then click 'Run Simulation' to model transit feasibility, capacity load, and before-vs-after exposure."
+          body="Select a source habitation and candidate site above, then click 'Run Simulation' to model transit feasibility, capacity load, and before-vs-after exposure reduction."
         />
       )}
 

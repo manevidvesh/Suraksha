@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   ShieldCheck,
-  MapPin,
   ChevronDown,
   XCircle,
   ArrowRight,
@@ -27,7 +26,7 @@ import {
 } from "lucide-react";
 import { useRiskData } from "@/hooks/useRiskData";
 import { api } from "@/lib/api";
-import { C, CAP_LABELS } from "@/components/Common/constants";
+import { C } from "@/components/Common/constants";
 import { SectionHead } from "@/components/Common/SectionHead";
 import { TierBadge } from "@/components/Common/Badges";
 import { Sidebar } from "@/components/Navigation/Sidebar";
@@ -38,10 +37,7 @@ import { CorridorAllocationFlow } from "@/components/Relocation/CorridorAllocati
 import { CorridorSelector, filterHabitationsByCorridor, filterSitesByCorridor } from "@/components/Common";
 import {
   HabitationMatchingResult,
-  HabitationSiteCandidateMatch,
   SiteCentricMatchingResult,
-  CandidateSite,
-  Habitation,
 } from "@/types";
 
 const DECISION_OUTCOMES = [
@@ -119,9 +115,10 @@ function RelocationContent() {
   const [matchingResult, setMatchingResult] = useState<HabitationMatchingResult | null>(null);
   const [matchingLoading, setMatchingLoading] = useState(false);
   const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
-  const [showExcluded, setShowExcluded] = useState(true);
+  const [showExcluded, setShowExcluded] = useState(false);
+  const [frameworkExpanded, setFrameworkExpanded] = useState(false);
 
-  // Competent authority field review overrides (stored locally in session)
+  // Competent authority field review overrides
   const [fieldOverrides, setFieldOverrides] = useState<Record<string, "suitable" | "unsuitable">>({});
 
   // Site-centric view state
@@ -266,15 +263,15 @@ function RelocationContent() {
 
       <div className="flex-1 min-w-0">
         <TopBar
-          title="SURAKSHA Relocation Intelligence"
+          title="Relocation Intelligence"
           mobileOpen={mobileOpen}
           setMobileOpen={setMobileOpen}
         />
 
-        <main className="px-5 sm:px-8 py-7 max-w-6xl">
+        <main className="px-5 sm:px-8 py-6 max-w-6xl space-y-4">
           <SectionHead
-            title="Many-to-Many Relocation Intelligence"
-            sub="Vulnerable settlements evaluated against multiple candidate resettlement sites. Independent screening separates site-level constraints from habitation-specific matching."
+            title="Relocation Intelligence &amp; Capacity"
+            sub="Screen candidate resettlement sites, inspect Liebig infrastructure bottlenecks, and compare destination options."
             action={
               <div className="flex items-center gap-2">
                 <Link
@@ -282,7 +279,7 @@ function RelocationContent() {
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border rounded-sm hover:bg-white text-[#22364A] transition-colors"
                   style={{ borderColor: C.line }}
                 >
-                  <Compass size={13} /> View on Map
+                  <Compass size={13} /> View Map
                 </Link>
                 <Link
                   href={`/simulation?hab=${activeHabitation?.id || "H1"}`}
@@ -295,11 +292,11 @@ function RelocationContent() {
           />
 
           {/* Operational Honesty Notice Banner */}
-          <div className="mb-4 p-3 rounded-sm bg-[#FFF9EE] border border-[#C0872B]/40 flex items-center justify-between gap-3 text-xs text-[#8C5D17] flex-wrap">
+          <div className="p-3 rounded-sm bg-[#FFF9EE] border border-[#C0872B]/40 flex items-center justify-between gap-3 text-xs text-[#8C5D17] flex-wrap">
             <div className="flex items-center gap-2">
-              <Info size={16} className="text-[#C0872B] shrink-0" />
+              <Info size={15} className="text-[#C0872B] shrink-0" />
               <span>
-                <strong>Operational Decision Standard:</strong> SURAKSHA verifies computational consistency, not real-world ground truth; field, legal, and administrative validation remain the responsibility of the competent authorities. Candidate sites are evaluated independently; ranking is contextual to the selected habitation.
+                <strong>Operational Decision Standard:</strong> Candidate sites are screened against baseline criteria; computational rankings do not replace ground-truth or administrative validation by competent disaster authorities.
               </span>
             </div>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded-xs bg-white border border-[#C0872B]/40 font-semibold shrink-0">
@@ -308,7 +305,7 @@ function RelocationContent() {
           </div>
 
           {/* Perspective Navigation Tabs */}
-          <div className="border-b mb-6 flex gap-6 text-sm font-medium" style={{ borderColor: C.line }}>
+          <div className="border-b flex gap-6 text-sm font-medium" style={{ borderColor: C.line }}>
             <button
               onClick={() => setActiveView("matching")}
               className={`pb-2.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
@@ -317,7 +314,7 @@ function RelocationContent() {
                   : "text-[#565F58] hover:text-[#1C2420] border-transparent"
               }`}
             >
-              <Activity size={15} /> Habitation → Candidate Matching (Contextual)
+              <Activity size={15} /> Habitation Matching
             </button>
             <button
               onClick={() => setActiveView("site_centric")}
@@ -327,7 +324,7 @@ function RelocationContent() {
                   : "text-[#565F58] hover:text-[#1C2420] border-transparent"
               }`}
             >
-              <Building size={15} /> Site-Centric Capacity &amp; Matches
+              <Building size={15} /> Site-Centric Capacity
             </button>
             <button
               onClick={() => setActiveView("screening_inventory")}
@@ -337,33 +334,19 @@ function RelocationContent() {
                   : "text-[#565F58] hover:text-[#1C2420] border-transparent"
               }`}
             >
-              <Layers size={15} /> All Candidate Sites (12-D Matrix)
+              <Layers size={15} /> 12-D Screening Matrix
             </button>
           </div>
 
           {/* VIEW 1: HABITATION -> CANDIDATE MATCHING */}
           {activeView === "matching" && (
-            <div className="space-y-6">
-              {/* Step 1: Regional Corridor & Habitation Selector */}
+            <div className="space-y-4">
+              {/* Regional Corridor & Habitation Selector */}
               <div className="border rounded-sm p-4 bg-white space-y-3" style={{ borderColor: C.line }}>
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-[#22364A] text-white flex items-center justify-center text-xs font-bold">
-                      1
-                    </span>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1C2420]">
-                      Select Vulnerable Habitation
-                    </h3>
-                  </div>
-                  <span className="text-[11px] text-[#565F58]">
-                    Filtering across {corridorHabitations.length} settlements
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <label className="text-[11px] text-[#565F58] font-medium block mb-1">
-                      Regional Corridor
+                      Regional Planning Corridor
                     </label>
                     <CorridorSelector
                       selectedCorridor={selectedCorridor}
@@ -433,7 +416,7 @@ function RelocationContent() {
                 onSelectSite={setSelectedSiteId}
               />
 
-              {/* Step 2: Matching Result Status Header */}
+              {/* Active Decision Outcome Header Banner */}
               {matchingResult && (
                 <div
                   className={`border rounded-sm p-4 flex items-start justify-between gap-3 flex-wrap ${
@@ -477,13 +460,70 @@ function RelocationContent() {
                     </div>
                   </div>
 
-                  <span className="text-[10px] font-mono text-[#565F58] bg-white/70 px-2 py-1 rounded-xs border border-[#D9D4C7] shrink-0">
-                    Decision Support · Prototype Heuristic
-                  </span>
+                  <button
+                    onClick={() => setFrameworkExpanded(!frameworkExpanded)}
+                    className="text-[11px] font-medium text-[#22364A] hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>{frameworkExpanded ? "Hide Decision Framework" : "Explore Decision Outcomes (5 States)"}</span>
+                    <ChevronDown size={12} className={`transition-transform ${frameworkExpanded ? "rotate-180" : ""}`} />
+                  </button>
                 </div>
               )}
 
-              {/* Step 3: Eligible Candidate Sites List */}
+              {/* Collapsible 5-State Decision Outcome Framework */}
+              {frameworkExpanded && matchingResult && (
+                <div className="border rounded-sm p-4 bg-white space-y-4" style={{ borderColor: C.line }}>
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#1C2420]">
+                      5-State Institutional Decision Outcome Framework
+                    </h4>
+                    <p className="text-[11px] text-[#565F58] mt-0.5">
+                      Standardized classification based on technical screening, Liebig bottlenecks, and evidence completeness.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-2.5">
+                    {DECISION_OUTCOMES.map((outcome) => {
+                      const isActive = activeDecisionState === outcome.id;
+                      const Icon = outcome.icon;
+                      return (
+                        <div
+                          key={outcome.id}
+                          className={`p-3 rounded-sm border flex flex-col justify-between transition-all ${
+                            isActive
+                              ? `${outcome.activeBgClass} ${outcome.borderClass} border-2 shadow-xs`
+                              : "bg-[#FAF9F5] border-[#E5E0D5] opacity-75"
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-1 mb-1.5">
+                              <span className="text-[9px] font-mono font-bold px-1 py-0.2 rounded-xs bg-white border border-[#D9D4C7] text-[#565F58]">
+                                Outcome {outcome.number}
+                              </span>
+                              {isActive && (
+                                <span className={`text-[8.5px] font-bold uppercase tracking-wider px-1 py-0.2 rounded-xs ${outcome.badgeClass}`}>
+                                  Active
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-start gap-1 mb-1">
+                              <Icon size={13} className={`${outcome.iconColor} shrink-0 mt-0.5`} />
+                              <h5 className="text-[11px] font-bold text-[#1C2420] leading-snug">
+                                {outcome.title}
+                              </h5>
+                            </div>
+                            <p className="text-[10px] text-[#565F58] leading-tight">
+                              {outcome.summary}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Eligible Candidate Sites List */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-[#1C2420] flex items-center gap-1.5">
@@ -501,27 +541,18 @@ function RelocationContent() {
                   </div>
                 ) : matchingResult && matchingResult.eligible_sites.length === 0 ? (
                   <div className="p-6 border rounded-sm bg-white text-center space-y-2" style={{ borderColor: C.line }}>
-                    <AlertCircle size={24} className="mx-auto text-[#C0872B]" />
+                    <AlertCircle size={22} className="mx-auto text-[#C0872B]" />
                     <p className="font-serif text-sm font-bold text-[#1C2420]">
                       NO SUITABLE CANDIDATE SITE IDENTIFIED
                     </p>
                     <p className="text-xs text-[#565F58] max-w-lg mx-auto">
-                      No candidate relocation site currently satisfies the prototype&apos;s baseline screening and effective capacity requirements for {activeHabitation?.name}. The decision engine does not force a destination when constraints are breached.
+                      No candidate relocation site currently satisfies the baseline screening and effective capacity requirements for {activeHabitation?.name}. The decision engine does not force an unsuitable site when constraints are breached.
                     </p>
-                    <div className="pt-2 flex justify-center gap-2">
-                      <a
-                        href="#decision-framework"
-                        className="px-3 py-1.5 text-xs font-semibold rounded-xs bg-[#FFF9EE] border border-[#C0872B] text-[#8C5D17] hover:bg-[#FFF3D6] cursor-pointer inline-flex items-center gap-1"
-                      >
-                        Inspect Decision Framework &amp; Candidate Measures
-                      </a>
-                    </div>
                   </div>
                 ) : (
                   matchingResult?.eligible_sites.map((match) => {
                     const isExpanded = expandedSiteId === match.site_id;
                     const siteObj = sites.find((s) => s.id === match.site_id);
-                    const isOverridden = fieldOverrides[match.site_id] === "unsuitable";
 
                     return (
                       <div
@@ -534,7 +565,7 @@ function RelocationContent() {
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-xs bg-[#22364A] text-white">
-                                Rank {match.rank} among eligible alternatives
+                                Rank {match.rank}
                               </span>
                               <h4 className="font-bold text-sm text-[#1C2420]">
                                 {match.site_name}
@@ -546,7 +577,7 @@ function RelocationContent() {
 
                             <p className="text-xs text-[#565F58] mt-1 flex items-center gap-3 flex-wrap">
                               <span>{match.region}</span>
-                              <span>· Transit Distance: <strong>{match.distance_km ?? "Data unavailable"} km</strong></span>
+                              <span>· Transit: <strong>{match.distance_km ?? "N/A"} km</strong></span>
                               <span>· Bottleneck: <strong className="text-[#B5462F]">{match.bottleneck}</strong></span>
                               <span>· Match Score: <strong>{match.match_score}/100</strong></span>
                             </p>
@@ -576,9 +607,9 @@ function RelocationContent() {
                               <button
                                 onClick={() => handleToggleOverride(match.site_id)}
                                 className="px-2.5 py-1.5 text-xs border rounded-xs hover:bg-[#FFF1F0] text-[#B5462F] border-[#B5462F]/40 cursor-pointer transition-colors"
-                                title="Field Review / Competent Authority Override: mark site as unsuitable"
+                                title="Field Review Override: mark site as unsuitable"
                               >
-                                <UserCheck size={12} /> Override Unsuitable
+                                <UserCheck size={12} /> Override
                               </button>
 
                               <button
@@ -603,7 +634,7 @@ function RelocationContent() {
                               <CapacityBreakdown cap={siteObj.cap} bottleneck={match.bottleneck} />
                             </div>
 
-                            {/* Computational Merits vs Key Constraints */}
+                            {/* Computational Merits vs Constraints */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                               <div className="p-3 rounded-xs bg-[#F4F7FA] border border-[#22364A]/20 space-y-1.5">
                                 <span className="font-bold text-[#22364A] text-[11px] uppercase tracking-wider flex items-center gap-1.5">
@@ -677,7 +708,7 @@ function RelocationContent() {
                 )}
               </div>
 
-              {/* Step 4: Excluded Candidates Accordion */}
+              {/* Excluded Candidates Accordion */}
               {matchingResult && matchingResult.excluded_sites.length > 0 && (
                 <div className="border rounded-sm bg-white overflow-hidden" style={{ borderColor: C.line }}>
                   <button
@@ -687,7 +718,7 @@ function RelocationContent() {
                     <div className="flex items-center gap-2">
                       <AlertTriangle size={15} className="text-[#B5462F]" />
                       <span className="font-bold text-xs text-[#1C2420]">
-                        Why were {matchingResult.excluded_sites.length} candidate site(s) excluded? (Exclusion &amp; Bottleneck Reasons)
+                        Excluded Candidate Sites ({matchingResult.excluded_sites.length}) — Exclusion &amp; Bottleneck Reasons
                       </span>
                     </div>
                     <ChevronDown size={14} className={`text-[#565F58] transition-transform ${showExcluded ? "rotate-180" : ""}`} />
@@ -730,7 +761,7 @@ function RelocationContent() {
                                   className="px-2.5 py-1 text-xs border rounded-xs hover:bg-[#F7F5F1] text-[#22364A] cursor-pointer"
                                   style={{ borderColor: C.line }}
                                 >
-                                  Remove Unsuitable Override
+                                  Remove Override
                                 </button>
                               ) : (
                                 <button
@@ -749,174 +780,34 @@ function RelocationContent() {
                 </div>
               )}
 
-              {/* Step 5: Five-State Decision Outcome Framework & Operational Considerations */}
-              {matchingResult && (
-                <div id="decision-framework" className="border rounded-sm p-5 bg-white space-y-5" style={{ borderColor: C.line }}>
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div>
-                      <h3 className="f-serif text-base font-bold text-[#1C2420]">
-                        Step 5: Relocation Decision Outcome Framework
-                      </h3>
-                      <p className="text-xs text-[#565F58] mt-0.5">
-                        Institutional decision outcome classification for <strong>{activeHabitation?.name}</strong> based on technical screening, carrying capacity, and evidence completeness.
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-[#565F58]">Active State:</span>
-                      <span
-                        className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-xs uppercase tracking-wider ${
-                          activeDecisionState === "RELOCATION_OPTIONS_AVAILABLE"
-                            ? "bg-[#2A6B52] text-white"
-                            : activeDecisionState === "NO_ELIGIBLE_CANDIDATE_SITE"
-                            ? "bg-[#B5462F] text-white"
-                            : activeDecisionState === "INSUFFICIENT_CAPACITY"
-                            ? "bg-[#C0872B] text-white"
-                            : activeDecisionState === "INSUFFICIENT_EVIDENCE"
-                            ? "bg-[#565F58] text-white"
-                            : "bg-[#22364A] text-white"
-                        }`}
-                      >
-                        {DECISION_OUTCOMES.find((o) => o.id === activeDecisionState)?.title || activeDecisionState}
-                      </span>
-                    </div>
+              {/* Secondary Operational Considerations */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <div className="p-3.5 rounded-sm bg-[#F4F7FA] border border-[#22364A]/20 space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#22364A]">
+                    <ShieldAlert size={14} className="text-[#22364A]" />
+                    <span>Temporary Protective Measures</span>
                   </div>
-
-                  {/* 5 Decision Outcomes Reference Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                    {DECISION_OUTCOMES.map((outcome) => {
-                      const isActive = activeDecisionState === outcome.id;
-                      const Icon = outcome.icon;
-                      return (
-                        <div
-                          key={outcome.id}
-                          className={`p-3.5 rounded-sm border flex flex-col justify-between transition-all ${
-                            isActive
-                              ? `${outcome.activeBgClass} ${outcome.borderClass} border-2 shadow-xs`
-                              : "bg-[#FAF9F5] border-[#E5E0D5] opacity-75 hover:opacity-100"
-                          }`}
-                        >
-                          <div>
-                            <div className="flex items-center justify-between gap-1 mb-2">
-                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-xs bg-white border border-[#D9D4C7] text-[#565F58]">
-                                Outcome {outcome.number}
-                              </span>
-                              {isActive && (
-                                <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-xs ${outcome.badgeClass}`}>
-                                  Active
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-start gap-1.5 mb-1.5">
-                              <Icon size={14} className={`${outcome.iconColor} shrink-0 mt-0.5`} />
-                              <h4 className="text-xs font-bold text-[#1C2420] leading-snug">
-                                {outcome.title}
-                              </h4>
-                            </div>
-                            <p className="text-[11px] text-[#565F58] leading-relaxed">
-                              {outcome.summary}
-                            </p>
-                          </div>
-
-                          <div className="mt-3 pt-2 border-t border-[#D9D4C7]/50 text-[10px] text-[#1C2420] font-medium">
-                            {outcome.detail}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Contextual Finding for Active Habitation */}
-                  <div
-                    className={`p-4 rounded-sm border ${
-                      activeDecisionState === "RELOCATION_OPTIONS_AVAILABLE"
-                        ? "bg-[#E8F0EC]/50 border-[#2A6B52]/30"
-                        : activeDecisionState === "NO_ELIGIBLE_CANDIDATE_SITE"
-                        ? "bg-[#FFF1F0]/50 border-[#B5462F]/30"
-                        : activeDecisionState === "INSUFFICIENT_CAPACITY"
-                        ? "bg-[#FFF9EE]/50 border-[#C0872B]/30"
-                        : activeDecisionState === "INSUFFICIENT_EVIDENCE"
-                        ? "bg-[#F7F5F1] border-[#565F58]/30"
-                        : "bg-[#F4F7FA] border-[#22364A]/30"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      <div>
-                        <h4 className="text-xs font-bold text-[#1C2420] flex items-center gap-1.5">
-                          <span>Decision Support Finding:</span>
-                          <span className="font-semibold text-[#565F58]">{activeHabitation?.name}</span>
-                        </h4>
-                        <p className="text-xs text-[#1C2420] mt-1 leading-relaxed">
-                          {activeDecisionState === "RELOCATION_OPTIONS_AVAILABLE" && (
-                            <>
-                              Candidate relocation sites passed baseline screening and have relevant capacity information. {matchingResult.eligible_sites.length} site(s) available within the search corridor. The recommended primary candidate is <strong>{matchingResult.eligible_sites[0]?.site_name}</strong> (distance: {matchingResult.eligible_sites[0]?.distance_km} km, remaining capacity: {matchingResult.eligible_sites[0]?.remaining_capacity.toLocaleString()} persons).
-                            </>
-                          )}
-                          {activeDecisionState === "NO_ELIGIBLE_CANDIDATE_SITE" && (
-                            <>
-                              No candidate site passed the required screening conditions. All {matchingResult.excluded_sites.length} evaluated site(s) within the operational radius trigger environmental, steep slope (&gt;22°), or statutory reserve forest restrictions.
-                            </>
-                          )}
-                          {activeDecisionState === "INSUFFICIENT_CAPACITY" && (
-                            <>
-                              Eligible candidate sites exist, but available capacity is insufficient for the assessed demand ({activeHabitation?.pop.toLocaleString()} residents). Liebig bottleneck constraints restrict absorption at current municipal infrastructure thresholds.
-                            </>
-                          )}
-                          {activeDecisionState === "INSUFFICIENT_EVIDENCE" && (
-                            <>
-                              Critical information required for screening or matching is unavailable or unresolved. Field geotechnical borehole verification or revenue title verification required before formal administrative relocation orders.
-                            </>
-                          )}
-                          {activeDecisionState === "FIELD_REVIEW_REQUIRED" && (
-                            <>
-                              Human validation or field officer override recorded ({Object.keys(fieldOverrides).length} override(s) active). Field, legal, and administrative validation remain the responsibility of the competent authorities.
-                            </>
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Pending validation or unknown evidence list if any */}
-                    {matchingResult.unknown_evidence && matchingResult.unknown_evidence.length > 0 && (
-                      <div className="mt-2.5 pt-2 border-t border-black/10 text-[11px] text-[#565F58]">
-                        <span className="font-semibold text-[#1C2420]">Pending Evidence Verification: </span>
-                        {matchingResult.unknown_evidence.join(" · ")}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Secondary Operational Considerations */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                    {/* Secondary Note 1: Temporary Protective Measures */}
-                    <div className="p-3.5 rounded-sm bg-[#F4F7FA] border border-[#22364A]/20 space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#22364A]">
-                        <ShieldAlert size={14} className="text-[#22364A]" />
-                        <span>Temporary Protective Measures</span>
-                      </div>
-                      <p className="text-xs text-[#565F58] leading-relaxed">
-                        Temporary protective measures may be considered during an active hazard event (e.g., immediate evacuation, temporary shelter activation, community warning alerts, and emergency relief prepositioning).
-                      </p>
-                    </div>
-
-                    {/* Secondary Note 2: Candidate In-Situ Measures */}
-                    <div className="p-3.5 rounded-sm bg-[#FFFDF9] border border-[#E8DCC4] space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#8C5D17]">
-                        <LifeBuoy size={14} className="text-[#C0872B]" />
-                        <span>Candidate Measures for Consideration by Competent Authority</span>
-                      </div>
-                      <p className="text-xs text-[#565F58] leading-relaxed">
-                        Candidate Measures for Consideration by the Competent Authority: When planned relocation is constrained, candidate fallback measures (slope stabilization, drainage improvement, early warning) may be evaluated by competent technical departments.
-                      </p>
-                    </div>
-                  </div>
+                  <p className="text-xs text-[#565F58] leading-relaxed">
+                    Immediate evacuation, temporary shelter activation, early warning alerts, and relief prepositioning for active hazard emergencies.
+                  </p>
                 </div>
-              )}
+
+                <div className="p-3.5 rounded-sm bg-[#FFFDF9] border border-[#E8DCC4] space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#8C5D17]">
+                    <LifeBuoy size={14} className="text-[#C0872B]" />
+                    <span>Candidate In-Situ Measures</span>
+                  </div>
+                  <p className="text-xs text-[#565F58] leading-relaxed">
+                    When relocation is constrained, candidate in-situ measures (slope stabilization, polder dykes, drainage) may be evaluated by competent technical departments.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
           {/* VIEW 2: SITE-CENTRIC INVENTORY & MATCHES */}
           {activeView === "site_centric" && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="border rounded-sm p-4 bg-white space-y-3" style={{ borderColor: C.line }}>
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
@@ -988,9 +879,6 @@ function RelocationContent() {
                     <h5 className="text-xs font-bold uppercase tracking-wider text-[#2A6B52] flex items-center gap-1.5">
                       <CheckCircle2 size={14} /> Potentially Matched Habitations ({siteCentricResult.eligible_habitations.length})
                     </h5>
-                    <p className="text-[11px] text-[#565F58]">
-                      Habitations whose population demand fits within effective capacity and within operational corridor distance:
-                    </p>
 
                     {siteCentricResult.eligible_habitations.length === 0 ? (
                       <p className="text-xs text-[#565F58] italic p-3 bg-[#FAF9F5] border rounded-xs">
@@ -1047,18 +935,16 @@ function RelocationContent() {
             </div>
           )}
 
-          {/* VIEW 3: SCREENING INVENTORY (EXISTING SITE LIST) */}
+          {/* VIEW 3: SCREENING INVENTORY */}
           {activeView === "screening_inventory" && (
             <div className="border rounded-sm p-5 bg-white space-y-4" style={{ borderColor: C.line }}>
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                  <h3 className="font-serif text-base font-bold text-[#1C2420]">
-                    Candidate Resettlement Sites Screening Matrix
-                  </h3>
-                  <p className="text-xs text-[#565F58]">
-                    Evaluated and ranked by Liebig effective capacity — strictly bounded by the tightest infrastructure bottleneck.
-                  </p>
-                </div>
+              <div>
+                <h3 className="font-serif text-base font-bold text-[#1C2420]">
+                  Candidate Resettlement Sites Screening Matrix
+                </h3>
+                <p className="text-xs text-[#565F58]">
+                  Evaluated and ranked by Liebig effective capacity — strictly bounded by the tightest infrastructure bottleneck.
+                </p>
               </div>
 
               <SiteList
@@ -1077,7 +963,7 @@ function RelocationContent() {
 
 export default function RelocationSitesPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-xs text-[#565F58]">Loading SURAKSHA Relocation Intelligence…</div>}>
+    <Suspense fallback={<div className="p-8 text-xs text-[#565F58]">Loading Relocation Intelligence…</div>}>
       <RelocationContent />
     </Suspense>
   );

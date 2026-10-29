@@ -4,38 +4,31 @@ import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   Search,
-  RotateCcw,
   Loader2,
-  Info,
   ArrowRight,
   Plus,
-  Sliders,
   LifeBuoy,
   Calculator,
   History,
   ShieldCheck,
   FileCheck,
+  Sliders,
 } from "lucide-react";
 import { useRiskData } from "@/hooks/useRiskData";
-import { Habitation } from "@/types";
 import { api } from "@/lib/api";
 import { C } from "@/components/Common/constants";
 import { SectionHead } from "@/components/Common/SectionHead";
-import { Slider } from "@/components/Common/Slider";
 import { TierBadge } from "@/components/Common/Badges";
 import { Sidebar } from "@/components/Navigation/Sidebar";
 import { TopBar } from "@/components/Navigation/TopBar";
 import { HabitationTable, HabitationModal } from "@/components/HabitationTable";
-import { VulnerabilityBarChart } from "@/components/Charts/VulnerabilityBarChart";
 import {
   CorridorSelector,
   filterHabitationsByCorridor,
   CORRIDORS,
   AdaptationStrategyModal,
   McdaExplainerModal,
-  DataConfidencePanel,
   McdaScenarioPanel,
-  EvidenceGapPanel,
   HistoricalEvidenceModal,
   AssessmentProvenanceModal,
   HumanFieldReviewModal,
@@ -67,9 +60,6 @@ export default function HabitationsPage() {
   const [breakdown, setBreakdown] = useState<any>(null);
   const [loadingBreakdown, setLoadingBreakdown] = useState(false);
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
-  const [activePresetId, setActivePresetId] = useState<string>("NDMA-WG-2019");
-  const [cabinetOverrideOpen, setCabinetOverrideOpen] = useState(false);
-  const [cabinetOverrideReason, setCabinetOverrideReason] = useState("");
 
   const corridorHabitations = useMemo(() => {
     return filterHabitationsByCorridor(habitations, selectedCorridor);
@@ -124,34 +114,23 @@ export default function HabitationsPage() {
     };
   }, [sel?.id, weights]);
 
-  const factorList = useMemo(() => {
-    if (breakdown?.factors) return breakdown.factors;
-    if (sel?.f) {
-      return Object.entries(sel.f).map(([k, v]) => ({
-        factor: k,
-        value: Number(v),
-      }));
-    }
-    return [];
-  }, [breakdown, sel]);
-
   return (
     <div className="f-sans flex min-h-screen" style={{ backgroundColor: C.paper }}>
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       <div className="flex-1 min-w-0">
         <TopBar
-          title="SURAKSHA Settlements & Risk Scoring"
+          title="Settlement Risk Scoring"
           mobileOpen={mobileOpen}
           setMobileOpen={setMobileOpen}
         />
 
-        <main className="px-5 sm:px-8 py-7 max-w-6xl">
+        <main className="px-5 sm:px-8 py-6 max-w-6xl space-y-5">
           <SectionHead
             title="Settlements & Multi-Criteria Risk Scoring"
-            sub="Calibrate weights for hazard intensity, population exposure, social vulnerability, historical frequency, and accessibility deficit to recalculate priority tiers in real time."
+            sub="Deterministic MCDA scoring across hazard, exposure, vulnerability, history, and accessibility deficit."
             action={
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {isCalculating && (
                   <span className="inline-flex items-center gap-1.5 text-xs text-[#565F58]">
                     <Loader2 size={13} className="animate-spin text-[#22364A]" /> Recalculating…
@@ -167,9 +146,9 @@ export default function HabitationsPage() {
             }
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-[290px_1fr] gap-6">
-            {/* MCDA Multi-Criteria Weight Sensitivity & Planning Scenario Panel */}
-            <div className="h-fit">
+          <div className="grid grid-cols-1 lg:grid-cols-[290px_1fr] gap-6 items-start">
+            {/* MCDA Weight Sensitivity & Planning Scenario Panel */}
+            <div className="sticky top-6">
               <McdaScenarioPanel
                 weights={weights}
                 onWeightsChange={setWeights}
@@ -189,8 +168,8 @@ export default function HabitationsPage() {
 
             {/* Habitations List and Detail View */}
             <div className="space-y-4">
-              {/* Regional Planning Corridor Selector */}
-              <div className="bg-white border p-3.5 rounded-sm" style={{ borderColor: C.line }}>
+              {/* Regional Corridor Selector */}
+              <div className="bg-white border p-3 rounded-sm" style={{ borderColor: C.line }}>
                 <CorridorSelector
                   selectedCorridor={selectedCorridor}
                   onSelectCorridor={handleSelectCorridor}
@@ -207,7 +186,7 @@ export default function HabitationsPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter by habitation name, district, or primary hazard…"
+                  placeholder="Filter settlements by name, district, or primary hazard…"
                   className="w-full pl-9 pr-4 py-2 text-xs border rounded-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#22364A]"
                   style={{ borderColor: C.line }}
                 />
@@ -219,7 +198,7 @@ export default function HabitationsPage() {
                 </span>
                 {selectedCorridor !== "all" && (
                   <span className="font-medium text-[#22364A]">
-                    Active Corridor: {CORRIDORS.find((c) => c.id === selectedCorridor)?.shortLabel}
+                    Corridor: {CORRIDORS.find((c) => c.id === selectedCorridor)?.shortLabel}
                   </span>
                 )}
               </div>
@@ -234,42 +213,44 @@ export default function HabitationsPage() {
               {/* Selected Habitation Risk Factor Breakdown Card */}
               {sel && (
                 <div
-                  className="border rounded-sm p-5 bg-white space-y-4"
+                  className="border rounded-sm p-4 sm:p-5 bg-white space-y-4 shadow-2xs"
                   style={{ borderColor: C.line }}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="f-serif text-lg font-bold text-[#1C2420]">
-                        Why {sel.name} scored {sel.score}/100
+                      <h3 className="f-serif text-base sm:text-lg font-bold text-[#1C2420]">
+                        {sel.name}
                       </h3>
                       <TierBadge tier={sel.tier} />
+                      <span className="font-mono text-xs font-bold text-[#1C2420] px-2 py-0.5 rounded-xs bg-[#FAF9F5] border border-[#D9D4C7]">
+                        Composite Score: {sel.score}/100
+                      </span>
                       <button
                         onClick={() => setMcdaModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-[#22364A]/10 hover:bg-[#22364A]/20 text-[#22364A] text-xs font-semibold border border-[#22364A]/30 transition-colors cursor-pointer"
-                        title="Inspect exact MCDA mathematical formulation and weighted factor points"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs bg-[#22364A]/10 hover:bg-[#22364A]/20 text-[#22364A] text-xs font-medium border border-[#22364A]/20 transition-colors cursor-pointer"
+                        title="View exact mathematical formulation"
                       >
-                        <Calculator size={12} /> How is this score calculated?
+                        <Calculator size={11} /> Formula
                       </button>
                       {(sel.id === "H14" || sel.name.toLowerCase().includes("kuttanad")) && (
                         <span className="text-[10px] px-2 py-0.5 rounded-xs bg-[#FFF3D6] text-[#C0872B] font-semibold border border-[#C0872B]/40">
-                          In-Situ Priority (No Relocation Site)
+                          In-Situ Priority
                         </span>
                       )}
                     </div>
+
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-[11px] text-[#565F58] bg-[#F7F5F1] px-2 py-0.5 rounded-xs border border-[#D9D4C7]">
+                      <span className="font-mono text-[11px] text-[#565F58]">
                         {breakdown?.assessment_id || `SRK-2026-${sel.id}-v1`}
                       </span>
-                      {loadingBreakdown ? (
-                        <Loader2 size={14} className="animate-spin text-[#565F58]" />
-                      ) : (
-                        <Info size={15} style={{ color: C.inkSoft }} />
+                      {loadingBreakdown && (
+                        <Loader2 size={13} className="animate-spin text-[#565F58]" />
                       )}
                     </div>
                   </div>
 
-                  {/* Demographic vintage and historical evidence strip */}
-                  <div className="flex items-center gap-2.5 flex-wrap text-xs text-[#565F58] pt-1">
+                  {/* Demographic & Evidence Metadata Strip */}
+                  <div className="flex items-center gap-3 flex-wrap text-xs text-[#565F58]">
                     <span>
                       <strong className="text-[#1C2420]">Region:</strong> {sel.region}
                     </span>
@@ -280,23 +261,22 @@ export default function HabitationsPage() {
                       type="button"
                       onClick={() => setHistoricalModalOpen(true)}
                       className="inline-flex items-center gap-1 text-[#22364A] hover:underline cursor-pointer font-medium"
-                      title="Inspect 2018–2024 observation window event log"
                     >
-                      <History size={12} className="text-[#565F58]" />
-                      <span><strong>{sel.events}</strong> recorded past events (2018–2024)</span>
+                      <History size={11} className="text-[#565F58]" />
+                      <span>{sel.events} recorded past events (2018–2024)</span>
                     </button>
                     <span>·</span>
-                    <span className="text-[11px] px-1.5 py-0.5 rounded-xs bg-[#FFF9EE] text-[#8C5D17] border border-[#C0872B]/30 font-medium">
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-xs bg-[#FFF9EE] text-[#8C5D17] border border-[#C0872B]/30 font-semibold">
                       {breakdown?.evidence_status || "LIMITED EVIDENCE"}
                     </span>
                     {fieldReviewStatus && (
-                      <span className="text-[11px] px-1.5 py-0.5 rounded-xs bg-[#E8F0EC] text-[#2A6B52] border border-[#2A6B52]/30 font-semibold">
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-xs bg-[#E8F0EC] text-[#2A6B52] border border-[#2A6B52]/30 font-semibold">
                         Officer Review: {fieldReviewStatus}
                       </span>
                     )}
                   </div>
 
-                  {/* Visual 5-Factor MCDA Factor Breakdown with Weights and Formula */}
+                  {/* 5-Factor MCDA Bar Breakdown */}
                   <RiskFactorBarBreakdown
                     factors={sel.f}
                     weights={weights}
@@ -304,75 +284,67 @@ export default function HabitationsPage() {
                     showFormula
                   />
 
-                  <p className="f-sans text-xs text-[#565F58] leading-relaxed bg-[#F7F5F1] p-3 rounded-xs border border-[#D9D4C7]">
+                  <p className="f-sans text-xs text-[#565F58] leading-relaxed bg-[#FAF9F5] p-3 rounded-xs border border-[#D9D4C7]">
                     {breakdown?.explanation ||
                       `${sel.name} is prioritized as a ${sel.tier} resettlement urgency based on elevated hazard exposure and accessibility deficits.`}
                   </p>
 
-                  {/* Evidence Gaps & Field Validation Disclosure */}
-                  <EvidenceGapPanel
-                    entityName={sel.name}
-                    status={breakdown?.evidence_status || "LIMITED EVIDENCE"}
-                  />
-
-                  {/* Operational Action Row */}
-                  <div className="pt-2 flex items-center justify-between gap-2.5 flex-wrap border-t border-[#EAE7DF]">
-                    <div className="flex items-center gap-2 flex-wrap">
+                  {/* Operational Actions */}
+                  <div className="pt-3 border-t flex items-center justify-between gap-3 flex-wrap" style={{ borderColor: C.line }}>
+                    {/* Secondary Evidence Modals Group */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <button
                         onClick={() => setStrategyModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FFF9EE] hover:bg-[#FFF3D6] text-[#22364A] border border-[#C0872B] text-xs font-semibold rounded-sm transition-colors cursor-pointer"
-                        title="Inspect 3-Pillar In-Situ Adaptation Interventions"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#FFF9EE] hover:bg-[#FFF3D6] text-[#22364A] border border-[#C0872B] text-xs font-medium rounded-xs transition-colors cursor-pointer"
+                        title="Inspect in-situ adaptation options"
                       >
-                        <LifeBuoy size={13} className="text-[#C0872B]" /> In-Situ SDMA Strategies
+                        <LifeBuoy size={12} className="text-[#C0872B]" /> In-Situ Strategies
                       </button>
 
                       <button
                         onClick={() => setHistoricalModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#D9D4C7] text-xs font-semibold rounded-sm transition-colors cursor-pointer"
-                        title="Inspect recorded disaster events window"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#D9D4C7] text-xs font-medium rounded-xs transition-colors cursor-pointer"
+                        title="Inspect disaster history log"
                       >
-                        <History size={13} /> Historical Evidence
+                        <History size={12} /> Disaster History
                       </button>
 
                       <button
                         onClick={() => setProvenanceModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#D9D4C7] text-xs font-semibold rounded-sm transition-colors cursor-pointer"
-                        title="Trace 8-stage data lineage and processing timestamps"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#D9D4C7] text-xs font-medium rounded-xs transition-colors cursor-pointer"
+                        title="Trace data lineage"
                       >
-                        <FileCheck size={13} /> Provenance Lineage
+                        <FileCheck size={12} /> Provenance
                       </button>
 
                       <button
                         onClick={() => setFieldReviewModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#22364A]/10 hover:bg-[#22364A]/20 text-[#22364A] border border-[#22364A]/30 text-xs font-semibold rounded-sm transition-colors cursor-pointer"
-                        title="Record DDMA field verification note or challenge"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#22364A]/10 hover:bg-[#22364A]/20 text-[#22364A] border border-[#22364A]/20 text-xs font-medium rounded-xs transition-colors cursor-pointer"
+                        title="Record DDMA field verification note"
                       >
-                        <ShieldCheck size={13} /> Officer Review
+                        <ShieldCheck size={12} /> Officer Review
                       </button>
-
                     </div>
 
+                    {/* Primary Workflow Actions */}
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/relocation?habitation=${sel.id}`}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#3D6B5C] hover:bg-[#32584B] text-white text-xs font-semibold rounded-sm transition-colors cursor-pointer shadow-xs"
+                        className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#3D6B5C] hover:bg-[#32584B] text-white text-xs font-semibold rounded-sm transition-colors cursor-pointer shadow-xs"
                       >
                         Evaluate Candidate Sites <ArrowRight size={13} />
                       </Link>
 
                       <Link
-                        href="/simulation"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#22364A]/30 text-xs font-medium rounded-sm transition-colors cursor-pointer"
+                        href={`/simulation?hab=${sel.id}`}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#FAF9F5] text-[#22364A] border border-[#22364A]/30 text-xs font-medium rounded-sm transition-colors cursor-pointer"
                       >
-                        Stress Test
+                        <Sliders size={12} /> Stress Test
                       </Link>
                     </div>
                   </div>
                 </div>
               )}
-
-              {/* Data Confidence & Evidentiary Lineage Panel */}
-              <DataConfidencePanel />
             </div>
           </div>
         </main>
@@ -434,7 +406,6 @@ export default function HabitationsPage() {
           habitationName={sel.name}
         />
       )}
-
     </div>
   );
 }

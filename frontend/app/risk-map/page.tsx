@@ -10,7 +10,6 @@ import {
   ShieldAlert,
   Sliders,
   LifeBuoy,
-  Radio,
   CloudRain,
   Waves,
   RotateCcw,
@@ -68,6 +67,7 @@ export default function RiskMapPage() {
     targetName: string;
   } | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [disclosureOpen, setDisclosureOpen] = useState(false);
 
   const currentCorridor = useMemo(() => {
     return CORRIDORS.find((c) => c.id === selectedCorridor) || CORRIDORS[0];
@@ -108,7 +108,7 @@ export default function RiskMapPage() {
         longitude: selectedHabitation.longitude,
         radiusKm: 5.5,
         hazardType: "IMD Extreme Cloudburst Surge",
-        zoneName: `IMD-Inspired Dynamic Cloudburst Buffer: ${selectedHabitation.name}`,
+        zoneName: `Dynamic Cloudburst Buffer: ${selectedHabitation.name}`,
         severity: "Critical Cloudburst Surge",
       });
 
@@ -121,8 +121,8 @@ export default function RiskMapPage() {
       setTelemetryAlert({
         type: "cloudburst",
         targetName: selectedHabitation.name,
-        message: `SIMULATED IMD RADAR TRIGGER: Extreme Precipitation (>68.5 mm/hr) over ${selectedHabitation.name}`,
-        details: `Candidate dynamic risk zone expanded by 5.5 km buffer in simulation. Simulated stress-test scenario for district contingency review (Demonstration Run).`,
+        message: `Simulated Cloudburst Surge (>68.5 mm/hr) over ${selectedHabitation.name}`,
+        details: `Dynamic risk buffer expanded by 5.5 km for scenario stress-testing. (Simulated Demonstration).`,
       });
     } finally {
       setIsSimulating(false);
@@ -138,7 +138,7 @@ export default function RiskMapPage() {
         longitude: selectedHabitation.longitude,
         radiusKm: 4.5,
         hazardType: "CWC Riverine Flood Inundation Surge",
-        zoneName: `CWC Stage-III Flood Inundation Buffer: ${selectedHabitation.name}`,
+        zoneName: `Dynamic Flood Inundation Buffer: ${selectedHabitation.name}`,
         severity: "Severe Inundation",
       });
 
@@ -151,8 +151,8 @@ export default function RiskMapPage() {
       setTelemetryAlert({
         type: "flood",
         targetName: selectedHabitation.name,
-        message: `SIMULATED CWC HYDROLOGICAL ALERT: Stage-III Riverine High Inundation at ${selectedHabitation.name}`,
-        details: `Simulated catchment discharge exceeding High Flood Level (HFL). Candidate risk zone dynamically expanded by 4.5 km buffer for DDMA contingency assessment.`,
+        message: `Simulated Stage-III Riverine Flood Inundation at ${selectedHabitation.name}`,
+        details: `Catchment discharge exceeding High Flood Level (HFL). Dynamic risk buffer expanded by 4.5 km.`,
       });
     } finally {
       setIsSimulating(false);
@@ -164,15 +164,13 @@ export default function RiskMapPage() {
     setTelemetryAlert(null);
   };
 
-  const [disclosureOpen, setDisclosureOpen] = useState(false);
-
   return (
     <div className="f-sans flex min-h-screen" style={{ backgroundColor: C.paper }}>
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       <div className="flex-1 min-w-0">
         <TopBar
-          title="SURAKSHA Multi-Hazard Map"
+          title="Multi-Hazard Spatial Map"
           mobileOpen={mobileOpen}
           setMobileOpen={setMobileOpen}
         />
@@ -180,8 +178,8 @@ export default function RiskMapPage() {
         <main className="px-5 sm:px-8 py-6 max-w-6xl space-y-4">
           {/* Header & View Mode Switcher */}
           <SectionHead
-            title="Multi-Hazard Spatial Viewer"
-            sub="Interactive GIS visualization showing PostGIS hazard zones (flood plains, landslide corridors) and candidate resettlement sites across national planning corridors."
+            title="Multi-Hazard Spatial Map"
+            sub="Interactive GIS visualization showing PostGIS hazard zones, candidate risk zones, and resettlement sites."
             action={
               <div className="inline-flex rounded-sm border p-0.5 bg-white shadow-2xs" style={{ borderColor: C.line }}>
                 <button
@@ -208,7 +206,7 @@ export default function RiskMapPage() {
             }
           />
 
-          {/* Unified Map Command Bar: Corridor Selector + Legend + Quick Actions */}
+          {/* Unified Map Command Bar */}
           <div className="bg-white border rounded-sm p-3 shadow-2xs space-y-2.5" style={{ borderColor: C.line }}>
             <div className="flex items-center justify-between flex-wrap gap-3">
               {/* Corridor Selector */}
@@ -221,36 +219,35 @@ export default function RiskMapPage() {
 
               {/* Dynamic Simulation Triggers */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-mono text-[#565F58] uppercase tracking-wider hidden sm:inline">
-                  Dynamic Stress Test:
+                <span className="text-[10px] font-mono text-[#565F58] uppercase tracking-wider">
+                  Simulate Shock:
                 </span>
                 <button
                   onClick={handleTriggerCloudburstAlert}
                   disabled={isSimulating}
                   className="px-2.5 py-1.5 bg-[#B5462F] hover:bg-[#9B3C27] text-white text-xs font-medium rounded-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
-                  title="Simulate localized extreme precipitation (>65mm/hr) expanding candidate buffer"
+                  title="Simulate localized extreme precipitation (>65mm/hr)"
                 >
                   {isSimulating ? <Loader2 size={12} className="animate-spin" /> : <CloudRain size={12} />}
-                  ⚡ Cloudburst Alert (&gt;65 mm/hr)
+                  Cloudburst (&gt;65 mm/hr)
                 </button>
 
                 <button
                   onClick={handleTriggerRiverineSurge}
                   disabled={isSimulating}
                   className="px-2.5 py-1.5 bg-[#22364A] hover:bg-[#3E5E82] text-white text-xs font-medium rounded-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
-                  title="Simulate high hydrological riverine discharge expanding candidate inundation zone"
+                  title="Simulate riverine flood discharge surge"
                 >
                   {isSimulating ? <Loader2 size={12} className="animate-spin" /> : <Waves size={12} />}
-                  🌊 Flood Surge
+                  Flood Surge
                 </button>
 
                 {telemetryAlert && (
                   <button
                     onClick={handleResetTelemetry}
                     className="px-2 py-1.5 border border-[#D9D4C7] hover:bg-[#F7F5F1] text-[#565F58] text-xs font-medium rounded-xs inline-flex items-center gap-1 cursor-pointer transition-colors"
-                    title="Restore baseline candidate risk zones"
                   >
-                    <RotateCcw size={12} /> Reset
+                    <RotateCcw size={12} /> Reset Buffer
                   </button>
                 )}
               </div>
@@ -259,12 +256,11 @@ export default function RiskMapPage() {
             {/* Sub-bar: Map Legend & Corridor Metric Summary */}
             <div className="pt-2 border-t flex items-center justify-between flex-wrap gap-2 text-xs" style={{ borderColor: C.line }}>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#B5462F] animate-pulse" />
                 <span className="font-semibold text-[#1C2420]">
                   {selectedCorridor === "all" ? "National Overview" : currentCorridor.name}
                 </span>
                 <span className="text-[#565F58] font-mono text-[11px]">
-                  ({displayedHabitations.length} Monitored Settlements · {displayedSites.length} Candidate Sites)
+                  ({displayedHabitations.length} Settlements · {displayedSites.length} Candidate Sites)
                 </span>
               </div>
               <MapLegend />
@@ -274,38 +270,36 @@ export default function RiskMapPage() {
           {/* Active Telemetry Urgent Banner (if triggered) */}
           {telemetryAlert && (
             <div
-              className="p-3.5 rounded-sm border flex items-start justify-between gap-3 animate-fadeIn"
+              className="p-3 rounded-sm border flex items-center justify-between gap-3"
               style={{
                 borderColor: telemetryAlert.type === "cloudburst" ? "#B5462F" : "#22364A",
                 backgroundColor: telemetryAlert.type === "cloudburst" ? "#FFF8F6" : "#F4F7FA",
               }}
             >
-              <div className="flex items-start gap-2.5">
+              <div className="flex items-center gap-2.5">
                 <BellRing
-                  size={18}
-                  className={`shrink-0 mt-0.5 animate-bounce ${
-                    telemetryAlert.type === "cloudburst" ? "text-[#B5462F]" : "text-[#22364A]"
-                  }`}
+                  size={16}
+                  className={telemetryAlert.type === "cloudburst" ? "text-[#B5462F]" : "text-[#22364A]"}
                 />
                 <div>
                   <p className="text-xs font-bold" style={{ color: telemetryAlert.type === "cloudburst" ? "#B5462F" : "#22364A" }}>
                     {telemetryAlert.message}
                   </p>
-                  <p className="text-[11px] text-[#565F58] mt-0.5 leading-relaxed">
+                  <p className="text-[11px] text-[#565F58] mt-0.5">
                     {telemetryAlert.details}
                   </p>
                 </div>
               </div>
 
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-xs bg-[#FFF1F0] border border-[#B5462F]/40 text-[#B5462F] font-bold shrink-0">
-                SIMULATED EVENT · DYNAMIC BUFFER EXPANDED
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-xs bg-white border border-black/10 text-[#565F58] font-semibold shrink-0">
+                SIMULATION SCENARIO
               </span>
             </div>
           )}
 
-          {/* 🗺️ THE MAP HERO CONTAINER */}
+          {/* Map Hero Viewport */}
           <div className="border rounded-sm overflow-hidden bg-white shadow-sm" style={{ borderColor: C.line }}>
-            <div className="w-full h-[560px]">
+            <div className="w-full h-[540px]">
               {mapMode === "maplibre" ? (
                 <MapLibreView
                   habitations={displayedHabitations}
@@ -335,7 +329,7 @@ export default function RiskMapPage() {
             </div>
           </div>
 
-          {/* 🔍 SELECTED HABITATION LEVEL 1 & LEVEL 2 QUICK INSPECTOR */}
+          {/* Selected Habitation Quick Inspector */}
           {selectedHabitation && (
             <div
               className="border rounded-sm p-4 bg-white shadow-2xs space-y-3"
@@ -361,6 +355,8 @@ export default function RiskMapPage() {
                   <div className="flex items-center gap-3 text-xs text-[#565F58] font-mono pt-0.5">
                     <span>Pop: <strong>{selectedHabitation.pop.toLocaleString()}</strong></span>
                     <span>·</span>
+                    <span>Score: <strong>{selectedHabitation.score}/100</strong></span>
+                    <span>·</span>
                     <span>Coords: {selectedHabitation.latitude.toFixed(3)}, {selectedHabitation.longitude.toFixed(3)}</span>
                   </div>
 
@@ -385,55 +381,50 @@ export default function RiskMapPage() {
 
                 {/* Right: Quick Operational Directives & Action Links */}
                 <div className="lg:col-span-4 space-y-2">
-                  <div className="text-xs text-[#565F58] mb-1">
-                    <span className="font-semibold text-[#1C2420] block">Operational Decision Chain:</span>
-                    <span>Screen candidate destination sites or test in-situ adaptation fallback.</span>
-                  </div>
+                  <Link
+                    href={`/relocation?habitation=${selectedHabitation.id}`}
+                    className="w-full px-3 py-2.5 text-xs font-semibold rounded-sm text-white bg-[#3D6B5C] hover:bg-[#32584B] transition-colors inline-flex items-center justify-center gap-1.5 shadow-2xs text-center"
+                  >
+                    <MapPin size={13} /> Evaluate Relocation Sites <ArrowRight size={12} />
+                  </Link>
 
                   <div className="grid grid-cols-2 gap-2">
                     <Link
-                      href={`/relocation?habitation=${selectedHabitation.id}`}
-                      className="px-3 py-2 text-xs font-semibold rounded-sm text-white bg-[#3D6B5C] hover:bg-[#32584B] transition-colors inline-flex items-center justify-center gap-1 shadow-2xs text-center"
-                      title="Evaluate candidate resettlement sites & carrying capacity"
+                      href="/simulation"
+                      className="px-2.5 py-1.5 text-xs font-medium rounded-sm border hover:bg-[#F7F5F1] text-[#22364A] transition-colors inline-flex items-center justify-center gap-1 text-center"
+                      style={{ borderColor: C.line }}
                     >
-                      <MapPin size={12} /> Relocation Sites <ArrowRight size={11} />
+                      <Sliders size={12} /> Simulation
                     </Link>
 
                     <Link
-                      href="/simulation"
-                      className="px-3 py-2 text-xs font-semibold rounded-sm text-white bg-[#22364A] hover:bg-[#3E5E82] transition-colors inline-flex items-center justify-center gap-1 shadow-2xs text-center"
-                      title="Simulate relocation before-vs-after exposure reduction"
+                      href="/habitations"
+                      className="px-2.5 py-1.5 text-xs font-medium rounded-sm border hover:bg-[#F7F5F1] text-[#22364A] transition-colors inline-flex items-center justify-center gap-1 text-center"
+                      style={{ borderColor: C.line }}
                     >
-                      <Sliders size={12} /> Stress Test
+                      <span>Risk Weights</span>
+                      <ChevronRight size={12} />
                     </Link>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  {(selectedHabitation.id === "H14" ||
+                    selectedHabitation.name.toLowerCase().includes("kuttanad")) && (
                     <button
                       onClick={() => {
                         setActiveStrategyEntity(selectedHabitation);
                         setStrategyModalOpen(true);
                       }}
-                      className="w-full px-2.5 py-1.5 text-xs font-medium rounded-sm text-[#22364A] bg-[#FFF9EE] border border-[#C0872B] hover:bg-[#FFF3D6] transition-colors inline-flex items-center justify-center gap-1 cursor-pointer"
-                      title="View 3-Pillar Candidate In-Situ Adaptation Measures"
+                      className="w-full px-2 py-1 text-xs font-medium rounded-sm text-[#22364A] bg-[#FFF9EE] border border-[#C0872B] hover:bg-[#FFF3D6] transition-colors inline-flex items-center justify-center gap-1 cursor-pointer"
                     >
-                      <LifeBuoy size={12} className="text-[#C0872B]" /> Candidate In-Situ Measures
+                      <LifeBuoy size={12} className="text-[#C0872B]" /> In-Situ Adaptation Measures
                     </button>
-
-                    <Link
-                      href="/habitations"
-                      className="px-2.5 py-1.5 text-xs font-medium border rounded-sm hover:bg-[#F7F5F1] text-[#22364A] transition-colors inline-flex items-center justify-center gap-1 shrink-0"
-                      style={{ borderColor: C.line }}
-                    >
-                      Inspect Factors <ChevronRight size={12} />
-                    </Link>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
 
-          {/* ⚖️ TECHNICAL AUDIT & STATUTORY CREDIBILITY DRAWER */}
+          {/* Statutory Notice & Simulation Parameters Drawer */}
           <div className="border rounded-sm bg-white overflow-hidden" style={{ borderColor: C.line }}>
             <button
               onClick={() => setDisclosureOpen(!disclosureOpen)}
@@ -441,8 +432,8 @@ export default function RiskMapPage() {
             >
               <div className="flex items-center gap-2 text-xs">
                 <ShieldCheck size={14} className="text-[#22364A]" />
-                <span className="font-bold text-[#1C2420]">
-                  Statutory Legal Disclaimers &amp; Scientific Buffer Parameters (GSI / IMD / CWC / Census 2011)
+                <span className="font-semibold text-[#1C2420]">
+                  Statutory Notices &amp; Buffer Parameters (GSI / IMD / CWC / Census 2011)
                 </span>
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-xs bg-white border border-[#D9D4C7] text-[#565F58]">
                   DECISION SUPPORT ONLY
@@ -456,13 +447,11 @@ export default function RiskMapPage() {
 
             {disclosureOpen && (
               <div className="p-4 border-t space-y-3 bg-white" style={{ borderColor: C.line }}>
-                <div className="p-2.5 rounded-sm bg-[#FFF9EE] border border-[#C0872B]/40 flex items-center justify-between gap-2 text-xs text-[#8C5D17]">
-                  <div className="flex items-center gap-2">
-                    <Info size={14} className="text-[#C0872B] shrink-0" />
-                    <span>
-                      <strong>Statutory Notice:</strong> SURAKSHA model-generated zones are decision-support outputs and do not constitute statutory or legal designation. Final designation remains with the competent authority.
-                    </span>
-                  </div>
+                <div className="p-2.5 rounded-sm bg-[#FFF9EE] border border-[#C0872B]/40 flex items-center gap-2 text-xs text-[#8C5D17]">
+                  <Info size={14} className="text-[#C0872B] shrink-0" />
+                  <span>
+                    <strong>Statutory Notice:</strong> SURAKSHA model-generated zones are decision-support outputs and do not constitute statutory or legal designations. Final designations remain with the competent authority.
+                  </span>
                 </div>
 
                 <SimulationParameterDisclosure />
